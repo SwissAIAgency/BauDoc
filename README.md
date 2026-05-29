@@ -1,160 +1,143 @@
 # BauDoc
 
-BauDoc ist das Projektfundament für eine Web- und Mobile/PWA-Applikation zur planbasierten Baufortschrittsdokumentation.
+BauDoc ist das Projektfundament für eine Web- und Mobile/PWA-Anwendung zur planbasierten Baufortschrittsdokumentation.
 
 ## Status
 
-Phase: Projektfundament und Orchestrator-Setup.
+Phase: Phase 1 Projektsetup abgeschlossen.
 
-Dieses Repository enthält bewusst noch keinen Produktivcode und keine installierten Dependencies. Es setzt zuerst die im Unternehmensstandard geforderte Struktur, Dokumentation, Agentenrollen, Skills, Repository-Regeln und fachliche Projektdefinition auf.
+Dieses Repository enthält bewusst noch keinen Produktivcode und keine installierten Dependencies. Es legt zuerst Struktur, Dokumentation, Agentenrollen, Sicherheitsregeln, Datenschutzregeln, UI-Standards und Teststrategie fest.
 
 ## Kurzbeschreibung
 
-Die Applikation soll Baufortschritte mit normalen Fotos und Panoramafotos dokumentieren. Bilder werden strukturiert Projekten, Gebäuden, Etagen, Räumen, Planpositionen, Gewerken und Arbeiten zugeordnet. Pläne werden versioniert und als räumliche Referenz verwendet, damit der Baufortschritt chronologisch, ortsbezogen und fachlich nachvollziehbar bleibt.
-
-## Zweck / Problem
-
-Baufortschritt wird in vielen Projekten über lose Fotogalerien, Chats oder Ordnerstrukturen dokumentiert. Dadurch fehlen häufig Planbezug, Raumbezug, Gewerk, Zeitpunkt, Verantwortlichkeit, Berechtigungen und Nachvollziehbarkeit. BauDoc löst dieses Problem durch strukturierte Fotoerfassung, Planpositionen, private Dateiablage, Rollenmodell und Audit-Logs.
-
-## Features
-
-Geplanter MVP:
-
-- Login und Rollenmodell
-- Projektverwaltung
-- Gebäude-, Etagen- und Raumstruktur
-- Gewerke und Arbeitstypen
-- Planverwaltung mit Versionen
-- Planviewer für PDF/Bild
-- Fotoaufnahme über mobile Web-App/PWA
-- Foto-Upload über Web-App
-- Fotozuordnung zu Projekt, Raum, Gewerk und Plan
-- Planpunkt setzen
-- Textkommentare
-- chronologische Galerie
-- Filter nach Zeitraum, Ort und Gewerk
-- private Dateiablage
-- Audit-Log
-- E-Mail-Benachrichtigung bei neuer Planversion
-
-Nicht im MVP:
-
-- Native Mobile App
-- Offline-Synchronisation
-- 360-Grad-Viewer
-- KI-Bildanalyse
-- semantische Suche
-- vollständiges Mängelmanagement
-- BIM-/IFC-Anbindung
-- produktive Drittprodukt-Integrationen
+BauDoc dokumentiert Baufortschritt mit Fotos, Plänen, Planversionen, Planpositionen, Räumen, Gewerken, Kommentaren, Rollen, Berechtigungen und Audit-Logs. Der MVP bleibt auf Foto, Plan, Ort, Zeit, Gewerk, Rechte, Chronologie und Audit begrenzt.
 
 ## Hauptquellen
 
 - `docs/references/leistungskatalog_baufortschritt_dokumentation.html`
 - `docs/references/unternehmensstandard-codex-agenten.txt`
 
+## Wichtige Dokumente
+
+- `AGENTS.md`: verbindliche Arbeitsregeln.
+- `PROJECT_DEFINITION.md`: Projektdefinition.
+- `LEISTUNGSKATALOG.md`: Module, Funktionen und Akzeptanzkriterien.
+- `ARCHITECTURE.md`: Zielarchitektur und technische Entscheidungen.
+- `SECURITY_PRIVACY.md`: Sicherheits- und Datenschutzgrundlage.
+- `UI_STANDARDS.md`: UI-, Brand- und Accessibility-Regeln.
+- `TESTING.md`: Teststrategie.
+- `DECISIONS/0001-project-baseline.md`: Baseline-Entscheidung.
+
 ## Zielarchitektur
 
-- Backend: Laravel API
-- Frontend: Mobile PWA / Web-App, Stackentscheidung zwischen Vue 3, React oder Inertia noch offen
-- Datenbank: PostgreSQL, später optional pgvector
-- Queue/Cache: Redis + Laravel Queues
-- Dateien: S3-kompatibler Object Storage oder MinIO lokal
-- KI: späterer separater Processing Layer für Bildanalyse, Transkription, Embeddings und semantische Suche
+- Backend: Laravel API.
+- Frontend: Web-App / Mobile PWA, Stackentscheidung zwischen Vue 3, React oder Inertia bleibt für Phase 2 offen.
+- Datenbank: PostgreSQL, später optional pgvector.
+- Queue/Cache: Redis + Laravel Queues.
+- Dateien: S3-kompatibler Object Storage oder MinIO lokal.
+- KI: späterer separater Processing Layer, nicht Teil des MVP.
 
-## Projektstruktur
+## Repository-Struktur
 
 ```text
 BauDoc/
 ├── AGENTS.md
 ├── README.md
+├── PROJECT_DEFINITION.md
+├── LEISTUNGSKATALOG.md
+├── ARCHITECTURE.md
+├── SECURITY_PRIVACY.md
+├── UI_STANDARDS.md
+├── TESTING.md
 ├── CHANGELOG.md
-├── CONTRIBUTING.md
 ├── .env.example
-├── .gitignore
+├── DECISIONS/
 ├── docs/
-├── prompts/
-├── skills/
+│   ├── business/
+│   ├── technical/
+│   ├── legal/
+│   ├── ux/
+│   └── references/
 ├── frontend/
 ├── backend/
 ├── database/
+├── integrations/
+├── security/
+├── devops/
 ├── tests/
 ├── scripts/
-└── .github/
+├── skills/
+└── prompts/
 ```
 
-## Voraussetzungen
+## Lokales Setup
 
-Für die spätere Umsetzung werden voraussichtlich benötigt:
+Noch keine Anwendung startbar. In Phase 1 werden keine Dependencies installiert und kein Produktivcode erzeugt.
 
-- PHP und Composer für Laravel
-- Node.js und Paketmanager für das Frontend
-- PostgreSQL
-- Redis
-- S3-kompatibler Object Storage oder MinIO für lokale Entwicklung
-- Git und GitHub-Zugang
+Für spätere Umsetzung voraussichtlich nötig:
 
-TODO: konkrete Versionen festlegen, sobald Laravel- und Frontend-Stack final entschieden sind.
+- PHP und Composer für Laravel.
+- Node.js und Paketmanager für das Frontend.
+- PostgreSQL.
+- Redis.
+- S3-kompatibler Object Storage oder MinIO.
+- Git und GitHub-Zugang.
 
-## Installation
-
-Derzeit gibt es noch keine installierbare Anwendung. Dieses Repository enthält das Projektfundament und die technische Planung.
-
-Späterer Ablauf, sobald Produktivcode angelegt ist:
-
-```bash
-# Backend
-cd backend
-composer install
-
-# Frontend
-cd ../frontend
-npm install
-```
-
-TODO: Befehle anpassen, sobald die konkrete Laravel-/Frontend-Struktur angelegt ist.
-
-## Lokale Entwicklung / Start
-
-Noch nicht verfügbar, da bewusst kein Produktivcode und keine Dependencies installiert wurden.
-
-Geplanter lokaler Start nach Implementierung:
-
-```bash
-# Backend API
-php artisan serve
-
-# Queue Worker
-php artisan queue:work
-
-# Frontend
-npm run dev
-```
-
-TODO: endgültige Startbefehle nach Stackentscheidung dokumentieren.
+Konkrete Versionen werden nach Technologieentscheidung dokumentiert.
 
 ## Umgebungsvariablen
 
 Beispielwerte liegen in `.env.example`.
 
-Wichtig:
+Regeln:
 
-- keine echten Secrets committen
-- lokale `.env`-Dateien bleiben ignoriert
-- Zugangsdaten für Datenbank, Redis, Storage und Mail lokal setzen
+- Keine echten Secrets committen.
+- Lokale `.env`-Dateien bleiben ignoriert.
+- Zugangsdaten für Datenbank, Redis, Storage und Mail lokal setzen.
+
+## Entwicklungsregeln
+
+- Vor Codeänderungen `AGENTS.md` und relevante Bereichs-`AGENTS.md` lesen.
+- Produktivcode erst nach Abschluss der Planungs- und Architekturphase.
+- Kleine, testbare Tasks.
+- Keine neuen Dependencies ohne Begründung.
+- Keine personenbezogenen Produktivdaten.
+- Security und Datenschutz bei betroffenen Änderungen prüfen.
+
+## Testbefehle
+
+Phase 1 enthält nur Dokumentation und Struktur. Es gibt noch keine ausführbaren Build-, Lint- oder Testbefehle. Verfügbare Checks sind Struktur-, Inhalts- und Git-Checks.
 
 ## Deployment-Hinweise
 
-Noch nicht final definiert.
+Deployment ist noch nicht umgesetzt. Bekannte Anforderungen:
 
-Bekannte Anforderungen:
+- Hosting in Schweiz oder EU prüfen.
+- HTTPS erzwingen.
+- Private Dateiablage verwenden.
+- Queue Worker betreiben.
+- Backups für Datenbank und Object Storage planen.
+- Secrets über sichere Umgebungskonfiguration verwalten.
 
-- Hosting in der Schweiz oder EU prüfen
-- HTTPS erzwingen
-- private Dateiablage verwenden
-- Queue Worker betreiben
-- Backups für Datenbank und Object Storage planen
-- Secrets über sichere Umgebungskonfiguration verwalten
+## Sicherheits- und Datenschutzhinweise
+
+- Keine öffentlichen Direktlinks für Fotos, Pläne, Panoramen oder Audiodateien.
+- Berechtigungen serverseitig prüfen.
+- Audit-Logs datensparsam führen.
+- Baustellenfotos und Kommentare als potenziell personenbezogen behandeln.
+- KI-Verarbeitung erst nach separater Datenschutzprüfung.
+
+## Codex-Arbeitsweise
+
+Codex folgt dem Unternehmensstandard:
+
+1. Dokumentieren.
+2. Analysieren.
+3. Architektur planen.
+4. Risiken prüfen.
+5. Entwicklungsplan erstellen.
+6. Kleine Tasks umsetzen.
+7. Tests und Reviews durchführen.
 
 ## GitHub Repository
 
@@ -162,13 +145,8 @@ https://github.com/SwissAIAgency/BauDoc.git
 
 ## Lizenz
 
-TODO: Es ist noch keine Lizenzdatei definiert. Vor öffentlicher oder externer Nutzung muss entschieden werden, ob und unter welcher Lizenz BauDoc veröffentlicht wird.
+Noch nicht festgelegt. Vor öffentlicher oder externer Nutzung muss entschieden werden, ob und unter welcher Lizenz BauDoc veröffentlicht wird.
 
 ## Nächster empfohlener Schritt
 
-Der Orchestrator sollte den ersten sicheren Umsetzungstask erstellen:
-
-1. Stackentscheidung für Frontend dokumentieren.
-2. Laravel-Projektanlage planen.
-3. Lokale Basisdienste PostgreSQL, Redis und MinIO entscheiden.
-4. Danach erst Produktivcode oder Dependencies anlegen.
+Phase 2 starten: Inhalte und Planung finalisieren, insbesondere Projektanalyse, Architekturverfeinerung, Datenmodell, Security Review, Datenschutz Review, Entwicklungsplan und finale Technologieentscheidung.
