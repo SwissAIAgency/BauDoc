@@ -1,0 +1,1079 @@
+Codex · Agenten · Repository · Skills · Unternehmensstandard
+Standardisierte Softwareentwicklung mit Codex-Agenten
+Leitfaden für Unternehmen, die mehrere Codex-Projekte sauber, wiederholbar und kontrolliert aufsetzen möchten: vom leeren Projekt über Agentendefinition, Repository, Skills, UI-Standards, Datenschutz und Datenbank bis zur fertigen Applikation.
+
+Inhalt
+Ziel des Standards
+Grundprinzip der Agentenarbeit
+Empfohlenes Agentenmodell
+Repository-Workflow
+Standard-Ordnerstruktur
+Projektdefinition
+MD-Regeln und Unternehmenskonventionen
+Skills für wiederholbare Abläufe
+Standard-Prompts
+Schritt-für-Schritt-Ablauf
+Zwischenkontrollen
+Projektabschluss
+1. Ziel des Standards
+Dieser Leitfaden beschreibt, wie ein Unternehmen mehrere Softwareprojekte mit Codex strukturiert aufsetzt. Ziel ist nicht, dass ein Agent unkontrolliert eine komplette Software baut, sondern dass jedes Projekt nach einem wiederholbaren Standard entsteht.
+
+Kontrolle
+Jede Änderung hat Task, Agent, Dateigrenzen, Akzeptanzkriterien und QA-Prüfung.
+
+Wiederholbarkeit
+Projektdefinition, Skills, UI-Standards und Konventionen werden in Markdown-Dateien hinterlegt.
+
+Teamfähigkeit
+Alle Agenten arbeiten über ein Repository, Branches, Pull Requests, Review-Regeln und Dokumentation.
+
+Wichtig: Codex soll nicht einfach „alles bauen“. Codex soll nach einem Unternehmensstandard planen, delegieren, implementieren, prüfen und dokumentieren.
+2. Grundprinzip der Agentenarbeit
+Die Standardlogik lautet:
+
+Idee
+→ Projektdefinition
+→ Repository initialisieren
+→ AGENTS.md und Unternehmensregeln hinterlegen
+→ Orchestrator-Agent starten
+→ Architektur und Datenmodell planen
+→ Tasks definieren
+→ spezialisierte Agenten umsetzen lassen
+→ QA, Security und Datenschutz prüfen
+→ Pull Request
+→ Review
+→ Merge
+→ Dokumentation aktualisieren
+Die wichtigste Regel
+Setze nicht direkt alles um.
+Arbeite als Orchestrator:
+analysieren, zerlegen, begrenzen, delegieren, prüfen und dokumentieren.
+3. Empfohlenes Agentenmodell
+Für DB-basierte Webapplikationen mit Unternehmensstandard empfehle ich folgendes Agentensystem:
+
+Agent	Aufgabe	Darf ändern?	Wann einsetzen?
+Orchestrator-Agent	Koordiniert Projekt, Tasks, Agenten, Reihenfolge und Reviews.	Nur Dokumentation/Planung, wenn erlaubt.	Immer.
+Architektur-Agent	Plant technische Struktur, Module, Schnittstellen und Risiken.	Nein, primär Analyse und Dokumentation.	Vor Projektstart und bei Architekturänderungen.
+Backend-Agent	API, Services, Businesslogik, Validierung, Backendtests.	Ja, nur Backend-Dateien.	Bei API- und Logik-Tasks.
+Frontend-/UI-Agent	UI, Komponenten, Layouts, Responsiveness, Interaktionen.	Ja, nur Frontend-Dateien.	Bei UI-Tasks.
+DB-Agent	Datenmodell, Migrationen, Relationen, Indizes, Constraints.	Ja, nur DB-/Schema-Dateien nach Freigabe.	Bei jeder DB-Änderung.
+Datenschutz- & Compliance-Agent	Schweizer DSG/nDSG, DSGVO-Risiken, Datenflüsse, Löschung, Consent.	Nein, prüft und definiert Anforderungen.	Bei personenbezogenen Daten, Tracking, KI, Voice, RAG, Uploads.
+DevOps-/Security-Agent	Docker, Deployments, CI/CD, Env, Secrets, Hosting, Security.	Ja, nur Infrastrukturdateien.	Bei Deployment, Ports, Secrets, CI/CD.
+QA-/Review-Agent	Prüft Änderungen gegen Auftrag, Tests, Standards und Regressionen.	Nein, ausser Reparatur ausdrücklich erlaubt.	Nach jeder Implementierung.
+Unternehmensregel: Ein Agent darf nie eigenmächtig ausserhalb seiner Rolle arbeiten. Der Backend-Agent ändert keine DB-Struktur ohne DB-Agent. Der Frontend-Agent ändert keine API-Verträge. Der DevOps-Agent ändert keine Businesslogik.
+4. Repository-Workflow für Zusammenarbeit der Agenten
+Sobald mehrere Agenten oder mehrere Codex-Projekte entstehen, braucht jedes Projekt ein Repository mit klaren Branch- und Review-Regeln. Das Repository ist die gemeinsame Wahrheit für Code, Standards, Dokumentation, Skills und Entscheidungen.
+
+Empfohlenes Branch-Modell
+main
+├── develop
+│   ├── feature/backend-customer-api
+│   ├── feature/frontend-customer-ui
+│   ├── feature/db-customer-model
+│   ├── fix/qa-login-validation
+│   └── chore/devops-docker-config
+Branch-Regeln
+main ist geschützt und enthält nur freigegebenen Code.
+develop ist Integrationsbranch für geprüfte Features.
+Jeder Task bekommt einen eigenen Branch.
+Kein Agent arbeitet direkt auf main.
+Kein Merge ohne QA-Bericht.
+DB-Migrationen brauchen DB-Agent + QA + Datenschutzprüfung, falls personenbezogene Daten betroffen sind.
+UI-Änderungen brauchen Abgleich mit Brand- und UI-Standards.
+Pull-Request-Template
+# Pull Request
+
+## Task
+
+[Task-ID und Kurzbeschreibung]
+
+## Zuständiger Agent
+
+[Backend-Agent / Frontend-Agent / DB-Agent / etc.]
+
+## Geänderte Dateien
+
+- Datei 1
+- Datei 2
+
+## Was wurde umgesetzt?
+
+## Was wurde bewusst nicht geändert?
+
+## Tests / Checks
+
+- [ ] Build
+- [ ] Lint
+- [ ] Unit Tests
+- [ ] Manuelle Prüfung
+- [ ] QA-Agent Review
+
+## Datenschutz / Security
+
+- [ ] Keine personenbezogenen Daten betroffen
+- [ ] Datenschutz-Agent geprüft
+- [ ] Security-Agent geprüft
+- [ ] Keine Secrets im Code
+
+## UI-/Brand-Check
+
+- [ ] UI-Standards eingehalten
+- [ ] Logo-Regeln eingehalten
+- [ ] Formate eingehalten
+- [ ] Responsiveness geprüft
+
+## Risiken
+
+## Freigabe
+
+- [ ] QA-Freigabe
+- [ ] Orchestrator-Freigabe
+- [ ] Menschliche Freigabe
+Praxisregel: Agenten liefern Änderungen als Pull Request. Der Orchestrator entscheidet, ob ein Review-Agent prüft, ob Reparatur nötig ist oder ob gemerged werden darf.
+5. Standard-Ordnerstruktur
+Diese Struktur sollte jedes neue Codex-Projekt im Unternehmen erhalten.
+
+projektname/
+│
+├── AGENTS.md
+├── README.md
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── .gitignore
+├── .env.example
+│
+├── docs/
+│   ├── 00_projektdefinition.md
+│   ├── 01_anforderungen.md
+│   ├── 02_architektur.md
+│   ├── 03_roadmap.md
+│   ├── 04_restriktionen.md
+│   ├── 05_agentenrollen.md
+│   ├── 06_entscheidungen.md
+│   ├── 07_qa_checkliste.md
+│   ├── 08_datenmodell.md
+│   ├── 09_datenschutzkonzept.md
+│   ├── 10_datenfluss.md
+│   ├── 11_loeschkonzept.md
+│   ├── 12_tom_security.md
+│   ├── 13_ui_brand_guidelines.md
+│   ├── 14_repository_workflow.md
+│   └── 15_release_checkliste.md
+│
+├── prompts/
+│   ├── 01_orchestrator.md
+│   ├── 02_architekt.md
+│   ├── 03_backend_agent.md
+│   ├── 04_frontend_ui_agent.md
+│   ├── 05_db_agent.md
+│   ├── 06_datenschutz_compliance_agent.md
+│   ├── 07_devops_security_agent.md
+│   └── 08_qa_review_agent.md
+│
+├── skills/
+│   ├── company-coding-standard.md
+│   ├── ui-brand-standard.md
+│   ├── safe-feature-implementation.md
+│   ├── db-migration-review.md
+│   ├── privacy-compliance-check.md
+│   ├── security-review.md
+│   ├── api-contract-check.md
+│   ├── qa-regression-review.md
+│   └── release-readiness-check.md
+│
+├── frontend/
+├── backend/
+├── database/
+│   ├── schema/
+│   ├── migrations/
+│   └── seeds/
+│
+├── tests/
+├── scripts/
+└── .github/
+    ├── pull_request_template.md
+    └── workflows/
+6. Projektdefinition: Wo die Idee hinterlegt wird
+Jede neue Softwareidee wird zuerst in docs/00_projektdefinition.md dokumentiert. Diese Datei ist die Basis für Orchestrator, Architektur-Agent und spätere Entwicklung.
+
+# 00_projektdefinition.md
+
+## Projektname
+
+[Name der Applikation]
+
+## Kurzbeschreibung
+
+[Was macht die Software in 3–5 Sätzen?]
+
+## Zielgruppe
+
+- Nutzergruppe 1
+- Nutzergruppe 2
+
+## Problem
+
+[Welches Problem wird gelöst?]
+
+## Nutzenversprechen
+
+- Nutzen 1
+- Nutzen 2
+- Nutzen 3
+
+## Kernfunktionen Version 1
+
+1. Funktion
+2. Funktion
+3. Funktion
+
+## Spätere Erweiterungen
+
+- Erweiterung
+- Erweiterung
+
+## Nicht-Ziele
+
+Diese Dinge werden bewusst nicht gebaut:
+
+- Nicht-Ziel 1
+- Nicht-Ziel 2
+
+## Datenarten
+
+Welche Daten werden verarbeitet?
+
+| Datenart | Beispiel | Personenbezogen? | Sensibel? | Zweck |
+|---|---|---|---|---|
+
+## UI-/Brand-Anforderungen
+
+- Logo:
+- Farben:
+- Schriften:
+- Button-Stil:
+- Layout-Prinzip:
+- Mobile-Anforderungen:
+
+## Technische Anforderungen
+
+- Frontend:
+- Backend:
+- Datenbank:
+- Auth:
+- Hosting:
+- Externe APIs:
+- KI/RAG/Voice:
+
+## Datenschutz / Compliance
+
+- Schweizer DSG/nDSG relevant: Ja/Nein
+- DSGVO-Risiko bei EU-Bezug: Ja/Nein
+- Besondere Risiken:
+- Datenlöschung erforderlich:
+- Exportfunktion erforderlich:
+
+## Erfolgskriterien
+
+Das Projekt ist erfolgreich, wenn:
+
+1.
+2.
+3.
+7. MD-Regeln und Unternehmenskonventionen
+Unternehmensstandards dürfen nicht nur im Prompt stehen. Sie müssen als dauerhafte Markdown-Dateien im Repository liegen.
+
+AGENTS.md
+# AGENTS.md
+
+## Unternehmensstandard
+
+Dieses Projekt folgt dem standardisierten Entwicklungsmodell des Unternehmens.
+
+Alle Agenten müssen lesen:
+- docs/00_projektdefinition.md
+- docs/04_restriktionen.md
+- docs/13_ui_brand_guidelines.md
+- docs/14_repository_workflow.md
+- relevante Skills aus /skills
+
+## Grundregeln
+
+- Arbeite nur am aktuellen Task.
+- Ändere nur erlaubte Dateien.
+- Keine grossen Refactorings ohne Freigabe.
+- Keine neuen Dependencies ohne Begründung.
+- Keine bestehenden Funktionen entfernen.
+- Keine globalen Konfigurationsänderungen ohne Auftrag.
+- Keine Ports ändern ohne DevOps-/Security-Agent.
+- Keine UI-Änderungen bei Backend-Tasks.
+- Keine Backend-Änderungen bei UI-Tasks.
+- Keine DB-Änderung ohne DB-Agent.
+- Keine personenbezogenen Daten ohne Datenschutz- & Compliance-Agent.
+- Keine Secrets im Code.
+- Kein Merge ohne QA-Review.
+
+## Rollenpflicht
+
+Jeder Task muss einem Agenten zugeordnet werden:
+- Orchestrator-Agent
+- Architektur-Agent
+- Backend-Agent
+- Frontend-/UI-Agent
+- DB-Agent
+- Datenschutz- & Compliance-Agent
+- DevOps-/Security-Agent
+- QA-/Review-Agent
+
+## Definition of Done
+
+Ein Task ist fertig, wenn:
+- Ziel erfüllt
+- erlaubte Dateien eingehalten
+- Tests/Checks dokumentiert
+- QA geprüft
+- Datenschutz/Security geprüft, falls relevant
+- UI-/Brand-Standards eingehalten, falls relevant
+- Dokumentation aktualisiert
+- PR bereit oder gemerged
+UI- und Brand-Guidelines
+Diese Datei stellt sicher, dass Logos, Formate, UI-Standards und Unternehmenskonventionen nicht bei jedem Projekt neu erklärt werden müssen.
+
+# docs/13_ui_brand_guidelines.md
+
+## Ziel
+
+Alle Applikationen des Unternehmens folgen einem konsistenten UI-, Brand- und UX-Standard.
+
+## Logo-Regeln
+
+- Nur freigegebene Logo-Dateien verwenden.
+- Keine Verzerrung.
+- Keine Farbänderung ohne Brand-Freigabe.
+- Mindestabstand um das Logo einhalten.
+- Keine Logos als unscharfe Screenshots verwenden.
+
+## Farben
+
+Primärfarben:
+- [Farbe 1]
+- [Farbe 2]
+
+Sekundärfarben:
+- [Farbe 3]
+- [Farbe 4]
+
+Statusfarben:
+- Erfolg:
+- Warnung:
+- Fehler:
+- Info:
+
+## Typografie
+
+- Primärschrift:
+- Sekundärschrift:
+- Mindestgrösse Mobile:
+- Mindestkontrast:
+- Keine ungewollten Uppercase-Stile.
+
+## Komponenten
+
+Buttons:
+- Primary:
+- Secondary:
+- Danger:
+- Disabled:
+
+Formulare:
+- Labels immer sichtbar.
+- Fehler klar anzeigen.
+- Pflichtfelder markieren.
+- Tastaturbedienung ermöglichen.
+
+Tabellen:
+- Responsive Verhalten definieren.
+- Leere Zustände anzeigen.
+- Ladezustände anzeigen.
+
+## Layout
+
+- Einheitliche Containerbreiten.
+- Einheitliche Abstände.
+- Mobile-first prüfen.
+- Kein horizontaler Scroll.
+- Keine globalen Layoutänderungen ohne UI-Agent.
+
+## Assets
+
+- Bilder komprimieren.
+- Alt-Texte verwenden.
+- Icons konsistent halten.
+- Dateiformate: SVG für Logos, WebP/AVIF für Bilder, PNG nur wenn nötig.
+
+## Accessibility
+
+- Tastaturbedienung
+- Kontrast
+- Fokuszustände
+- Aria-Labels, wo nötig
+- Fehlermeldungen verständlich
+Unternehmenskonventionen
+# docs/04_restriktionen.md
+
+## Technische Restriktionen
+
+- Keine neuen Frameworks ohne Architekturfreigabe.
+- Keine neuen Dependencies ohne Begründung.
+- Keine direkten Änderungen an main.
+- Keine Secrets im Repository.
+- Keine produktiven Daten in Tests.
+- Keine externen Dienste ohne Datenschutz- und Security-Prüfung.
+
+## Namenskonventionen
+
+- Branches: feature/, fix/, chore/, docs/, release/
+- Commits: feat:, fix:, docs:, refactor:, test:, chore:
+- Dateien: sprechende Namen, keine kryptischen Abkürzungen.
+- API-Routen: konsistent und versionierbar.
+
+## Dokumentationspflicht
+
+Jede relevante Entscheidung kommt in:
+- docs/06_entscheidungen.md
+
+Jede DB-Änderung kommt in:
+- docs/08_datenmodell.md
+
+Jede Datenschutzentscheidung kommt in:
+- docs/09_datenschutzkonzept.md
+
+Jede UI-Grundregel kommt in:
+- docs/13_ui_brand_guidelines.md
+8. Skills: Wo wiederholbare Arbeitsweisen hinterlegt werden
+Skills sind standardisierte Arbeitsanweisungen für wiederkehrende Aufgaben. Sie gehören ins Repository unter /skills. Dadurch arbeitet Codex in jedem Unternehmensprojekt gleich.
+
+Skill: Safe Feature Implementation
+# skills/safe-feature-implementation.md
+
+## Ziel
+
+Ein Feature klein, sicher und prüfbar umsetzen.
+
+## Ablauf
+
+1. Task lesen.
+2. AGENTS.md lesen.
+3. Erlaubte Dateien prüfen.
+4. Gesperrte Bereiche prüfen.
+5. Minimalen Implementierungsplan erstellen.
+6. Nur notwendige Änderungen durchführen.
+7. Tests ausführen.
+8. Bericht schreiben.
+9. QA-Review anfordern.
+
+## Verboten
+
+- Grosse Refactorings
+- Nebenfeatures
+- globale Änderungen
+- neue Dependencies ohne Freigabe
+- UI-Änderungen ohne UI-Task
+- DB-Änderungen ohne DB-Agent
+Skill: UI Brand Standard
+# skills/ui-brand-standard.md
+
+## Ziel
+
+Alle UI-Änderungen müssen dem Unternehmensdesign folgen.
+
+## Prüfen
+
+- Logo korrekt?
+- Farben korrekt?
+- Typografie korrekt?
+- Komponenten konsistent?
+- Mobile Ansicht geprüft?
+- Kein horizontaler Scroll?
+- Lade-, Fehler- und Leerzustände vorhanden?
+- Accessibility geprüft?
+
+## Verboten
+
+- Logo neu zeichnen
+- Farben frei erfinden
+- globale Styles ohne Auftrag ändern
+- bestehendes Layout unnötig umbauen
+- uneinheitliche Buttons oder Formulare erzeugen
+Skill: DB Migration Review
+# skills/db-migration-review.md
+
+## Ziel
+
+Datenbankänderungen sicher planen und prüfen.
+
+## Prüfen
+
+- Welche Tabellen sind betroffen?
+- Gibt es Datenverlust?
+- Sind Relationen korrekt?
+- Sind Constraints nötig?
+- Sind Indizes nötig?
+- Gibt es Rollback?
+- Sind personenbezogene Daten betroffen?
+- Ist Datenschutzprüfung nötig?
+
+## Verboten
+
+- Felder löschen ohne Migrationsplan
+- produktive Daten gefährden
+- sensible Daten ohne Zweck speichern
+- Migration ohne Tests
+Skill: Privacy Compliance Check
+# skills/privacy-compliance-check.md
+
+## Ziel
+
+Features datenschutzfreundlich prüfen.
+
+## Prüfen
+
+- Welche personenbezogenen Daten?
+- Warum werden sie verarbeitet?
+- Welche Rechtsgrundlage?
+- Wie lange gespeichert?
+- Wie gelöscht?
+- Wer hat Zugriff?
+- Externe Anbieter?
+- EU-/Drittlandübermittlung?
+- Consent nötig?
+- Datenschutzhinweis nötig?
+- Export/Auskunft nötig?
+
+## Ergebnis
+
+Freigabe: Ja / Nein
+Auflagen:
+Risiken:
+Nächste Schritte:
+9. Standard-Prompts für Agenten
+9.1 Start-Prompt für ein leeres Projekt
+Du bist der Orchestrator-Agent für ein neues Unternehmensprojekt.
+
+Ausgangslage:
+Das Repository ist neu oder leer. Es soll nach unserem standardisierten Codex-Agentenmodell aufgebaut werden.
+
+Aufgabe:
+1. Prüfe die vorhandene Projektstruktur.
+2. Erstelle noch keinen Produktivcode.
+3. Lege zuerst die Projektgrundlagen an:
+   - AGENTS.md
+   - README.md
+   - docs/
+   - prompts/
+   - skills/
+   - database/
+   - frontend/
+   - backend/
+   - tests/
+   - scripts/
+4. Erstelle die Standard-Dokumente als leere Templates.
+5. Erstelle die Standard-Agentenprompts.
+6. Erstelle die Standard-Skills.
+7. Erstelle Repository-Regeln und PR-Template.
+
+Strikte Regeln:
+- Kein Produktivfeature bauen.
+- Keine Dependencies installieren.
+- Keine Framework-Entscheidung ohne Architekturphase.
+- Keine Annahmen verstecken.
+- Offene Fragen dokumentieren.
+
+Ausgabeformat:
+## Angelegte Struktur
+## Erstellte Dateien
+## Offene Fragen
+## Nächster empfohlener Schritt
+9.2 Prompt für Projektdefinition
+Du bist der Orchestrator-Agent.
+
+Nutze die folgende Softwareidee und erstelle daraus eine saubere Projektdefinition in:
+docs/00_projektdefinition.md
+
+Softwareidee:
+[HIER IDEE EINFÜGEN]
+
+Leistungen/Funktionen:
+[HIER FUNKTIONEN EINFÜGEN]
+
+Zielgruppe:
+[HIER ZIELGRUPPE EINFÜGEN]
+
+Wichtig:
+- Noch keine Implementierung.
+- Keine technischen Annahmen als Tatsache darstellen.
+- Unklare Punkte als offene Fragen markieren.
+- Datenarten und Datenschutzrisiken bereits grob erfassen.
+- UI-/Brand-Anforderungen aufnehmen.
+
+Ändere nur:
+- docs/00_projektdefinition.md
+9.3 Prompt für Architekturphase
+Du bist der Architektur-Agent.
+
+Lies:
+- AGENTS.md
+- docs/00_projektdefinition.md
+- docs/01_anforderungen.md
+- docs/04_restriktionen.md
+
+Aufgabe:
+1. Erstelle eine technische Zielarchitektur.
+2. Definiere Frontend-, Backend-, DB- und Infrastrukturmodule.
+3. Definiere Schnittstellen und Datenflüsse.
+4. Markiere Risiken.
+5. Definiere, welche Agenten für welche Bereiche zuständig sind.
+6. Erstelle eine empfohlene Umsetzungsreihenfolge.
+
+Wichtig:
+- Kein Produktivcode.
+- Keine Dependencies installieren.
+- Keine Dateien ausser docs/02_architektur.md ändern.
+
+Ausgabe in:
+docs/02_architektur.md
+9.4 Prompt für Datenmodell
+Du bist der DB-Agent.
+
+Lies:
+- AGENTS.md
+- docs/00_projektdefinition.md
+- docs/01_anforderungen.md
+- docs/02_architektur.md
+- docs/09_datenschutzkonzept.md, falls vorhanden
+
+Aufgabe:
+1. Plane das Datenmodell.
+2. Definiere Tabellen, Felder, Relationen, Constraints und Indizes.
+3. Markiere personenbezogene und sensible Daten.
+4. Beschreibe Migrationen.
+5. Definiere Rollback-Risiken.
+6. Erstelle offene Fragen für Datenschutz-Agenten.
+
+Wichtig:
+- Keine Migration ausführen.
+- Keine Produktivdaten.
+- Keine Backend-Implementierung.
+- Keine API ändern.
+
+Ausgabe in:
+docs/08_datenmodell.md
+9.5 Prompt für Datenschutz- und Compliance-Prüfung
+Du bist der Datenschutz- & Compliance-Agent.
+
+Lies:
+- AGENTS.md
+- docs/00_projektdefinition.md
+- docs/08_datenmodell.md
+- docs/10_datenfluss.md, falls vorhanden
+
+Aufgabe:
+1. Prüfe Schweizer DSG/nDSG-Relevanz.
+2. Prüfe DSGVO-Risiken bei EU-Bezug.
+3. Prüfe Datenminimierung.
+4. Prüfe Zweckbindung.
+5. Prüfe Aufbewahrung und Löschung.
+6. Prüfe externe Anbieter und Datenübermittlungen.
+7. Prüfe KI-/RAG-/Voice-/Upload-Risiken, falls relevant.
+8. Definiere technische und organisatorische Massnahmen.
+9. Gib Freigabe oder Auflagen.
+
+Wichtig:
+- Keine Rechtsberatung als endgültige juristische Freigabe formulieren.
+- Keine Produktivdateien ändern.
+- Keine Migration durchführen.
+
+Ausgabe in:
+docs/09_datenschutzkonzept.md
+docs/10_datenfluss.md
+docs/11_loeschkonzept.md
+docs/12_tom_security.md
+9.6 Prompt für UI-/Brand-Standard
+Du bist der Frontend-/UI-Agent.
+
+Lies:
+- AGENTS.md
+- docs/13_ui_brand_guidelines.md
+- skills/ui-brand-standard.md
+
+Aufgabe:
+1. Prüfe vorhandene UI-Standards.
+2. Falls das Projekt neu ist, erstelle ein UI-Konzept.
+3. Definiere Komponentenstandards.
+4. Definiere Logo-, Farb-, Typografie- und Formatregeln.
+5. Definiere responsive Regeln.
+6. Definiere Accessibility-Regeln.
+
+Wichtig:
+- Keine Feature-Implementierung.
+- Keine Backend-Änderungen.
+- Keine globalen Styles ohne Freigabe.
+- Keine Logos neu erstellen.
+
+Ausgabe in:
+docs/13_ui_brand_guidelines.md
+9.7 Prompt für ersten Umsetzungstask
+Du bist der Orchestrator-Agent.
+
+Lies:
+- AGENTS.md
+- docs/02_architektur.md
+- docs/03_roadmap.md
+- docs/04_restriktionen.md
+- docs/13_ui_brand_guidelines.md
+
+Aufgabe:
+Wähle den kleinsten sicheren nächsten Umsetzungstask.
+
+Erstelle:
+1. Taskbeschreibung
+2. zuständigen Agenten
+3. erlaubte Dateien
+4. gesperrte Dateien
+5. Abhängigkeiten
+6. Akzeptanzkriterien
+7. Testpflicht
+8. Datenschutz-/Security-Prüfpflicht
+9. QA-Prompt
+10. Branch-Name
+
+Wichtig:
+- Noch nicht umsetzen.
+- Keine grossen Tasks.
+- Keine parallelen Änderungen bei Dateikonflikten.
+9.8 Prompt für Implementierung
+Du bist [Backend-Agent / Frontend-Agent / DB-Agent / DevOps-Agent].
+
+Arbeite ausschliesslich am folgenden Task:
+[TASK EINFÜGEN]
+
+Branch:
+[BRANCH-NAME]
+
+Erlaubte Dateien:
+[DATEIEN]
+
+Gesperrte Dateien:
+[DATEIEN / ORDNER]
+
+Akzeptanzkriterien:
+[KRITERIEN]
+
+Nutze Skills:
+- skills/safe-feature-implementation.md
+- [weiterer relevanter Skill]
+
+Strikte Regeln:
+- Keine Änderungen ausserhalb der erlaubten Dateien.
+- Keine neuen Features.
+- Keine Refactorings ausserhalb des Tasks.
+- Keine neuen Dependencies ohne Freigabe.
+- Keine Secrets.
+- Keine UI-Änderung bei Backend-Task.
+- Keine DB-Änderung ohne DB-Agent.
+- Keine personenbezogenen Daten ohne Datenschutzprüfung.
+
+Nach Abschluss berichte:
+## Geänderte Dateien
+## Umsetzung
+## Tests
+## Nicht geändert
+## Risiken
+## Nächster empfohlener QA-Prompt
+9.9 Prompt für QA-Review
+Du bist der QA-/Review-Agent.
+
+Prüfe die letzte Änderung gegen:
+- ursprünglichen Task
+- AGENTS.md
+- erlaubte Dateien
+- gesperrte Dateien
+- Akzeptanzkriterien
+- relevante Skills
+- docs/13_ui_brand_guidelines.md, falls UI betroffen
+- docs/09_datenschutzkonzept.md, falls Daten betroffen
+
+Prüfe:
+1. Wurde nur der Task umgesetzt?
+2. Wurden nur erlaubte Dateien geändert?
+3. Gibt es nicht beauftragte Refactorings?
+4. Sind Tests/Checks nachvollziehbar?
+5. Gibt es Regressionen?
+6. Gibt es Security-Risiken?
+7. Gibt es Datenschutz-Risiken?
+8. Werden UI-/Brand-Standards eingehalten?
+9. Ist der PR mergefähig?
+
+Keine Produktivdateien ändern.
+
+Ausgabe:
+## Ergebnis
+Bestanden / Nicht bestanden
+
+## Kritische Probleme
+## Mittlere Probleme
+## Kleine Probleme
+## Verstösse gegen Restriktionen
+## Tests
+## Datenschutz/Security
+## UI/Brand
+## Empfehlung
+## Freigabe
+Ja / Nein
+10. Schritt-für-Schritt-Ablauf vom leeren Projekt bis fertigen Projekt
+1Leeren Projektordner erstellen
+mkdir projektname
+cd projektname
+git init
+Danach den Ordner in Codex als Projekt-Root öffnen.
+
+2Repository verbinden
+git remote add origin [REPOSITORY-URL]
+git checkout -b develop
+Alle Agenten arbeiten später über Branches und Pull Requests.
+
+3Standardstruktur erzeugen lassen
+Nutze den Start-Prompt aus Abschnitt 9.1. Codex soll nur Dokumentations-, Prompt- und Skill-Dateien anlegen.
+
+4Projektidee eintragen
+Die Idee kommt in docs/00_projektdefinition.md. Nutze den Prompt aus Abschnitt 9.2.
+
+5Anforderungen erstellen
+Erstelle docs/01_anforderungen.md mit Muss-, Sollte-, Kann- und Nicht-Zielen.
+
+Orchestrator-Agent:
+
+Erstelle aus docs/00_projektdefinition.md die Anforderungen in:
+docs/01_anforderungen.md
+
+Strukturiere nach:
+- Muss-Anforderungen
+- Sollte-Anforderungen
+- Kann-Anforderungen
+- Nicht-Ziele
+- Akzeptanzkriterien für Version 1
+
+Ändere nur diese Datei.
+6Architektur planen
+Nutze den Architektur-Prompt aus Abschnitt 9.3.
+
+7Datenmodell planen
+Bei DB-basierten Webapplikationen immer den DB-Agenten einsetzen. Nutze Abschnitt 9.4.
+
+8Datenschutz und Compliance prüfen
+Bei personenbezogenen Daten, Logins, Uploads, Logs, RAG, KI oder Voice immer Datenschutz-Agent verwenden. Nutze Abschnitt 9.5.
+
+9UI-/Brand-Standards festlegen
+Logos, Farben, Formate, Komponenten, Typografie und responsive Regeln kommen in docs/13_ui_brand_guidelines.md und skills/ui-brand-standard.md.
+
+10Roadmap erstellen
+Orchestrator-Agent:
+
+Erstelle auf Basis von:
+- docs/00_projektdefinition.md
+- docs/01_anforderungen.md
+- docs/02_architektur.md
+- docs/08_datenmodell.md
+- docs/09_datenschutzkonzept.md
+- docs/13_ui_brand_guidelines.md
+
+eine Roadmap in:
+docs/03_roadmap.md
+
+Strukturiere nach:
+Phase 1: Projektfundament
+Phase 2: Minimal lauffähiger Prototyp
+Phase 3: Kernfunktionen
+Phase 4: UI/UX
+Phase 5: Datenschutz/Security-Härtung
+Phase 6: Tests und Stabilisierung
+Phase 7: Deployment
+Phase 8: Release
+
+Jede Phase braucht:
+- Ziel
+- Tasks
+- Agenten
+- Akzeptanzkriterien
+- QA-Kontrolle
+- Risiken
+
+Ändere nur docs/03_roadmap.md.
+11Ersten Task definieren
+Der Orchestrator wählt den kleinsten sicheren Task. Nutze Prompt 9.7.
+
+12Branch erstellen
+git checkout -b feature/task-001-project-bootstrap
+13Task implementieren lassen
+Nutze Prompt 9.8 mit dem passenden Agenten.
+
+14QA prüfen lassen
+Nutze Prompt 9.9. Ohne QA-Freigabe kein Merge.
+
+15Reparaturtask bei Fehlern
+Orchestrator-Agent:
+
+QA hat den Task nicht freigegeben.
+
+Erstelle einen Reparaturtask, der nur die gemeldeten Probleme behebt.
+
+Wichtig:
+- Keine neuen Features.
+- Keine zusätzlichen Refactorings.
+- Nur die beanstandeten Punkte korrigieren.
+- Danach erneut QA prüfen.
+16Pull Request erstellen
+Nutze das PR-Template aus Abschnitt 4. PR wird erst nach QA-Freigabe gemerged.
+
+17Merge nach develop
+git checkout develop
+git merge feature/task-001-project-bootstrap
+18Nach 3–5 Tasks Integrationsprüfung
+Der QA-Agent prüft Gesamtsystem, Tests, Schnittstellen, UI, DB, Datenschutz und Security.
+
+19Release vorbereiten
+Vor Release wird docs/15_release_checkliste.md abgearbeitet.
+
+20Projektabschluss
+Code, Dokumentation, Entscheidungen, Datenschutz, Datenmodell, UI-Standards und Deployment müssen synchron sein.
+
+11. Zwischenkontrollen
+Nach jedem Task
+Nur erlaubte Dateien geändert?
+Keine gesperrten Bereiche verändert?
+Akzeptanzkriterien erfüllt?
+Tests/Checks dokumentiert?
+QA-Agent geprüft?
+PR-Template ausgefüllt?
+Nach jedem DB-Task
+Migration vorhanden?
+Rollback-Risiko dokumentiert?
+Constraints/Indizes geprüft?
+Personenbezogene Daten markiert?
+Datenschutz-Agent einbezogen?
+Nach jedem UI-Task
+Logo korrekt?
+Farben und Typografie korrekt?
+Mobile Ansicht geprüft?
+Formate eingehalten?
+Accessibility geprüft?
+Keine globalen Styles unnötig verändert?
+Nach jedem Datenschutz-relevanten Task
+Datenarten dokumentiert?
+Zweck definiert?
+Löschung möglich?
+Externe Anbieter geprüft?
+Logs minimiert?
+Consent/Informationspflicht geprüft?
+Integrationsprüfung
+QA-Agent:
+
+Führe eine Integrationsprüfung durch.
+
+Prüfe:
+1. Backend startet.
+2. Frontend startet.
+3. API-Verträge stimmen.
+4. DB-Migrationen laufen.
+5. Tests sind grün oder Abweichungen dokumentiert.
+6. UI-/Brand-Standards sind eingehalten.
+7. Datenschutzdokumente sind aktuell.
+8. Keine Secrets im Repository.
+9. Keine nicht dokumentierten Dependencies.
+10. Roadmap und Ist-Zustand stimmen überein.
+
+Keine Produktivdateien ändern.
+Erstelle einen Bericht.
+12. Projektabschluss und Release-Freigabe
+Release-Checkliste
+# docs/15_release_checkliste.md
+
+## Funktional
+
+- [ ] Kernfunktionen umgesetzt
+- [ ] Akzeptanzkriterien erfüllt
+- [ ] Keine offenen kritischen Bugs
+
+## Technik
+
+- [ ] Build erfolgreich
+- [ ] Tests erfolgreich
+- [ ] Migrationen geprüft
+- [ ] Rollback dokumentiert
+- [ ] Keine Secrets im Code
+
+## UI / Brand
+
+- [ ] Logo korrekt
+- [ ] Farben korrekt
+- [ ] Typografie korrekt
+- [ ] Mobile Ansicht geprüft
+- [ ] Accessibility geprüft
+
+## Datenschutz / Compliance
+
+- [ ] Datenarten dokumentiert
+- [ ] Datenflüsse dokumentiert
+- [ ] Löschkonzept vorhanden
+- [ ] TOM/Security dokumentiert
+- [ ] Externe Anbieter geprüft
+- [ ] Datenschutzhinweise vorbereitet
+
+## Repository
+
+- [ ] PRs reviewed
+- [ ] develop stabil
+- [ ] main geschützt
+- [ ] CHANGELOG aktualisiert
+- [ ] README aktuell
+
+## Freigabe
+
+- [ ] QA-Agent
+- [ ] Orchestrator-Agent
+- [ ] Datenschutz- & Compliance-Agent, falls relevant
+- [ ] DevOps-/Security-Agent
+- [ ] Menschliche Projektfreigabe
+Finaler Orchestrator-Prompt
+Orchestrator-Agent:
+
+Bereite die finale Projektfreigabe vor.
+
+Lies:
+- AGENTS.md
+- docs/03_roadmap.md
+- docs/06_entscheidungen.md
+- docs/07_qa_checkliste.md
+- docs/08_datenmodell.md
+- docs/09_datenschutzkonzept.md
+- docs/13_ui_brand_guidelines.md
+- docs/15_release_checkliste.md
+
+Prüfe:
+1. Sind alle geplanten Version-1-Funktionen umgesetzt?
+2. Gibt es offene kritische Risiken?
+3. Sind QA-Berichte vorhanden?
+4. Sind Datenschutz und Security geprüft?
+5. Sind UI-/Brand-Standards eingehalten?
+6. Ist das Repository sauber?
+7. Ist die Dokumentation aktuell?
+
+Ausgabe:
+## Projektstatus
+## Erledigt
+## Offen
+## Risiken
+## Release-Empfehlung
+Freigabe: Ja / Nein
+Endregel: Ein Projekt ist nicht fertig, wenn nur Code vorhanden ist. Es ist fertig, wenn Code, Repository, Dokumentation, UI-Standards, Datenmodell, Datenschutz, QA und Release-Checkliste zusammenpassen.
+Version 1.0 · Leitfaden für standardisierte Codex-Projektentwicklung in Unternehmen. Dieses Dokument ist als interne Arbeitsgrundlage gedacht und ersetzt keine juristische Prüfung bei Datenschutz- oder Compliance-Fragen.

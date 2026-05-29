@@ -1,0 +1,44 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Environment / Secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Node / Frontend
+node_modules/
+dist/
+build/
+.vite/
+coverage/
+
+# PHP / Laravel
+vendor/
+storage/*.key
+bootstrap/cache/*.php
+
+# Database / Dumps
+*.sqlite
+*.sqlite3
+*.dump
+*.sql
+
+# Test / Tooling
+.phpunit.cache/
+.pytest_cache/
+.playwright-mcp/
+
+# Local agent skill/cache directories
+skills/*/
+
+# Local files
+tmp/
+temp/
