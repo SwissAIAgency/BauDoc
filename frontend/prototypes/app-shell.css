@@ -1,0 +1,1061 @@
+/* ============================================================
+   VisiDoc App-Shell – gemeinsame Stile für alle Prototypen
+   (frontend/prototypes/app-shell.css)
+
+   Enthält: Design-Tokens, App-Layout, Sidebar, Topbar, Buttons,
+   Fokus-Ring, responsive Regeln für Shell.
+
+   Seite-spezifische Stile (z. B. Dashboard, Galerie) bleiben im
+   jeweiligen HTML-<style>-Block.
+   ============================================================ */
+
+/* ============================================================
+   Design-Tokens (gemäss frontend/prototypes/DESIGN.md §3)
+   ============================================================ */
+
+:root {
+  --color-primary: #668048;
+  --color-primary-hover: #7A9359;
+  --color-primary-press: #566B3D;
+  --color-primary-soft: rgba(102, 128, 72, 0.14);
+  --color-ink: #1F2429;
+  --text-on-primary: #FFFFFF;
+
+  --radius-container: 10px;
+  --radius-small: 8px;
+  --radius-preview: 12px;
+  --radius-pill: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  --border-width-default: 1px;
+  --border-width-active: 2px;
+
+  --shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.32);
+  --shadow-tooltip: 0 2px 6px rgba(0, 0, 0, 0.24);
+
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --topbar-height: 64px;
+  --sidebar-width: 240px;
+  --sidebar-width-collapsed: 64px;
+}
+
+/* Dark Theme (Default) */
+:root,
+[data-theme="dark"] {
+  --bg-base: #14181B;
+  --bg-panel: #1F2429;
+  --bg-raised: #2A2F35;
+  --bg-warm: #1B2024;
+  --border-default: #2F353C;
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --text-high: #F2F4F7;
+  --text-mid: #A3ACB8;
+  --text-low: #7C848F;
+  --status-info: #5B8DEF;
+  --status-info-soft: rgba(91, 141, 239, 0.18);
+  --status-warn: #F5C768;
+  --status-warn-soft: rgba(245, 199, 104, 0.18);
+  --status-error: #F26B6B;
+  --status-error-soft: rgba(242, 107, 107, 0.18);
+}
+
+/* Light Theme (aus Logo abgeleitet) */
+[data-theme="light"] {
+  --bg-base: #F7F8F5;
+  --bg-panel: #FFFFFF;
+  --bg-raised: #EDEFE9;
+  --bg-warm: #F2F4EE;
+  --border-default: #D9DCD3;
+  --border-subtle: rgba(31, 36, 41, 0.08);
+  --text-high: #1F2429;
+  --text-mid: #5A636C;
+  --text-low: #8B929B;
+  --status-info: #2C5BB8;
+  --status-info-soft: rgba(44, 91, 184, 0.10);
+  --status-warn: #8A6618;
+  --status-warn-soft: rgba(138, 102, 24, 0.10);
+  --status-error: #A83333;
+  --status-error-soft: rgba(168, 51, 51, 0.10);
+}
+
+/* ============================================================
+   Reset
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--text-high);
+  background: var(--bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+h1, h2, h3, h4, h5, h6 { margin: 0; font-weight: 600; }
+p { margin: 0; }
+button { font-family: inherit; cursor: pointer; }
+a { color: var(--color-primary); text-decoration: none; }
+a:hover { color: var(--color-primary-hover); }
+table { border-collapse: collapse; width: 100%; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+
+/* ============================================================
+   App-Layout (Sidebar + Body)
+   ============================================================ */
+
+.vd-app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   Sidebar
+   ============================================================ */
+
+.vd-sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Markenblock oberhalb der Organisation */
+.vd-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.vd-sidebar-brand-mark {
+  width: 28px;
+  height: 28px;
+  color: var(--text-high);
+  flex-shrink: 0;
+}
+.vd-sidebar-brand-text {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.vd-sidebar-brand-text .vd-brand-accent { color: var(--color-primary); }
+
+/* Organisationskopf */
+.vd-sidebar-org {
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  min-height: var(--topbar-height);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+.vd-sidebar-org-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-low);
+}
+.vd-sidebar-org-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-high);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vd-sidebar-org-slug {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-low);
+  letter-spacing: 0.02em;
+}
+
+/* Navigation */
+.vd-sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.vd-sidebar-section-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-low);
+  padding: var(--space-3) var(--space-3) var(--space-2);
+}
+.vd-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 40px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-small);
+  color: var(--text-mid);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  transition: background 120ms ease, color 120ms ease;
+}
+.vd-nav-item:hover { background: var(--bg-raised); color: var(--text-high); }
+.vd-nav-item:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.vd-nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+.vd-nav-item-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vd-nav-item-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-low);
+  background: var(--bg-raised);
+  padding: 2px 6px;
+  border-radius: var(--radius-pill);
+  line-height: 1;
+}
+
+/* Aktiver Zustand: 2px Salwei-Balken links + Salwei-Soft Hintergrund + Salwei Icon */
+.vd-nav-item--active {
+  color: var(--text-high);
+  background: var(--color-primary-soft);
+}
+.vd-nav-item--active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--color-primary);
+  border-radius: 0 2px 2px 0;
+}
+.vd-nav-item--active svg { color: var(--color-primary); }
+.vd-nav-item--active .vd-nav-item-count { background: var(--bg-panel); color: var(--color-primary); }
+
+.vd-sidebar-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: var(--space-2) var(--space-3);
+}
+
+/* User-Footer */
+.vd-sidebar-footer {
+  border-top: 1px solid var(--border-subtle);
+  padding: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.vd-sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-small);
+  flex: 1;
+  min-width: 0;
+}
+.vd-sidebar-user:hover { background: var(--bg-raised); }
+.vd-sidebar-user-meta { min-width: 0; flex: 1; }
+.vd-sidebar-user-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-high);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vd-sidebar-user-role {
+  font-size: 11px;
+  color: var(--text-low);
+  line-height: 1.2;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vd-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.vd-avatar svg { width: 18px; height: 18px; }
+
+/* ============================================================
+   App-Body (Topbar + Main)
+   ============================================================ */
+
+.vd-app-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================================
+   Topbar
+   ============================================================ */
+
+.vd-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: var(--topbar-height);
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: 0 var(--space-5);
+}
+.vd-topbar-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-mid);
+}
+.vd-topbar-spacer { flex: 1; }
+.vd-search-wrap {
+  flex: 1;
+  max-width: 480px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.vd-search-input {
+  width: 100%;
+  height: 36px;
+  padding: 0 var(--space-3) 0 36px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-small);
+  color: var(--text-high);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1;
+}
+.vd-search-input::placeholder { color: var(--text-low); }
+.vd-search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-soft);
+}
+.vd-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 0;
+  bottom: 0;
+  margin: auto 0;
+  width: 16px;
+  height: 16px;
+  color: var(--text-low);
+  pointer-events: none;
+  display: block;
+  flex-shrink: 0;
+}
+.vd-topbar-actions { display: flex; align-items: center; gap: var(--space-2); }
+
+/* ============================================================
+   Schaltflächen
+   ============================================================ */
+
+.vd-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 36px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-small);
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.vd-button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.vd-button--primary { background: var(--color-primary); color: var(--text-on-primary); }
+.vd-button--primary:hover { background: var(--color-primary-hover); }
+.vd-button--primary:active { background: var(--color-primary-press); }
+.vd-button--secondary { background: var(--bg-panel); color: var(--text-high); border-color: var(--border-default); }
+.vd-button--secondary:hover { background: var(--bg-raised); }
+.vd-button--ghost { background: transparent; color: var(--text-high); }
+.vd-button--ghost:hover { background: var(--bg-raised); }
+.vd-button--outlined { background: transparent; color: var(--color-primary); border-color: var(--color-primary); }
+.vd-button--outlined:hover { background: var(--color-primary-soft); }
+.vd-button--danger { background: transparent; color: var(--status-error); border-color: var(--status-error); }
+.vd-button--danger:hover { background: rgba(242, 107, 107, 0.10); }
+.vd-button--link { background: transparent; border: none; color: var(--color-primary); height: auto; padding: 0; }
+.vd-button--link:hover { color: var(--color-primary-hover); text-decoration: underline; }
+
+.vd-icon-button {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-small);
+  color: var(--text-mid);
+  transition: background 120ms ease, color 120ms ease;
+}
+.vd-icon-button:hover { background: var(--bg-raised); color: var(--text-high); }
+.vd-icon-button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.vd-icon-button svg { width: 20px; height: 20px; }
+
+/* ============================================================
+   Hauptbereich
+   ============================================================ */
+
+.vd-main {
+  flex: 1;
+  padding: var(--space-6) var(--space-5);
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+}
+.vd-page-title {
+  font-size: 26px;
+  line-height: 1.20;
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+.vd-page-subtitle {
+  font-size: 14px;
+  color: var(--text-mid);
+  margin-bottom: var(--space-5);
+}
+
+/* ============================================================
+   Fokus-Ring (global)
+   ============================================================ */
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   Karten – freigegebene Varianten
+   ============================================================ */
+
+.vd-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-container);
+  padding: var(--space-5);
+}
+
+/* Karte mit Salwei-Akzent: 3px linker Balken + sanfter Schimmer */
+.vd-card--accent {
+  position: relative;
+  overflow: hidden;
+}
+.vd-card--accent::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--color-primary);
+}
+.vd-card--accent .vd-card-header { padding-left: var(--space-3); }
+
+/* Karte mit Salwei-Hintergrund-Tönung für Hero / Willkommen */
+.vd-card--hero {
+  background:
+    linear-gradient(135deg, var(--color-primary-soft) 0%, transparent 60%),
+    var(--bg-panel);
+  border-color: rgba(102, 128, 72, 0.28);
+}
+
+/* Karte klickbar: Salwei-Rand on hover, leichter Lift */
+.vd-card--interactive { cursor: pointer; transition: border-color 120ms ease, transform 120ms ease, box-shadow 120ms ease; }
+.vd-card--interactive:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+.vd-card--interactive:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.vd-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+.vd-card-title {
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 500;
+  color: var(--text-high);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.vd-card-title .vd-card-icon {
+  display: inline-flex;
+  color: var(--text-mid);
+}
+.vd-card-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: var(--space-2);
+}
+
+/* ============================================================
+   Hero / Willkommens-Karte
+   ============================================================ */
+
+.vd-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-6);
+  background:
+    radial-gradient(circle at 100% 0%, var(--color-primary-soft) 0%, transparent 50%),
+    var(--bg-panel);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-preview);
+  position: relative;
+  overflow: hidden;
+}
+.vd-hero::after {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--color-primary);
+}
+.vd-hero-greeting {
+  flex: 1;
+  min-width: 0;
+}
+.vd-hero-eyebrow {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--color-primary);
+  margin-bottom: 4px;
+}
+.vd-hero-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-high);
+  line-height: 1.2;
+  margin-bottom: var(--space-1);
+}
+.vd-hero-subtitle {
+  font-size: 13px;
+  color: var(--text-mid);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.vd-hero-subtitle-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--text-low);
+  display: inline-block;
+}
+.vd-hero-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding-left: var(--space-5);
+  border-left: 1px solid var(--border-subtle);
+}
+.vd-hero-stat-value {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--color-primary);
+  line-height: 1.1;
+}
+.vd-hero-stat-label {
+  font-size: 11px;
+  color: var(--text-mid);
+  margin-top: 2px;
+}
+
+/* Avatar-Ring (Salwei) für aktive Hervorhebung */
+.vd-avatar--ring {
+  box-shadow: 0 0 0 2px var(--bg-panel), 0 0 0 4px var(--color-primary);
+}
+.vd-avatar--lg { width: 64px; height: 64px; font-size: 20px; }
+.vd-avatar--xl { width: 96px; height: 96px; font-size: 28px; }
+
+/* ============================================================
+   Tipp-Karte (subtle Salwei-Akzent)
+   ============================================================ */
+
+.vd-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-primary-soft);
+  border: 1px solid rgba(102, 128, 72, 0.30);
+  border-radius: var(--radius-container);
+  color: var(--text-high);
+}
+.vd-tip-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--radius-small);
+  background: var(--color-primary);
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.vd-tip-icon svg { width: 18px; height: 18px; }
+.vd-tip-body { flex: 1; min-width: 0; }
+.vd-tip-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-high);
+  margin-bottom: 2px;
+}
+.vd-tip-text {
+  font-size: 13px;
+  color: var(--text-mid);
+  line-height: 1.4;
+}
+.vd-tip-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+/* ============================================================
+   Kacheln mit farbigem Hintergrund (für Icons in Karten)
+   ============================================================ */
+
+.vd-tile {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-small);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.vd-tile--primary { background: var(--color-primary-soft); color: var(--color-primary); }
+.vd-tile--info { background: var(--status-info-soft); color: var(--status-info); }
+.vd-tile--warn { background: var(--status-warn-soft); color: var(--status-warn); }
+.vd-tile--error { background: var(--status-error-soft); color: var(--status-error); }
+.vd-tile--neutral { background: var(--bg-raised); color: var(--text-mid); }
+.vd-tile svg { width: 20px; height: 20px; }
+.vd-tile--lg { width: 48px; height: 48px; }
+.vd-tile--lg svg { width: 24px; height: 24px; }
+
+/* ============================================================
+   Avatar-Stack (überlappende Avatare für Beteiligte)
+   ============================================================ */
+
+.vd-avatar-stack {
+  display: inline-flex;
+  align-items: center;
+}
+.vd-avatar-stack .vd-avatar {
+  border: 2px solid var(--bg-panel);
+  margin-left: -8px;
+}
+.vd-avatar-stack .vd-avatar:first-child { margin-left: 0; }
+.vd-avatar-stack-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-raised);
+  color: var(--text-mid);
+  font-size: 11px;
+  font-weight: 500;
+  border: 2px solid var(--bg-panel);
+  margin-left: -8px;
+}
+
+/* ============================================================
+   Farb-Akzente (Welle 2)
+   Ziel: freundlicher, wärmer, einladender – strikt innerhalb
+   der Markenpalette (Salwei #668048, Anthrazit #1F2429,
+   Info #5B8DEF, Warn #F5C768, Fehler #F26B6B).
+   ============================================================ */
+
+/* Salwei-Variationen für Karten-Hintergründe.
+   Im Light Theme etwas zarter, im Dark Theme mit Tönung. */
+:root,
+[data-theme="dark"] {
+  --color-primary-tint-1: rgba(102, 128, 72, 0.08);
+  --color-primary-tint-2: rgba(102, 128, 72, 0.18);
+  --color-primary-tint-3: rgba(102, 128, 72, 0.32);
+  --color-ink-tint-1: rgba(31, 36, 41, 0.04);
+}
+[data-theme="light"] {
+  --color-primary-tint-1: rgba(102, 128, 72, 0.07);
+  --color-primary-tint-2: rgba(102, 128, 72, 0.14);
+  --color-primary-tint-3: rgba(102, 128, 72, 0.24);
+  --color-ink-tint-1: rgba(31, 36, 41, 0.03);
+}
+
+/* Karte mit warmem Salwei-Gradient (für Hero, Highlight-Karten).
+   Bestehend: .vd-card--hero (Subtle). Neu: .vd-card--warm (satter). */
+.vd-card--warm {
+  background:
+    linear-gradient(135deg, var(--color-primary-tint-2) 0%, var(--color-primary-tint-1) 60%, transparent 100%),
+    var(--bg-panel);
+  border-color: rgba(102, 128, 72, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+.vd-card--warm::after {
+  content: "";
+  position: absolute;
+  right: -40px; top: -40px;
+  width: 180px; height: 180px;
+  background: radial-gradient(circle, var(--color-primary-tint-2) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Sanftes Salwei-Glow auf Karten-Vorderkante */
+.vd-card--glow {
+  box-shadow:
+    0 1px 0 var(--color-primary-tint-2) inset,
+    0 4px 14px rgba(0, 0, 0, 0.10);
+}
+
+/* Karten-Header mit Salwei-Akzent-Linie darunter */
+.vd-card-header--accent {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
+  position: relative;
+}
+.vd-card-header--accent::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: -1px;
+  width: 36px; height: 2px;
+  background: var(--color-primary);
+  border-radius: 2px;
+}
+
+/* Stat-Kachel: kleine farbige Kachel mit Zahl + Label */
+.vd-stat-tile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-container);
+}
+.vd-stat-tile-label {
+  font-size: 12px;
+  color: var(--text-mid);
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+.vd-stat-tile-value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-high);
+  line-height: 1;
+}
+.vd-stat-tile-meta {
+  font-size: 11px;
+  color: var(--text-low);
+  margin-top: 2px;
+}
+.vd-stat-tile--primary .vd-stat-tile-icon { background: var(--color-primary-soft); color: var(--color-primary); }
+.vd-stat-tile--info .vd-stat-tile-icon { background: var(--status-info-soft); color: var(--status-info); }
+.vd-stat-tile--warn .vd-stat-tile-icon { background: var(--status-warn-soft); color: var(--status-warn); }
+.vd-stat-tile--error .vd-stat-tile-icon { background: var(--status-error-soft); color: var(--status-error); }
+.vd-stat-tile--primary .vd-stat-tile-value { color: var(--color-primary); }
+.vd-stat-tile-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-small);
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.vd-stat-tile-icon svg { width: 18px; height: 18px; }
+.vd-stat-tile-body { flex: 1; min-width: 0; }
+
+/* Tag-Chip (für Tags, Kategorien) – kleiner, abgerundet, mit optionalem Icon */
+.vd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  background: var(--bg-raised);
+  color: var(--text-mid);
+  border: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+.vd-chip svg { width: 12px; height: 12px; flex-shrink: 0; }
+.vd-chip--primary { background: var(--color-primary-soft); color: var(--color-primary); border-color: transparent; }
+.vd-chip--info { background: var(--status-info-soft); color: var(--status-info); border-color: transparent; }
+.vd-chip--warn { background: var(--status-warn-soft); color: var(--status-warn); border-color: transparent; }
+.vd-chip--error { background: var(--status-error-soft); color: var(--status-error); border-color: transparent; }
+.vd-chip--ink { background: var(--color-ink); color: #FFFFFF; border-color: transparent; }
+.vd-chip--sm { height: 20px; font-size: 10px; padding: 0 8px; }
+.vd-chip--lg { height: 26px; font-size: 12px; padding: 0 12px; }
+.vd-chip--removable { padding-right: 4px; }
+.vd-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px; height: 16px;
+  margin-left: 2px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.10);
+  color: inherit;
+  cursor: pointer;
+  border: none;
+}
+.vd-chip-remove:hover { background: rgba(0, 0, 0, 0.20); }
+.vd-chip-remove svg { width: 10px; height: 10px; }
+
+/* Inline-Tag mit Salwei-Punkt links (für Metadaten-Reihen) */
+.vd-inline-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-mid);
+}
+.vd-inline-tag::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  flex-shrink: 0;
+}
+.vd-inline-tag--info::before { background: var(--status-info); }
+.vd-inline-tag--warn::before { background: var(--status-warn); }
+.vd-inline-tag--error::before { background: var(--status-error); }
+.vd-inline-tag--muted::before { background: var(--text-low); }
+
+/* Badge mit Salwei-Soft-Hintergrund (für Status-Anzeigen in Listen) */
+.vd-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+.vd-badge svg { width: 12px; height: 12px; flex-shrink: 0; }
+.vd-badge--primary { background: var(--color-primary-soft); color: var(--color-primary); }
+.vd-badge--neutral { background: var(--bg-raised); color: var(--text-mid); border: 1px solid var(--border-default); }
+
+/* Live-Indikator (sanft pulsierender Punkt) – dezent, kein Decoration-Spam */
+.vd-live-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  box-shadow: 0 0 0 0 var(--color-primary);
+  animation: vd-pulse 1.8s ease-out infinite;
+  flex-shrink: 0;
+}
+.vd-live-dot--info { background: var(--status-info); box-shadow: 0 0 0 0 var(--status-info); }
+@keyframes vd-pulse {
+  0% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
+  70% { box-shadow: 0 0 0 6px transparent; opacity: 0.6; }
+  100% { box-shadow: 0 0 0 0 transparent; opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vd-live-dot { animation: none; }
+}
+
+/* Sektions-Eyebrow mit Salwei-Linie (für Bereiche, Anker) */
+.vd-section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: var(--space-2);
+}
+.vd-section-eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 18px; height: 2px;
+  background: var(--color-primary);
+  border-radius: 2px;
+}
+
+/* Salwei-Divider – weicher, weicher Übergang */
+.vd-divider-accent {
+  height: 1px;
+  background: linear-gradient(to right, var(--color-primary-tint-2), var(--border-subtle) 40%, transparent);
+  border: none;
+  margin: var(--space-4) 0;
+}
+
+/* Tipp / Hinweis-Karte (freundlich, warm) – Variante mit Icon in Salwei-Kachel */
+.vd-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-container);
+}
+.vd-callout-icon {
+  width: 32px; height: 32px;
+  border-radius: var(--radius-small);
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+.vd-callout-icon svg { width: 18px; height: 18px; }
+.vd-callout-body { flex: 1; min-width: 0; }
+.vd-callout-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-high);
+  margin-bottom: 2px;
+}
+.vd-callout-text {
+  font-size: 12px;
+  color: var(--text-mid);
+  line-height: 1.5;
+}
+
+/* Avatar mit Salwei-Ring (für Profil, hochrangige Karten) */
+.vd-avatar--ring-primary {
+  box-shadow: 0 0 0 2px var(--bg-panel), 0 0 0 4px var(--color-primary);
+}
+
+/* Foto-Stub (für leere Profilbilder / Foto-Platzhalter) */
+.vd-photo-stub {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background:
+    linear-gradient(135deg, var(--color-primary-tint-1) 0%, var(--color-primary-tint-2) 100%),
+    var(--bg-raised);
+  color: var(--color-primary);
+  overflow: hidden;
+}
+.vd-photo-stub::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, transparent 60%, rgba(31, 36, 41, 0.15) 100%);
+}
+.vd-photo-stub svg { width: 50%; height: 50%; position: relative; z-index: 1; }
+
+/* Empty-State (für leere Galerien, leere Listen) */
+.vd-empty {
+  text-align: center;
+  padding: var(--space-8) var(--space-5);
+  color: var(--text-mid);
+}
+.vd-empty-icon {
+  width: 64px; height: 64px;
+  margin: 0 auto var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.vd-empty-icon svg { width: 32px; height: 32px; }
+.vd-empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-high);
+  margin-bottom: 4px;
+}
+.vd-empty-text { font-size: 13px; color: var(--text-mid); margin-bottom: var(--space-4); }
+
+/* Responsive: Sidebar collapse + Topbar
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .vd-sidebar { width: var(--sidebar-width-collapsed); }
+  .vd-sidebar-org,
+  .vd-sidebar-brand-text,
+  .vd-nav-item-label,
+  .vd-nav-item-count,
+  .vd-sidebar-section-label,
+  .vd-sidebar-user-meta { display: none; }
+  .vd-sidebar-brand { justify-content: center; padding: var(--space-4) 0; }
+  .vd-nav-item { justify-content: center; padding: 0; }
+  .vd-sidebar-user { justify-content: center; }
+}
+
+@media (max-width: 720px) {
+  .vd-topbar { padding: 0 var(--space-3); gap: var(--space-2); }
+  .vd-search-wrap { display: none; }
+  .vd-main { padding: var(--space-4) var(--space-3); }
+}
