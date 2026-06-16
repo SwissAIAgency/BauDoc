@@ -2,23 +2,24 @@
 
 ## Vor Implementierung
 
-- [ ] Personenbezogene Daten pro Modul identifiziert.
-- [ ] Zweck je Datenart dokumentiert.
-- [ ] Datenminimierung geprüft.
-- [ ] Lösch- und Aufbewahrungsregeln geplant.
-- [ ] Externe Dienstleister identifiziert.
-- [ ] Hosting Schweiz/EU geprüft.
-- [ ] KI-Verarbeitung als nicht-MVP markiert.
+- [x] Personenbezogene Daten pro Modul identifiziert.
+- [x] Zweck je Datenart dokumentiert.
+- [x] Datenminimierung geprüft.
+- [x] Lösch- und Aufbewahrungsregeln geplant.
+- [x] Externe Dienstleister als offene Entscheidung identifiziert.
+- [ ] Hosting Schweiz/EU entschieden.
+- [x] KI-Verarbeitung als nicht-MVP markiert.
 
 ## Vor produktiver Nutzung
 
-- [ ] Datenschutz Review durchgeführt.
+- [ ] Datenschutz Review durch verantwortliche Person durchgeführt.
 - [ ] Rollen und Rechte serverseitig getestet.
 - [ ] Private Dateiablage geprüft.
 - [ ] Logs auf personenbezogene Daten geprüft.
 - [ ] Audit-Retention festgelegt.
 - [ ] Export-/Auskunftsfähigkeit bewertet.
 - [ ] Auftragsbearbeitung mit Dienstleistern geklärt.
+- [ ] Backup- und Löschprozess abgestimmt.
 
 ## Datenschutzrisiken
 

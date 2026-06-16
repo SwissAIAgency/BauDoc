@@ -1,5 +1,9 @@
 # Data Classification
 
+## Status
+
+Phase-2-Datenschutzbaseline. Vor produktiver Nutzung ist eine menschliche Datenschutzfreigabe erforderlich.
+
 ## Öffentlich
 
 Keine Produktivdaten des MVP sind öffentlich vorgesehen.
@@ -37,3 +41,4 @@ Nicht gezielt erfasst. Möglich, falls Fotos oder Kommentare entsprechende Infor
 - Audit-Logs auf Zweck und Notwendigkeit begrenzen.
 - IP-Adresse und User-Agent erst nach Datenschutzbewertung speichern.
 - KI-Metadaten erst nach separater Freigabe verarbeiten.
+- Externe Anbieter erst nach Dienstleisterprüfung verwenden.

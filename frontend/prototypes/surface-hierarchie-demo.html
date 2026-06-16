@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="de-CH" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VisiDoc – Surface-Hierarchie Demo</title>
+  <link rel="stylesheet" href="app-shell.css">
+  <style>
+    /* ============================================================
+       SURFACE-HIERARCHIE – VORHER / NACHHER
+       Zeigt zwei Versionen derselben Dashboard-Card nebeneinander.
+       Links: IST (viele Borders, flache Hierarchie)
+       Rechts: SOLL (Surfaces statt Borders, klare Ebenen)
+       ============================================================ */
+
+    body {
+      background: var(--bg-base);
+      color: var(--text-high);
+      font-family: var(--font-sans);
+      margin: 0;
+      padding: 32px;
+      min-height: 100vh;
+    }
+
+    .demo-head {
+      max-width: 1280px;
+      margin: 0 auto 24px;
+    }
+    .demo-head h1 {
+      font-size: 22px;
+      font-weight: 600;
+      margin: 0 0 4px;
+    }
+    .demo-head p {
+      font-size: 13px;
+      color: var(--text-mid);
+      margin: 0;
+    }
+
+    .demo-grid {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .demo-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .demo-col-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      padding: 0 4px;
+    }
+    .demo-col-label::before {
+      content: "";
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--color-primary);
+    }
+    .demo-col-label--after::before { background: var(--status-warn); }
+
+    /* ============================================================
+       IST – mit Borders
+       ============================================================ */
+    .ist-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .ist-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 12px;
+    }
+    .ist-card-title { font-size: 14px; font-weight: 600; }
+    .ist-card-link { font-size: 12px; color: var(--color-primary); }
+    .ist-activity { display: flex; flex-direction: column; gap: 4px; }
+    .ist-activity-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 12.5px;
+    }
+    .ist-activity-row:hover { background: var(--bg-raised); }
+    .ist-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .ist-dot--photo { background: var(--color-primary); }
+    .ist-dot--plan  { background: var(--status-info); }
+    .ist-text { flex: 1; color: var(--text-high); }
+    .ist-time { font-size: 11px; color: var(--text-low); font-family: var(--font-mono); }
+
+    .ist-kpi-row {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .ist-kpi {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      padding: 12px;
+      position: relative; overflow: hidden;
+    }
+    .ist-kpi::before {
+      content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: var(--color-primary);
+    }
+    .ist-kpi-label {
+      font-size: 11px; color: var(--text-low);
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .ist-kpi-value {
+      font-size: 24px; font-weight: 600; font-family: var(--font-mono);
+      margin-top: 4px; line-height: 1.1;
+    }
+    .ist-kpi-delta { font-size: 11px; color: var(--text-mid); margin-top: 2px; }
+
+    .ist-pill-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ist-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 28px; padding: 0 12px;
+      background: var(--bg-raised);
+      border: 1px solid var(--border-default);
+      border-radius: 999px;
+      font-size: 12px; color: var(--text-mid);
+    }
+    .ist-pill--active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #fff;
+    }
+
+    /* ============================================================
+       SOLL – mit Surfaces (das Apple-Pattern)
+       ============================================================ */
+
+    /* Neue Token-Ebene: 3 Surface-Tiers + 1 Separator-Tint */
+    .soll {
+      --surface-0: var(--bg-base);          /* App-Hintergrund       */
+      --surface-1: #1A1F24;                 /* Panel 1 Ebene höher   */
+      --surface-2: #20262C;                 /* Card / Pill / Input   */
+      --surface-3: #262D34;                 /* Hover / Active-Fläche */
+      --separator-soft: rgba(255,255,255,0.06);
+      --separator-strong: rgba(255,255,255,0.10);
+    }
+
+    .soll-card {
+      background: var(--surface-1);
+      /* KEIN border. Stattdessen: leichter Inset-Highlight oben,
+         Shadow unten für Tiefen-Staffelung. */
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow:
+        0 0 0 1px var(--separator-soft),                  /* extrem dünner "edge" */
+        0 1px 0 rgba(255,255,255,0.04) inset,             /* top-highlight */
+        0 1px 2px rgba(0,0,0,0.20);                       /* drop */
+    }
+    .soll-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 0 10px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--separator-soft);
+    }
+    .soll-card-title {
+      font-size: 13px; font-weight: 600; color: var(--text-high);
+      letter-spacing: 0.01em;
+    }
+    .soll-card-link {
+      font-size: 12px; color: var(--color-primary);
+      text-decoration: none;
+    }
+    .soll-card-link:hover { text-decoration: underline; }
+
+    .soll-activity { display: flex; flex-direction: column; gap: 2px; }
+    .soll-activity-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 8px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text-high);
+      transition: background 120ms ease;
+    }
+    .soll-activity-row:hover { background: var(--surface-2); }
+    .soll-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .soll-dot--photo { background: var(--color-primary); }
+    .soll-dot--plan  { background: var(--status-info); }
+    .soll-text { flex: 1; line-height: 1.4; }
+    .soll-text em {
+      font-style: normal; color: var(--color-primary);
+      font-weight: 500;
+    }
+    .soll-time {
+      font-size: 11px; color: var(--text-low);
+      font-family: var(--font-mono); flex-shrink: 0;
+    }
+
+    /* KPI – ohne Border, mit Gradient-Stripe (Status-Farbe) */
+    .soll-kpi-row {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .soll-kpi {
+      background: var(--surface-1);
+      border-radius: 12px;
+      padding: 14px 14px 14px 18px;
+      position: relative; overflow: hidden;
+      box-shadow:
+        0 0 0 1px var(--separator-soft),
+        0 1px 0 rgba(255,255,255,0.04) inset;
+    }
+    .soll-kpi::before {
+      content: "";
+      position: absolute; left: 0; top: 14px; bottom: 14px;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+      background: var(--color-primary);
+    }
+    .soll-kpi--warn::before { background: var(--status-warn); }
+    .soll-kpi--error::before { background: var(--status-error); }
+    .soll-kpi-label {
+      font-size: 11px; color: var(--text-mid);
+      font-weight: 500; letter-spacing: 0.01em;
+    }
+    .soll-kpi-value {
+      font-size: 26px; font-weight: 600;
+      font-family: var(--font-mono);
+      color: var(--text-high);
+      line-height: 1.05;
+      margin-top: 4px;
+      letter-spacing: -0.01em;
+    }
+    .soll-kpi-delta {
+      font-size: 11px; color: var(--text-mid);
+      margin-top: 4px;
+    }
+    .soll-kpi-delta--up { color: var(--color-primary); }
+    .soll-kpi-delta--down { color: var(--status-error); }
+
+    /* Pill – Apple-Style: transparent, dann fill bei Active */
+    .soll-pill-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .soll-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 28px; padding: 0 12px;
+      background: var(--surface-2);
+      border-radius: 999px;
+      font-size: 12.5px; color: var(--text-mid);
+      font-weight: 500;
+      box-shadow: 0 0 0 1px var(--separator-soft);
+      transition: background 120ms ease, color 120ms ease;
+    }
+    .soll-pill:hover { background: var(--surface-3); color: var(--text-high); }
+    .soll-pill--active {
+      background: var(--color-primary);
+      color: #fff;
+      box-shadow: 0 0 0 1px var(--color-primary);
+    }
+    .soll-pill--active:hover { background: var(--color-primary-hover); }
+
+    /* ============================================================
+       VERGLEICHS-HIGHLIGHTS
+       ============================================================ */
+    .compare-callout {
+      max-width: 1280px;
+      margin: 32px auto 0;
+      padding: 16px 20px;
+      background: var(--surface-1);
+      border-radius: 12px;
+      box-shadow: 0 0 0 1px var(--separator-soft);
+      font-size: 13px;
+      color: var(--text-mid);
+      line-height: 1.55;
+    }
+    .compare-callout strong { color: var(--text-high); font-weight: 600; }
+    .compare-callout code {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      padding: 2px 6px;
+      background: var(--surface-2);
+      border-radius: 4px;
+      color: var(--text-high);
+    }
+  </style>
+</head>
+<body>
+  <header class="demo-head">
+    <h1>Surface-Hierarchie · Vorher ↔ Nachher</h1>
+    <p>Selbe Komponenten, zwei Philosophien. Links der IST-Stand (viele Borders, flach). Rechts der SOLL-Stand (Surfaces + minimale Edges, klare Tiefe).</p>
+  </header>
+
+  <div class="demo-grid">
+
+    <!-- ============== LINKS: IST ============== -->
+    <div class="demo-col">
+      <span class="demo-col-label">Ist · Border-getrieben</span>
+
+      <div class="ist-card">
+        <div class="ist-card-head">
+          <span class="ist-card-title">Letzte Aktivität</span>
+          <a class="ist-card-link" href="#">Alle anzeigen →</a>
+        </div>
+        <div class="ist-activity">
+          <div class="ist-activity-row">
+            <span class="ist-dot ist-dot--photo"></span>
+            <span class="ist-text"><strong>T. Hofer</strong> hat 12 Fotos in <em>Neubau Bahnhofstrasse 12</em> hochgeladen.</span>
+            <span class="ist-time">vor 14 Min.</span>
+          </div>
+          <div class="ist-activity-row">
+            <span class="ist-dot ist-dot--plan"></span>
+            <span class="ist-text"><em>Plan v3.2 – Grundriss EG</em> wurde freigegeben.</span>
+            <span class="ist-time">vor 1 Std.</span>
+          </div>
+          <div class="ist-activity-row">
+            <span class="ist-dot ist-dot--photo"></span>
+            <span class="ist-text"><strong>6 neue Fotos</strong> in <em>Schulhaus Erweiterung</em>.</span>
+            <span class="ist-time">heute 08:42</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ist-kpi-row">
+        <div class="ist-kpi">
+          <div class="ist-kpi-label">Aktive Projekte</div>
+          <div class="ist-kpi-value">12</div>
+          <div class="ist-kpi-delta">+2 seit letztem Monat</div>
+        </div>
+        <div class="ist-kpi">
+          <div class="ist-kpi-label">Medien (gesamt)</div>
+          <div class="ist-kpi-value">1'284</div>
+          <div class="ist-kpi-delta">+148 diese Woche</div>
+        </div>
+        <div class="ist-kpi">
+          <div class="ist-kpi-label">Offene Pläne</div>
+          <div class="ist-kpi-value">17</div>
+          <div class="ist-kpi-delta">3 überfällig</div>
+        </div>
+      </div>
+
+      <div class="ist-card">
+        <div class="ist-card-head">
+          <span class="ist-card-title">Filter</span>
+        </div>
+        <div class="ist-pill-row">
+          <span class="ist-pill ist-pill--active">Planposition: Alle</span>
+          <span class="ist-pill">Status: In Prüfung</span>
+          <span class="ist-pill">Zeitraum: 7 Tage</span>
+          <span class="ist-pill">Ersteller: Alle</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== RECHTS: SOLL ============== -->
+    <div class="demo-col soll">
+      <span class="demo-col-label demo-col-label--after">Soll · Surface-getrieben</span>
+
+      <div class="soll-card">
+        <div class="soll-card-head">
+          <span class="soll-card-title">Letzte Aktivität</span>
+          <a class="soll-card-link" href="#">Alle anzeigen</a>
+        </div>
+        <div class="soll-activity">
+          <div class="soll-activity-row">
+            <span class="soll-dot soll-dot--photo"></span>
+            <span class="soll-text"><strong>T. Hofer</strong> hat 12 Fotos in <em>Neubau Bahnhofstrasse 12</em> hochgeladen.</span>
+            <span class="soll-time">vor 14 Min.</span>
+          </div>
+          <div class="soll-activity-row">
+            <span class="soll-dot soll-dot--plan"></span>
+            <span class="soll-text"><em>Plan v3.2 – Grundriss EG</em> wurde freigegeben.</span>
+            <span class="soll-time">vor 1 Std.</span>
+          </div>
+          <div class="soll-activity-row">
+            <span class="soll-dot soll-dot--photo"></span>
+            <span class="soll-text"><strong>6 neue Fotos</strong> in <em>Schulhaus Erweiterung</em>.</span>
+            <span class="soll-time">heute 08:42</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="soll-kpi-row">
+        <div class="soll-kpi">
+          <div class="soll-kpi-label">Aktive Projekte</div>
+          <div class="soll-kpi-value">12</div>
+          <div class="soll-kpi-delta soll-kpi-delta--up">+2 seit letztem Monat</div>
+        </div>
+        <div class="soll-kpi">
+          <div class="soll-kpi-label">Medien (gesamt)</div>
+          <div class="soll-kpi-value">1'284</div>
+          <div class="soll-kpi-delta soll-kpi-delta--up">+148 diese Woche</div>
+        </div>
+        <div class="soll-kpi soll-kpi--warn">
+          <div class="soll-kpi-label">Offene Pläne</div>
+          <div class="soll-kpi-value">17</div>
+          <div class="soll-kpi-delta soll-kpi-delta--down">3 überfällig</div>
+        </div>
+      </div>
+
+      <div class="soll-card">
+        <div class="soll-card-head">
+          <span class="soll-card-title">Filter</span>
+        </div>
+        <div class="soll-pill-row">
+          <span class="soll-pill soll-pill--active">Planposition: Alle</span>
+          <span class="soll-pill">Status: In Prüfung</span>
+          <span class="soll-pill">Zeitraum: 7 Tage</span>
+          <span class="soll-pill">Ersteller: Alle</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="compare-callout">
+    <strong>Was sich geändert hat:</strong>
+    <br><br>
+    <strong>1.</strong> <code>border: 1px solid var(--border-default)</code> ersetzt durch
+    <code>box-shadow: 0 0 0 1px var(--separator-soft)</code> + leichter Inset-Highlight.
+    Edges sind da, aber 70% subtiler und reagieren mit dem Surface statt es zu "umrahmen".
+    <br><br>
+    <strong>2.</strong> Neue Token-Ebene <code>--surface-0/1/2/3</code> (Base → Panel → Card → Hover).
+    Cards liegen nicht mehr flach auf dem Base, sondern auf <code>surface-1</code> = eine sichtbare Stufe höher.
+    <br><br>
+    <strong>3.</strong> Pills: nicht mehr mit Border, sondern mit Surface-2 als Fülle.
+    Active-State füllt mit Primary, nicht mit Primary-Border. Das ist der grösste visuelle Unterschied.
+    <br><br>
+    <strong>4.</strong> KPI-Stripe: bleibt (3px links, Status-Farbe), aber Card-Body hat keinen Border mehr —
+    die Status-Farbe wird zur einzigen visuellen Signatur.
+  </div>
+</body>
+</html>

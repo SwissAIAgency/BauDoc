@@ -1,5 +1,9 @@
 # Deletion and Retention
 
+## Status
+
+Phase-2-Planungsbaseline. Konkrete Fristen sind vor produktiver Nutzung final festzulegen.
+
 ## Ziele
 
 - Personenbezogene Daten nur solange speichern, wie Zweck, Vertrag oder rechtliche Anforderungen dies rechtfertigen.
@@ -21,6 +25,13 @@
 - Löschung von Dateien und Datenbankeinträgen konsistent behandeln.
 - Audit-Logs nicht unkontrolliert verändern.
 - Retention vor produktiver Nutzung final festlegen.
+
+## Vorläufige Retention-Leitplanken
+
+- Projektinhalte: projekt-/vertragsabhängig.
+- Audit-Logs: so kurz wie möglich, so lang wie für Nachvollziehbarkeit nötig.
+- Technische Logs: kurz halten und personenbezogene Inhalte vermeiden.
+- Backups: separate Frist und Restore-/Löschprozess definieren.
 
 ## Offene Fragen
 

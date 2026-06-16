@@ -1,0 +1,1870 @@
+<!DOCTYPE html>
+<html lang="de-CH" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Einstellung und Profil – VisiDoc</title>
+  <meta name="description" content="VisiDoc Einstellungen. Persönliche Informationen, Konto, Sicherheit, Benachrichtigungen, Anzeige und Datenschutz verwalten.">
+  <link rel="stylesheet" href="app-shell.css">
+  <style>
+    /* ============================================================
+       Einstellungs-spezifische Stile
+       Layout: 2-Spalten
+         [1] Sub-Nav (220px, sticky)
+         [2] Inhalt (flex, mehrere Sektionen)
+       ============================================================ */
+
+    .vd-settings-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: var(--space-6);
+    }
+    @media (max-width: 1100px) {
+      .vd-settings-layout { grid-template-columns: 1fr; }
+    }
+
+    .vd-settings-subnav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      position: sticky;
+      top: calc(var(--topbar-height) + var(--space-6));
+      align-self: start;
+    }
+    @media (max-width: 1100px) {
+      .vd-settings-subnav {
+        position: static;
+        flex-direction: row;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: var(--space-2);
+      }
+      .vd-settings-subnav-label, .vd-settings-subnav-divider { display: none; }
+    }
+
+    .vd-settings-subnav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-small);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-mid);
+      white-space: nowrap;
+    }
+    .vd-settings-subnav-item:hover { background: var(--bg-raised); color: var(--text-high); }
+    .vd-settings-subnav-item--active { background: var(--color-primary-soft); color: var(--color-primary); }
+    .vd-settings-subnav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .vd-settings-subnav-divider { height: 1px; background: var(--border-subtle); margin: var(--space-3) 0; }
+    .vd-settings-subnav-label {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--text-low);
+      padding: 0 var(--space-3) var(--space-2);
+    }
+
+    .vd-settings-content { min-width: 0; }
+
+    /* ============================================================
+       Profil-Header (warmes Hero)
+       ============================================================ */
+    .vd-profile-header {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: var(--space-5);
+      padding: var(--space-5) var(--space-6);
+      background:
+        radial-gradient(circle at 100% 0%, var(--color-primary-tint-2) 0%, transparent 55%),
+        var(--bg-panel);
+      border: 1px solid rgba(102, 128, 72, 0.30);
+      border-radius: var(--radius-preview);
+      margin-bottom: var(--space-5);
+      overflow: hidden;
+    }
+    .vd-profile-header::after {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--color-primary);
+    }
+    .vd-profile-avatar {
+      width: 88px; height: 88px;
+      border-radius: var(--radius-pill);
+      background: var(--color-primary-soft);
+      color: var(--color-primary);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 28px; font-weight: 600;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 2px var(--bg-panel), 0 0 0 4px var(--color-primary);
+    }
+    .vd-profile-identity { flex: 1; min-width: 0; }
+    .vd-profile-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: 4px;
+    }
+    .vd-profile-eyebrow::before {
+      content: "";
+      width: 14px; height: 2px;
+      background: var(--color-primary);
+      border-radius: 2px;
+    }
+    .vd-profile-name { font-size: 24px; font-weight: 600; color: var(--text-high); line-height: 1.2; margin-bottom: 4px; }
+    .vd-profile-role { font-size: 13px; color: var(--text-mid); margin-bottom: var(--space-3); }
+    .vd-profile-meta { display: flex; gap: var(--space-4); font-size: 12px; color: var(--text-low); flex-wrap: wrap; }
+    .vd-profile-meta-item { display: flex; align-items: center; gap: 6px; }
+    .vd-profile-meta-item svg { width: 14px; height: 14px; }
+
+    .vd-profile-actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      align-items: flex-end;
+    }
+    .vd-profile-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-mid);
+      margin-bottom: 4px;
+    }
+
+    /* ============================================================
+       Formular
+       ============================================================ */
+    .vd-form-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-container);
+      padding: var(--space-6);
+    }
+    .vd-form-section {
+      padding-bottom: var(--space-5);
+      margin-bottom: var(--space-6);
+      border-bottom: 1px solid var(--border-subtle);
+      scroll-margin-top: calc(var(--topbar-height) + var(--space-4));
+    }
+    .vd-form-section:last-of-type { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+    .vd-form-section-header { margin-bottom: var(--space-4); }
+    .vd-form-section-title {
+      font-size: 18px; font-weight: 600; color: var(--text-high);
+      line-height: 1.25; margin-bottom: 4px;
+      display: flex; align-items: center; gap: var(--space-2);
+    }
+    .vd-form-section-title .vd-form-section-icon {
+      display: inline-flex;
+      color: var(--color-primary);
+    }
+    .vd-form-section-desc { font-size: 13px; color: var(--text-mid); }
+
+    .vd-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+    .vd-form-grid--single { grid-template-columns: 1fr; }
+    .vd-form-grid--tri { grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 720px) {
+      .vd-form-grid, .vd-form-grid--tri { grid-template-columns: 1fr; }
+    }
+
+    .vd-field { display: flex; flex-direction: column; gap: 6px; }
+    .vd-field-label {
+      font-size: 13px; font-weight: 500; color: var(--text-high);
+      display: flex; align-items: center; gap: var(--space-1);
+    }
+    .vd-field-label .vd-field-required { color: var(--status-error); }
+
+    .vd-field-input, .vd-field-select, .vd-field-textarea {
+      height: 40px;
+      padding: 0 var(--space-3);
+      background: var(--bg-raised);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-small);
+      color: var(--text-high);
+      font-family: inherit;
+      font-size: 14px;
+    }
+    .vd-field-textarea {
+      height: auto; min-height: 88px;
+      padding: var(--space-3); line-height: 1.45;
+      resize: vertical;
+    }
+    .vd-field-input:focus, .vd-field-select:focus, .vd-field-textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px var(--color-primary-soft);
+    }
+    .vd-field-input[readonly] {
+      background: var(--bg-base);
+      color: var(--text-mid);
+      cursor: not-allowed;
+    }
+    .vd-field-help { font-size: 12px; color: var(--text-mid); line-height: 1.4; }
+    .vd-field-help--error { color: var(--status-error); }
+
+    .vd-field-prefix { display: flex; align-items: center; }
+    .vd-field-prefix .vd-field-input { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+    .vd-field-prefix-tag {
+      display: inline-flex; align-items: center;
+      height: 40px; padding: 0 var(--space-3);
+      background: var(--bg-base);
+      border: 1px solid var(--border-default);
+      border-right: none;
+      border-radius: var(--radius-small) 0 0 var(--radius-small);
+      color: var(--text-mid);
+      font-size: 13px; font-weight: 500;
+      font-family: var(--font-mono);
+    }
+
+    .vd-field-with-action {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--space-2);
+      align-items: end;
+    }
+    .vd-field-with-action .vd-button { height: 40px; }
+
+    .vd-form-actions {
+      display: flex; justify-content: flex-end; gap: var(--space-2);
+      margin-top: var(--space-6);
+      padding-top: var(--space-5);
+      border-top: 1px solid var(--border-subtle);
+    }
+    .vd-form-actions--start { justify-content: flex-start; }
+    .vd-form-actions--between { justify-content: space-between; }
+
+    /* Toggle / Switch */
+    .vd-toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: var(--space-4); padding: var(--space-3) 0;
+    }
+    .vd-toggle-row + .vd-toggle-row { border-top: 1px solid var(--border-subtle); }
+    .vd-toggle-text strong {
+      display: block; font-size: 14px; font-weight: 500;
+      color: var(--text-high); margin-bottom: 2px;
+    }
+    .vd-toggle-text span { font-size: 12px; color: var(--text-mid); }
+    .vd-toggle-text .vd-toggle-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--color-primary);
+      margin-top: 4px;
+    }
+
+    .vd-switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .vd-switch input {
+      position: absolute; opacity: 0;
+      width: 100%; height: 100%;
+      margin: 0; cursor: pointer;
+    }
+    .vd-switch-track {
+      position: absolute; inset: 0;
+      background: var(--bg-raised);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-pill);
+      transition: background 120ms ease, border-color 120ms ease;
+    }
+    .vd-switch-thumb {
+      position: absolute; top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      background: var(--text-mid);
+      border-radius: var(--radius-pill);
+      transition: transform 120ms ease, background 120ms ease;
+    }
+    .vd-switch input:checked + .vd-switch-track {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+    .vd-switch input:checked + .vd-switch-track .vd-switch-thumb {
+      transform: translateX(18px);
+      background: #FFFFFF;
+    }
+
+    /* Karten-Grid (z. B. Theme-Wahl) */
+    .vd-choice-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-3);
+    }
+    @media (max-width: 720px) {
+      .vd-choice-grid { grid-template-columns: 1fr; }
+    }
+    .vd-choice {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--space-2);
+      padding: var(--space-3);
+      background: var(--bg-raised);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-container);
+      cursor: pointer;
+      transition: border-color 120ms ease, background 120ms ease;
+    }
+    .vd-choice:hover { border-color: var(--color-primary); }
+    .vd-choice--active {
+      border-color: var(--color-primary);
+      background: var(--color-primary-soft);
+    }
+    .vd-choice-preview {
+      aspect-ratio: 16 / 9;
+      border-radius: var(--radius-small);
+      border: 1px solid var(--border-default);
+      background: var(--bg-panel);
+      display: flex;
+      align-items: stretch;
+      padding: 4px;
+      gap: 4px;
+    }
+    .vd-choice-preview-side { width: 30%; background: var(--bg-raised); border-radius: 4px; }
+    .vd-choice-preview-body { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+    .vd-choice-preview-line { height: 6px; background: var(--bg-raised); border-radius: 3px; }
+    .vd-choice-preview-line--accent { background: var(--color-primary); width: 40%; }
+    .vd-choice--dark .vd-choice-preview { background: #14181B; }
+    .vd-choice--dark .vd-choice-preview-side { background: #1F2429; }
+    .vd-choice--dark .vd-choice-preview-line { background: #2A2F35; }
+    .vd-choice--light .vd-choice-preview { background: #F7F8F5; }
+    .vd-choice--light .vd-choice-preview-side { background: #FFFFFF; }
+    .vd-choice--light .vd-choice-preview-line { background: #EDEFE9; }
+    .vd-choice--system .vd-choice-preview {
+      background: linear-gradient(135deg, #14181B 0%, #14181B 50%, #F7F8F5 50%, #F7F8F5 100%);
+    }
+    .vd-choice--system .vd-choice-preview-side { background: rgba(127,127,127,0.3); }
+    .vd-choice--system .vd-choice-preview-line { background: rgba(127,127,127,0.3); }
+    .vd-choice-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-high);
+      text-align: center;
+    }
+    .vd-choice-check {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: #FFFFFF;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 120ms ease;
+    }
+    .vd-choice--active .vd-choice-check { opacity: 1; }
+    .vd-choice-check svg { width: 12px; height: 12px; }
+    .vd-choice { position: relative; }
+
+    /* Session / Geräte-Liste */
+    .vd-session-list { display: flex; flex-direction: column; gap: var(--space-2); }
+    .vd-session-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3);
+      background: var(--bg-raised);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-container);
+    }
+    .vd-session-item--current {
+      border-color: var(--color-primary);
+      background: var(--color-primary-soft);
+    }
+    .vd-session-icon {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-small);
+      background: var(--bg-panel);
+      color: var(--text-mid);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .vd-session-item--current .vd-session-icon { color: var(--color-primary); }
+    .vd-session-icon svg { width: 18px; height: 18px; }
+    .vd-session-meta { flex: 1; min-width: 0; }
+    .vd-session-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-high);
+      line-height: 1.2;
+    }
+    .vd-session-detail {
+      font-size: 12px;
+      color: var(--text-mid);
+      margin-top: 2px;
+    }
+    .vd-session-detail code {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-low);
+    }
+
+    /* API-Token-Tabelle */
+    .vd-token-list { display: flex; flex-direction: column; gap: var(--space-2); }
+    .vd-token-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3);
+      background: var(--bg-raised);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-container);
+    }
+    .vd-token-icon {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-small);
+      background: var(--bg-panel);
+      color: var(--text-mid);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .vd-token-icon svg { width: 16px; height: 16px; }
+    .vd-token-meta { flex: 1; min-width: 0; }
+    .vd-token-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-high);
+    }
+    .vd-token-detail {
+      font-size: 12px;
+      color: var(--text-mid);
+      margin-top: 2px;
+    }
+    .vd-token-detail code {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-low);
+      background: var(--bg-base);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Tipp-Karte / Hinweis im Formular */
+    .vd-form-callout {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background: var(--color-primary-soft);
+      border: 1px solid rgba(102, 128, 72, 0.30);
+      border-radius: var(--radius-container);
+      margin-top: var(--space-3);
+    }
+    .vd-form-callout-icon {
+      width: 28px; height: 28px;
+      border-radius: var(--radius-small);
+      background: var(--color-primary);
+      color: #FFFFFF;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .vd-form-callout-icon svg { width: 16px; height: 16px; }
+    .vd-form-callout-body { flex: 1; min-width: 0; }
+    .vd-form-callout-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-high);
+      margin-bottom: 2px;
+    }
+    .vd-form-callout-text {
+      font-size: 12px;
+      color: var(--text-mid);
+      line-height: 1.4;
+    }
+
+    /* Daten-Export-Kacheln */
+    .vd-export-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-3);
+    }
+    @media (max-width: 720px) {
+      .vd-export-grid { grid-template-columns: 1fr; }
+    }
+    .vd-export-card {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background: var(--bg-raised);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-container);
+    }
+    .vd-export-icon {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-small);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .vd-export-icon--primary { background: var(--color-primary-soft); color: var(--color-primary); }
+    .vd-export-icon--error { background: var(--status-error-soft); color: var(--status-error); }
+    .vd-export-icon svg { width: 18px; height: 18px; }
+    .vd-export-body { flex: 1; min-width: 0; }
+    .vd-export-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-high);
+      margin-bottom: 2px;
+    }
+    .vd-export-text {
+      font-size: 12px;
+      color: var(--text-mid);
+      line-height: 1.4;
+      margin-bottom: var(--space-2);
+    }
+
+    /* Aktivitätsliste */
+    .vd-activity-list { display: flex; flex-direction: column; }
+    .vd-activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .vd-activity-item:last-child { border-bottom: none; }
+    .vd-activity-icon {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-small);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .vd-activity-icon--info { background: var(--status-info-soft); color: var(--status-info); }
+    .vd-activity-icon--primary { background: var(--color-primary-soft); color: var(--color-primary); }
+    .vd-activity-icon--warn { background: var(--status-warn-soft); color: var(--status-warn); }
+    .vd-activity-icon svg { width: 16px; height: 16px; }
+    .vd-activity-body { flex: 1; min-width: 0; }
+    .vd-activity-title {
+      font-size: 13px;
+      color: var(--text-high);
+      line-height: 1.4;
+    }
+    .vd-activity-meta {
+      font-size: 12px;
+      color: var(--text-low);
+      margin-top: 2px;
+    }
+    .vd-activity-meta code {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-mid);
+    }
+
+    /* Danger Zone */
+    .vd-danger-zone {
+      border: 1px solid var(--status-error-soft);
+      background: rgba(242, 107, 107, 0.04);
+      border-radius: var(--radius-container);
+      padding: var(--space-4) var(--space-5);
+      margin-top: var(--space-3);
+    }
+    [data-theme="light"] .vd-danger-zone { background: rgba(168, 51, 51, 0.04); }
+
+    /* Channel-Auswahl (Benachrichtigungen) */
+    .vd-channel-table {
+      display: grid;
+      grid-template-columns: 1fr 80px 80px 80px;
+      gap: 0;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-container);
+      overflow: hidden;
+    }
+    .vd-channel-cell {
+      padding: var(--space-3);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .vd-channel-cell--label {
+      justify-content: flex-start;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+    }
+    .vd-channel-cell--label strong {
+      font-size: 13px;
+      color: var(--text-high);
+      font-weight: 500;
+    }
+    .vd-channel-cell--label span {
+      font-size: 11px;
+      color: var(--text-mid);
+    }
+    .vd-channel-cell--header {
+      background: var(--bg-raised);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-low);
+      border-bottom: 1px solid var(--border-default);
+      gap: 6px;
+    }
+    .vd-channel-cell--header svg { width: 14px; height: 14px; }
+    .vd-channel-cell:nth-child(4n+2),
+    .vd-channel-cell:nth-child(4n+3),
+    .vd-channel-cell:nth-child(4n+4) {
+      border-left: 1px solid var(--border-subtle);
+    }
+    .vd-channel-cell:nth-last-child(-n+4) { border-bottom: none; }
+
+    /* Inline-Eingabe-Gruppe (z. B. Speichern-Button neben Wert) */
+    .vd-field-action {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--space-2);
+      align-items: end;
+    }
+
+    @media (max-width: 1100px) {
+      .vd-settings-layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .vd-form-grid { grid-template-columns: 1fr; }
+      .vd-profile-meta { flex-direction: column; gap: var(--space-2); }
+      .vd-channel-table { grid-template-columns: 1fr 60px 60px 60px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="vd-app">
+
+    <aside class="vd-sidebar" aria-label="Hauptnavigation">
+      <a class="vd-sidebar-brand" href="dashboard.html" aria-label="VisiDoc – Startseite">
+        <svg class="vd-sidebar-brand-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <rect x="6" y="14" width="52" height="38" rx="3" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+          <circle cx="44" cy="24" r="2.5" fill="currentColor"/>
+          <path d="M12 44 L24 30 L34 38 L42 28 L52 44 Z" fill="currentColor"/>
+          <line x1="14" y1="58" x2="20" y2="58" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <line x1="26" y1="58" x2="38" y2="58" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <line x1="44" y1="58" x2="50" y2="58" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="17" cy="58" r="3" fill="currentColor"/>
+          <circle cx="32" cy="58" r="3" fill="currentColor"/>
+          <circle cx="47" cy="58" r="3" fill="currentColor"/>
+        </svg>
+        <span class="vd-sidebar-brand-text">Visi<span class="vd-brand-accent">Doc</span></span>
+      </a>
+
+      <nav class="vd-sidebar-nav" aria-label="Bereiche">
+        <span class="vd-sidebar-section-label">Arbeit</span>
+        <a class="vd-nav-item" href="dashboard.html" data-label="Dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="9" rx="1.2"/>
+            <rect x="14" y="3" width="7" height="5" rx="1.2"/>
+            <rect x="14" y="12" width="7" height="9" rx="1.2"/>
+            <rect x="3" y="16" width="7" height="5" rx="1.2"/>
+          </svg>
+          <span class="vd-nav-item-label">Dashboard</span>
+        </a>
+        <a class="vd-nav-item" href="projekte.html" data-label="Projekte">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>
+            <path d="M8 10v4"/>
+            <path d="M12 10v2"/>
+            <path d="M16 10v6"/>
+          </svg>
+          <span class="vd-nav-item-label">Projekte</span>
+          <span class="vd-nav-item-count">12</span>
+        </a>
+        <a class="vd-nav-item" href="galerie.html" data-label="Galerie">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="9" cy="9" r="2"/>
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+          </svg>
+          <span class="vd-nav-item-label">Galerie</span>
+          <span class="vd-nav-item-count">1'284</span>
+        </a>
+        <a class="vd-nav-item" href="archiv.html" data-label="Archiv">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="3" width="20" height="5" rx="1.5"/>
+            <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/>
+            <path d="M10 12h4"/>
+          </svg>
+          <span class="vd-nav-item-label">Archiv</span>
+        </a>
+
+        <div class="vd-sidebar-divider"></div>
+      </nav>
+
+      <div class="vd-sidebar-footer">
+        <a class="vd-sidebar-user" href="einstellung-profil.html" aria-label="Mein Profil öffnen">
+          <span class="vd-avatar" aria-hidden="true">MB</span>
+          <span class="vd-sidebar-user-meta">
+            <span class="vd-sidebar-user-name">Maria Brunner</span>
+            <span class="vd-sidebar-user-role">Bauleiterin</span>
+          </span>
+        </a>
+
+        <div class="vd-sidebar-midline" aria-hidden="true"></div>
+        <div class="vd-sidebar-org" aria-label="Aktive Organisation">
+          <span class="vd-sidebar-org-mark" aria-hidden="true">MH</span>
+          <span class="vd-sidebar-org-meta">
+            <span class="vd-sidebar-org-label">Organisation</span>
+            <span class="vd-sidebar-org-name">Muster Hochbau AG</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="vd-sidebar-settings">
+        <a class="vd-nav-item vd-nav-item--active" href="einstellung-profil.html" aria-current="page" data-label="Einstellung/Profil" aria-label="Einstellung/Profil">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <span class="vd-nav-item-label">Einstellung/Profil</span>
+        </a>
+      </div>
+
+      <div class="vd-sidebar-toggle-wrap">
+        <button class="vd-sidebar-toggle" type="button" id="vd-sidebar-collapse-toggle" aria-label="Sidebar einklappen" aria-expanded="true" title="Sidebar einklappen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <span class="vd-sidebar-toggle-label">Sidebar einklappen</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="vd-app-body">
+
+      <header class="vd-topbar" role="banner">
+        <span class="vd-topbar-title">Einstellung und Profil</span>
+        <div class="vd-topbar-spacer"></div>
+
+        <div class="vd-search-wrap" role="search">
+          <svg class="vd-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/>
+            <line x1="20" y1="20" x2="16.65" y2="16.65"/>
+          </svg>
+          <input class="vd-search-input" type="search" placeholder="Einstellung durchsuchen" aria-label="Einstellung durchsuchen">
+        </div>
+
+        <div class="vd-topbar-actions">
+          <button class="vd-icon-button" type="button" aria-label="Benachrichtigungen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+            </svg>
+          </button>
+
+          <button class="vd-theme-pill" type="button" role="switch" aria-checked="true" data-state="dark" aria-label="Theme wechseln" title="Theme wechseln">
+            <span class="vd-theme-pill-sun" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4"/>
+                <line x1="12" y1="2" x2="12" y2="4"/>
+                <line x1="12" y1="20" x2="12" y2="22"/>
+                <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/>
+                <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/>
+                <line x1="2" y1="12" x2="4" y2="12"/>
+                <line x1="20" y1="12" x2="22" y2="12"/>
+                <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/>
+                <line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/>
+              </svg>
+            </span>
+            <span class="vd-theme-pill-thumb" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+      </header>
+
+      <main class="vd-main">
+
+        <h1 class="vd-page-title">Einstellung und Profil</h1>
+        <p class="vd-page-subtitle">Persönliche Angaben, Sicherheit, Benachrichtigungen, Anzeige und Datenschutz an einem Ort.</p>
+
+        <div class="vd-settings-layout">
+
+          <nav class="vd-settings-subnav" aria-label="Einstellungs-Bereiche">
+            <span class="vd-settings-subnav-label">Konto</span>
+            <a class="vd-settings-subnav-item vd-settings-subnav-item--active" href="#persoenlich" aria-current="page">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              Profil
+            </a>
+            <a class="vd-settings-subnav-item" href="#sicherheit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              Sicherheit
+            </a>
+            <a class="vd-settings-subnav-item" href="#benachrichtigungen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+              </svg>
+              Benachrichtigungen
+            </a>
+            <a class="vd-settings-subnav-item" href="#anzeige">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/>
+                <line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              </svg>
+              Anzeige &amp; Sprache
+            </a>
+            <a class="vd-settings-subnav-item" href="#aktivitaet">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              Aktivität
+            </a>
+            <a class="vd-settings-subnav-item" href="#datenschutz">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              Daten &amp; Datenschutz
+            </a>
+
+            <div class="vd-settings-subnav-divider"></div>
+
+            <span class="vd-settings-subnav-label">Organisation</span>
+            <a class="vd-settings-subnav-item" href="#organisation">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 21h18"/>
+                <path d="M5 21V7l8-4v18"/>
+                <path d="M19 21V11l-6-4"/>
+              </svg>
+              Organisation
+            </a>
+            <a class="vd-settings-subnav-item" href="#integrationen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              </svg>
+              Integrationen
+            </a>
+            <a class="vd-settings-subnav-item" href="#audit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="9" y1="13" x2="15" y2="13"/>
+                <line x1="9" y1="17" x2="15" y2="17"/>
+              </svg>
+              Audit-Log
+            </a>
+          </nav>
+
+          <div class="vd-settings-content">
+
+            <!-- ============================================================
+                 Profil-Header (warmes Hero)
+                 ============================================================ -->
+            <section class="vd-profile-header" aria-label="Profil-Identität">
+              <div class="vd-profile-avatar" aria-hidden="true">MB</div>
+              <div class="vd-profile-identity">
+                <span class="vd-profile-eyebrow">Aktives Profil</span>
+                <h2 class="vd-profile-name">Maria Brunner</h2>
+                <p class="vd-profile-role">Bauleiterin &middot; Projektleitung Hochbau</p>
+                <div class="vd-profile-meta">
+                  <span class="vd-profile-meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <rect x="2" y="4" width="20" height="16" rx="2"/>
+                      <path d="m22 7-10 5L2 7"/>
+                    </svg>
+                    maria.brunner@visidoc.ch
+                  </span>
+                  <span class="vd-profile-meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                    +41 44 123 45 67
+                  </span>
+                  <span class="vd-profile-meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    8001 Zürich
+                  </span>
+                </div>
+              </div>
+              <div class="vd-profile-actions">
+                <span class="vd-profile-status">
+                  <span class="vd-live-dot" aria-hidden="true"></span>
+                  Online
+                </span>
+                <button class="vd-button vd-button--outlined" type="button">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
+                  Foto ändern
+                </button>
+                <button class="vd-button vd-button--ghost" type="button">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                  </svg>
+                  Status bearbeiten
+                </button>
+              </div>
+            </section>
+
+            <form class="vd-form-card" onsubmit="event.preventDefault();">
+
+              <!-- ============================================================
+                   Profil
+                   ============================================================ -->
+              <section class="vd-form-section" id="persoenlich">
+                <header class="vd-form-section-header">
+                  <h2 class="vd-form-section-title">
+                    <span class="vd-form-section-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                      </svg>
+                    </span>
+                    Persönliche Angaben
+                  </h2>
+                  <p class="vd-form-section-desc">Name und Kontaktdaten, die im Team und auf Berichten erscheinen.</p>
+                </header>
+
+                <div class="vd-form-grid">
+                  <div class="vd-field">
+                    <label class="vd-field-label" for="firstname">Vorname <span class="vd-field-required" aria-hidden="true">*</span></label>
+                    <input class="vd-field-input" type="text" id="firstname" value="Maria" autocomplete="given-name" required>
+                  </div>
+
+                  <div class="vd-field">
+                    <label class="vd-field-label" for="lastname">Nachname <span class="vd-field-required" aria-hidden="true">*</span></label>
+                    <input class="vd-field-input" type="text" id="lastname" value="Brunner" autocomplete="family-name" required>
+                  </div>
+
+                  <div class="vd-field">
+                    <label class="vd-field-label" for="email">E-Mail-Adresse <span class="vd-field-required" aria-hidden="true">*</span></label>
+                    <input class="vd-field-input" type="email" id="email" value="maria.brunner@visidoc.ch" autocomplete="email" required>
+                    <span class="vd-field-help">Wird für Benachrichtigungen und Login verwendet.</span>
+                  </div>
+
+                  <div class="vd-field">
+                    <label class="vd-field-label" for="phone">Telefonnummer</label>
+                    <div class="vd-field-prefix">
+                      <span class="vd-field-prefix-tag" aria-hidden="true">+41</span>
+                      <input class="vd-field-input" type="tel" id="phone" value="44 123 45 67" autocomplete="tel">
+                    </div>
+                    <span class="vd-field-help">Format: 44 123 45 67 (ohne Landesvorwahl).</span>
+                  </div>
+
+                  <div class="vd-field">
+                    <label class="vd-field-label" for="display-name">Anzeigename</label>
+                    <input class="vd-field-input" type="text" id="display-name" value="M. Brunner">
+                    <span class="vd-field-help">So erscheinst du in Kommentaren und Listen.</span>
+                  </div>
+
+                  <div class="vd-field">
+                    <label class="vd-field-label" for="location">Standort</label>
+                    <input class="vd-field-input" type="text" id="location" value="8001 Zürich">
+                  </div>
+
+                  <div class="vd-field" style="grid-column: 1 / -1;">
+                    <label class="vd-field-label" for="bio">Kurzbeschrieb</label>
+                    <textarea class="vd-field-textarea" id="bio" rows="2">Bauleiterin Hochbau, Schwerpunkt Wohn- und Gewerbebauten in der Deutschschweiz.</textarea>
+                    <span class="vd-field-help">Wird auf deiner Profilseite angezeigt. Max. 240 Zeichen.</span>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ============================================================
+                   Sicherheit
+                   ============================================================ -->
+              <section class="vd-form-section" id="sicherheit">
+                <header class="vd-form-section-header">
+                  <h2 class="vd-form-section-title">
+                    <span class="vd-form-section-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                      </svg>
+                    </span>
+                    Sicherheit
+                  </h2>
+                  <p class="vd-form-section-desc">Passwort, Zwei-Faktor-Authentifizierung und aktive Sitzungen.</p>
+                </header>
+
+                <div class="vd-form-grid">
+                  <div class="vd-field" style="grid-column: 1 / -1;">
+                    <label class="vd-field-label" for="current-password">Aktuelles Passwort</label>
+                    <div class="vd-field-with-action">
+                      <input class="vd-field-input" type="password" id="current-password" placeholder="••••••••" autocomplete="current-password">
+                      <button class="vd-button vd-button--secondary" type="button">Passwort ändern</button>
+                    </div>
+                    <span class="vd-field-help">Letzte Änderung: 14.02.2026. Wir empfehlen, Passwörter alle 90 Tage zu wechseln.</span>
+                  </div>
+                </div>
+
+                <div class="vd-toggle-row">
+                  <div class="vd-toggle-text">
+                    <strong>Zwei-Faktor-Authentifizierung (2FA)</strong>
+                    <span>Einmal-Code zusätzlich zum Passwort, per Authenticator-App (z. B. Aegis, 1Password).</span>
+                    <span class="vd-toggle-meta">
+                      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                      </svg>
+                      Aktiv
+                    </span>
+                  </div>
+                  <label class="vd-switch">
+                    <input type="checkbox" checked>
+                    <span class="vd-switch-track"><span class="vd-switch-thumb"></span></span>
+                  </label>
+                </div>
+
+                <div class="vd-toggle-row">
+                  <div class="vd-toggle-text">
+                    <strong>Sicherheits-Warnungen per E-Mail</strong>
+                    <span>Bei Login von neuen Geräten oder bei Passwort-Änderungen.</span>
+                  </div>
+                  <label class="vd-switch">
+                    <input type="checkbox" checked>
+                    <span class="vd-switch-track"><span class="vd-switch-thumb"></span></span>
+                  </label>
+                </div>
+
+                <div class="vd-toggle-row">
+                  <div class="vd-toggle-text">
+                    <strong>Session-Timeout</strong>
+                    <span>Nach 8 Stunden Inaktivität automatisch abmelden.</span>
+                  </div>
+                  <label class="vd-switch">
+                    <input type="checkbox" checked>
+                    <span class="vd-switch-track"><span class="vd-switch-thumb"></span></span>
+                  </label>
+                </div>
+
+                <div class="vd-form-callout">
+                  <span class="vd-form-callout-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                  </span>
+                  <div class="vd-form-callout-body">
+                    <div class="vd-form-callout-title">Backup-Codes</div>
+                    <p class="vd-form-callout-text">8 Codes liegen bereit. Du hast 6 von 8 nicht verwendet. Codes regenerieren oder anzeigen.</p>
+                  </div>
+                  <button class="vd-button vd-button--secondary" type="button">Codes anzeigen</button>
+                </div>
+
+                <div style="margin-top: var(--space-5);">
+                  <h3 class="vd-form-section-title" style="font-size: 14px; margin-bottom: var(--space-3);">Aktive Sitzungen</h3>
+                  <div class="vd-session-list">
+                    <div class="vd-session-item vd-session-item--current">
+                      <div class="vd-session-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                          <line x1="8" y1="21" x2="16" y2="21"/>
+                          <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                      </div>
+                      <div class="vd-session-meta">
+                        <div class="vd-session-name">MacBook Pro &middot; Safari 18 <span class="vd-chip vd-chip--primary vd-chip--sm" style="margin-left: 6px;">Diese Sitzung</span></div>
+                        <div class="vd-session-detail">Zürich, CH &middot; <code>192.168.1.42</code> &middot; aktiv seit 09.06.2026, 14:32</div>
+                      </div>
+                      <button class="vd-button vd-button--ghost" type="button" disabled>Beenden</button>
+                    </div>
+
+                    <div class="vd-session-item">
+                      <div class="vd-session-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                          <line x1="12" y1="18" x2="12.01" y2="18"/>
+                        </svg>
+                      </div>
+                      <div class="vd-session-meta">
+                        <div class="vd-session-name">iPhone 15 &middot; VisiDoc App 2.4</div>
+                        <div class="vd-session-detail">Zürich, CH &middot; <code>85.5.42.18</code> &middot; zuletzt aktiv vor 2 Stunden</div>
+                      </div>
+                      <button class="vd-button vd-button--ghost" type="button">Beenden</button>
+                    </div>
+
+                    <div class="vd-session-item">
+                      <div class="vd-session-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                          <line x1="8" y1="21" x2="16" y2="21"/>
+                          <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                      </div>
+                      <div class="vd-session-meta">
+                        <div class="vd-session-name">Windows 11 &middot; Edge 124</div>
+                        <div class="vd-session-detail">Bern, CH &middot; <code>46.140.22.7</code> &middot; zuletzt aktiv vor 3 Tagen</div>
+                      </div>
+                      <button class="vd-button vd-button--ghost" type="button">Beenden</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="margin-top: var(--space-5);">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3);">
+                    <h3 class="vd-form-section-title" style="font-size: 14px;">API-Tokens</h3>
+                    <button class="vd-button vd-button--secondary" type="button">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                      </svg>
+                      Token erstellen
+                    </button>
+                  </div>
+                  <div class="vd-token-list">
+                    <div class="vd-token-item">
+                      <div class="vd-token-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                      </div>
+                      <div class="vd-token-meta">
+                        <div class="vd-token-name">CI/CD Bauplan-Import</div>
+                        <div class="vd-token-detail"><code>vd_pat_********************2kQp</code> &middot; erstellt 22.05.2026, letzte Nutzung vor 2 Std.</div>
+                      </div>
+                      <button class="vd-button vd-button--danger" type="button">Widerrufen</button>
+                    </div>
+                    <div class="vd-token-item">
+                      <div class="vd-token-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                      </div>
+                      <div class="vd-token-meta">
+                        <div class="vd-token-name">Mobile App (VisiDoc iOS)</div>
+                        <div class="vd-token-detail"><code>vd_pat_********************8mTz</code> &middot; erstellt 18.03.2026, letzte Nutzung vor 12 Min.</div>
+                      </div>
+                      <button class="vd-button vd-button--danger" type="button">Widerrufen</button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ============================================================
+                   Benachrichtigungen
+                   ============================================================ -->
+              <section class="vd-form-section" id="benachrichtigungen">
+                <header class="vd-form-section-header">
+                  <h2 class="vd-form-section-title">
+                    <span class="vd-form-section-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                      </svg>
+                    </span>
+                    Benachrichtigungen
+                  </h2>
+                  <p class="vd-form-section-desc">Welche Ereignisse dich über welche Kanäle erreichen.</p>
+                </header>
+
+                <div class="vd-channel-table" role="table" aria-label="Benachrichtigungs-Kanäle">
+                  <div class="vd-channel-cell vd-channel-cell--header"></div>
+                  <div class="vd-channel-cell vd-channel-cell--header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <rect x="2" y="4" width="20" height="16" rx="2"/>
+                      <path d="m22 7-10 5L2 7"/>
+                    </svg>
+                    E-Mail
+                  </div>
+                  <div class="vd-channel-cell vd-channel-cell--header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                    </svg>
+                    In-App
+                  </div>
+                  <div class="vd-channel-cell vd-channel-cell--header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                      <line x1="12" y1="18" x2="12.01" y2="18"/>
+                    </svg>
+                    Push
+                  </div>
+
+                  <div class="vd-channel-cell vd-channel-cell--label">
+                    <strong>Neue Kommentare</strong>
+                    <span>Wenn jemand einen Kommentar zu deinen Fotos oder Plänen hinterlässt.</span>
+                  </div>
+                  <div class="vd-channel-cell"><label class="vd-switch"><input type="checkbox" checked><span class="vd-switch-track"><span class="vd-switch-thumb"></span></span></label></div>
+                  <div class="vd-channel-cell"><label class="vd-switch"><input type="checkbox" checked><span class="vd-switch-track"><span class="vd-switch-thumb"></span></span></label></div>
+                  <div class="vd-channel-cell"><label class="vd-switch"><input type="checkbox" checked><span class="vd-switch-track"><span class="vd-switch-thumb"></span></span></label></div>
+
+                  <div class="vd-channel-cell vd-channel-cell--label">
+                    <strong>Planfreigaben</strong>
+                    <span>Statusänderungen bei Plänen, die auf deine Freigabe warten.</span>
+                  </div>
+                  <div class="vd-channel-cell"><label class="vd-switch"><input type="checkbox" checked><span class="vd-switch-track"><span class="vd-switch-thumb"></span></span></label></div>
+                  <div class="vd-channel-cell"><label class="vd-switch"><input type="checkbox" checked><span class="vd-switch-track"><span class="vd-switch-thumb"></span></span></label></div>
+                  <div class="vd-channel-cell"><label class="vd-switch"><input type="checkbox"><span class="vd-switch-track"><span class="vd-switch-thumb"></span></span></label></div>
+
+                  <div class="vd-channel-cell vd-channel-cell--label">
+                    <strong>Erwähnungen</strong>
+                    <span>Wenn dich jemand in einem Kommentar oder Plan mit @name markiert.</span>
+                  </div>
+                  <div class="vd-channel-cell"><label class="vd-switch"><input type="checkbox" checked><span class="vd-switch-track"><span class="vd-switch-thumb"></span></span></label></div>
+                  <div class="vd-channel-cell"><label class="vd-switch"><input type="checkbox" checked><span class="vd-switch-track"><span class="vd-switch-thumb"></span></span></label></div>
+                  <div class="vd-channel-cell"><label class="vd-switch"><input type="checkbox" checked><span class="vd-switch-track"><span class="vd-switch-thumb"></span></span></label></div>
+
+                  <div class="vd-channel-cell vd-channel-cell--label">
+                    <strong>Wöchentliche Zusammenfassung</strong>
+                    <span>Jeden Montag eine Übersicht über deine Projekte.</span>
+                  </div>
+                  <div class="vd-channel-cell"><label class="vd-switch"><input type="checkbox" checked><span class="vd-switch-track"><span class="vd-switch-thumb"></span></span></label></div>
+                  <div class="vd-channel-cell"><label class="vd-switch"><input type="checkbox"><span class="vd-switch-track"><span class="vd-switch-thumb"></span></span></label></div>
+                  <div class="vd-channel-cell"><label class="vd-switch"><input type="checkbox"><span class="vd-switch-track"><span class="vd-switch-thumb"></span></span></label></div>
+
+                  <div class="vd-channel-cell vd-channel-cell--label">
+                    <strong>System-Meldungen</strong>
+                    <span>Wartungen, Versions-Updates und sicherheitsrelevante Hinweise.</span>
+                  </div>
+                  <div class="vd-channel-cell"><label class="vd-switch"><input type="checkbox" checked><span class="vd-switch-track"><span class="vd-switch-thumb"></span></span></label></div>
+                  <div class="vd-channel-cell"><label class="vd-switch"><input type="checkbox" checked><span class="vd-switch-track"><span class="vd-switch-thumb"></span></span></label></div>
+                  <div class="vd-channel-cell"><label class="vd-switch"><input type="checkbox"><span class="vd-switch-track"><span class="vd-switch-thumb"></span></span></label></div>
+                </div>
+
+                <div class="vd-toggle-row" style="margin-top: var(--space-4);">
+                  <div class="vd-toggle-text">
+                    <strong>Ruhezeiten</strong>
+                    <span>Keine Push-Benachrichtigungen zwischen 20:00 und 07:00.</span>
+                  </div>
+                  <label class="vd-switch">
+                    <input type="checkbox" checked>
+                    <span class="vd-switch-track"><span class="vd-switch-thumb"></span></span>
+                  </label>
+                </div>
+              </section>
+
+              <!-- ============================================================
+                   Anzeige & Sprache
+                   ============================================================ -->
+              <section class="vd-form-section" id="anzeige">
+                <header class="vd-form-section-header">
+                  <h2 class="vd-form-section-title">
+                    <span class="vd-form-section-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"/>
+                        <line x1="12" y1="1" x2="12" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="23"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                        <line x1="1" y1="12" x2="3" y2="12"/>
+                        <line x1="21" y1="12" x2="23" y2="12"/>
+                      </svg>
+                    </span>
+                    Anzeige &amp; Sprache
+                  </h2>
+                  <p class="vd-form-section-desc">Theme, Schriftdichte, Formate und Zeitzone.</p>
+                </header>
+
+                <div class="vd-field" style="margin-bottom: var(--space-4);">
+                  <label class="vd-field-label">Theme</label>
+                  <div class="vd-choice-grid">
+                    <div class="vd-choice vd-choice--dark vd-choice--active">
+                      <span class="vd-choice-check" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      </span>
+                      <div class="vd-choice-preview">
+                        <div class="vd-choice-preview-side"></div>
+                        <div class="vd-choice-preview-body">
+                          <div class="vd-choice-preview-line vd-choice-preview-line--accent"></div>
+                          <div class="vd-choice-preview-line"></div>
+                          <div class="vd-choice-preview-line"></div>
+                        </div>
+                      </div>
+                      <div class="vd-choice-label">Dunkel</div>
+                    </div>
+                    <div class="vd-choice vd-choice--light">
+                      <span class="vd-choice-check" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      </span>
+                      <div class="vd-choice-preview">
+                        <div class="vd-choice-preview-side"></div>
+                        <div class="vd-choice-preview-body">
+                          <div class="vd-choice-preview-line vd-choice-preview-line--accent"></div>
+                          <div class="vd-choice-preview-line"></div>
+                          <div class="vd-choice-preview-line"></div>
+                        </div>
+                      </div>
+                      <div class="vd-choice-label">Hell</div>
+                    </div>
+                    <div class="vd-choice vd-choice--system">
+                      <span class="vd-choice-check" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      </span>
+                      <div class="vd-choice-preview">
+                        <div class="vd-choice-preview-side"></div>
+                        <div class="vd-choice-preview-body">
+                          <div class="vd-choice-preview-line vd-choice-preview-line--accent"></div>
+                          <div class="vd-choice-preview-line"></div>
+                          <div class="vd-choice-preview-line"></div>
+                        </div>
+                      </div>
+                      <div class="vd-choice-label">System</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="vd-form-grid">
+                  <div class="vd-field">
+                    <label class="vd-field-label" for="language">Sprache</label>
+                    <select class="vd-field-select" id="language">
+                      <option>Deutsch (Schweiz)</option>
+                      <option>Français (Suisse)</option>
+                      <option>Italiano (Svizzera)</option>
+                      <option>English</option>
+                    </select>
+                  </div>
+
+                  <div class="vd-field">
+                    <label class="vd-field-label" for="timezone">Zeitzone</label>
+                    <select class="vd-field-select" id="timezone">
+                      <option>(UTC+01:00) Zürich &middot; Bern &middot; Wien</option>
+                      <option>(UTC+02:00) Athen &middot; Helsinki</option>
+                      <option>(UTC+00:00) London &middot; Dublin</option>
+                    </select>
+                  </div>
+
+                  <div class="vd-field">
+                    <label class="vd-field-label" for="date-format">Datumsformat</label>
+                    <select class="vd-field-select" id="date-format">
+                      <option>tt.mm.jjjj (Schweizer Standard)</option>
+                      <option>jjjj-mm-tt (ISO)</option>
+                      <option>tt.mm. (Kurz)</option>
+                    </select>
+                  </div>
+
+                  <div class="vd-field">
+                    <label class="vd-field-label" for="density">Schriftdichte</label>
+                    <select class="vd-field-select" id="density">
+                      <option>Kompakt</option>
+                      <option>Standard</option>
+                      <option>Komfortabel</option>
+                    </select>
+                    <span class="vd-field-help">Standard ist für 14-Zoll-Laptops optimiert.</span>
+                  </div>
+                </div>
+
+                <div class="vd-toggle-row" style="margin-top: var(--space-3);">
+                  <div class="vd-toggle-text">
+                    <strong>Reduzierte Animationen</strong>
+                    <span>Berücksichtigt die System-Einstellung &laquo;Bewegung reduzieren&raquo;.</span>
+                  </div>
+                  <label class="vd-switch">
+                    <input type="checkbox" checked>
+                    <span class="vd-switch-track"><span class="vd-switch-thumb"></span></span>
+                  </label>
+                </div>
+              </section>
+
+              <!-- ============================================================
+                   Aktivität
+                   ============================================================ -->
+              <section class="vd-form-section" id="aktivitaet">
+                <header class="vd-form-section-header">
+                  <h2 class="vd-form-section-title">
+                    <span class="vd-form-section-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                      </svg>
+                    </span>
+                    Aktivität
+                  </h2>
+                  <p class="vd-form-section-desc">Deine letzten Aktionen und Logins der vergangenen 30 Tage.</p>
+                </header>
+
+                <div class="vd-activity-list">
+                  <div class="vd-activity-item">
+                    <div class="vd-activity-icon vd-activity-icon--primary" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                    </div>
+                    <div class="vd-activity-body">
+                      <div class="vd-activity-title">12 Fotos zu &laquo;Bahnhofstrasse 12&raquo; hochgeladen.</div>
+                      <div class="vd-activity-meta">Heute, 14:18 &middot; <code>IMG_4518.jpg</code> &middot; &hellip; <code>IMG_4529.jpg</code></div>
+                    </div>
+                  </div>
+                  <div class="vd-activity-item">
+                    <div class="vd-activity-icon vd-activity-icon--info" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                      </svg>
+                    </div>
+                    <div class="vd-activity-body">
+                      <div class="vd-activity-title">Kommentar zu <code>IMG_4498.jpg</code> hinterlassen: &laquo;Bitte Sichtbeton-Seite prüfen&raquo;.</div>
+                      <div class="vd-activity-meta">Gestern, 16:45 &middot; Empfänger: Thomas Keller</div>
+                    </div>
+                  </div>
+                  <div class="vd-activity-item">
+                    <div class="vd-activity-icon vd-activity-icon--primary" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                      </svg>
+                    </div>
+                    <div class="vd-activity-body">
+                      <div class="vd-activity-title">Plan <code>PLN-014-v3.dwg</code> freigegeben.</div>
+                      <div class="vd-activity-meta">08.06.2026, 16:42 &middot; Projekt: Bahnhofstrasse 12</div>
+                    </div>
+                  </div>
+                  <div class="vd-activity-item">
+                    <div class="vd-activity-icon vd-activity-icon--warn" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                      </svg>
+                    </div>
+                    <div class="vd-activity-body">
+                      <div class="vd-activity-title">Login von neuem Gerät: <code>Windows 11 &middot; Edge 124</code> aus Bern.</div>
+                      <div class="vd-activity-meta">06.06.2026, 09:14 &middot; IP <code>46.140.22.7</code></div>
+                    </div>
+                  </div>
+                  <div class="vd-activity-item">
+                    <div class="vd-activity-icon vd-activity-icon--info" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>
+                      </svg>
+                    </div>
+                    <div class="vd-activity-body">
+                      <div class="vd-activity-title">Projekt &laquo;Umbau Schulhaus&raquo; angelegt.</div>
+                      <div class="vd-activity-meta">02.06.2026, 11:08 &middot; Auftraggeber: Stadt Luzern</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="vd-form-actions" style="margin-top: var(--space-4); border-top: none; padding-top: 0;">
+                  <button class="vd-button vd-button--link" type="button">Vollständigen Audit-Log anzeigen &rarr;</button>
+                </div>
+              </section>
+
+              <!-- ============================================================
+                   Daten & Datenschutz
+                   ============================================================ -->
+              <section class="vd-form-section" id="datenschutz">
+                <header class="vd-form-section-header">
+                  <h2 class="vd-form-section-title">
+                    <span class="vd-form-section-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      </svg>
+                    </span>
+                    Daten &amp; Datenschutz
+                  </h2>
+                  <p class="vd-form-section-desc">Export, Aufbewahrung und Löschung deiner Daten gemäss Schweizer DSG.</p>
+                </header>
+
+                <div class="vd-export-grid">
+                  <div class="vd-export-card">
+                    <div class="vd-export-icon vd-export-icon--primary" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                      </svg>
+                    </div>
+                    <div class="vd-export-body">
+                      <div class="vd-export-title">Persönliche Daten exportieren</div>
+                      <p class="vd-export-text">Vollständiger Export gemäss Art. 8 DSG. ZIP-Archiv mit allen Uploads, Kommentaren und Audit-Logs.</p>
+                      <button class="vd-button vd-button--secondary" type="button">Export starten</button>
+                    </div>
+                  </div>
+
+                  <div class="vd-export-card">
+                    <div class="vd-export-icon vd-export-icon--primary" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7"/>
+                        <path d="M21 7H3l2-3h14z"/>
+                      </svg>
+                    </div>
+                    <div class="vd-export-body">
+                      <div class="vd-export-title">Archiv anfordern</div>
+                      <p class="vd-export-text">Verschiebt alle deine Projekte in den Organisations-Archiv. Inhalte bleiben für Audits erhalten.</p>
+                      <button class="vd-button vd-button--secondary" type="button">Archiv anfordern</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="vd-toggle-row">
+                  <div class="vd-toggle-text">
+                    <strong>Foto-EXIF beim Hochladen entfernen</strong>
+                    <span>GPS, Kameramodell und Zeitstempel werden vor dem Speichern anonymisiert.</span>
+                  </div>
+                  <label class="vd-switch">
+                    <input type="checkbox">
+                    <span class="vd-switch-track"><span class="vd-switch-thumb"></span></span>
+                  </label>
+                </div>
+
+                <div class="vd-toggle-row">
+                  <div class="vd-toggle-text">
+                    <strong>Verwendung meiner Beispieldaten für Produktverbesserung</strong>
+                    <span>Anonymisierte Auswertung erlauben. Keine Inhalte werden an Dritte weitergegeben.</span>
+                  </div>
+                  <label class="vd-switch">
+                    <input type="checkbox">
+                    <span class="vd-switch-track"><span class="vd-switch-thumb"></span></span>
+                  </label>
+                </div>
+
+                <div class="vd-form-callout">
+                  <span class="vd-form-callout-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                  </span>
+                  <div class="vd-form-callout-body">
+                    <div class="vd-form-callout-title">Aufbewahrungsfristen</div>
+                    <p class="vd-form-callout-text">Aktive Projekte: bis Projektabschluss + 10 Jahre. Audit-Logs: 10 Jahre (SIA-Empfehlung). Nach Ablauf automatische Anonymisierung personenbezogener Daten.</p>
+                  </div>
+                  <a class="vd-button vd-button--link" href="#">Details &rarr;</a>
+                </div>
+
+                <div class="vd-danger-zone">
+                  <div class="vd-toggle-row" style="padding: 0; border-top: none;">
+                    <div class="vd-toggle-text">
+                      <strong style="color: var(--status-error);">Konto löschen</strong>
+                      <span>Endgültig. Alle deine personenbezogenen Daten werden gemäss DSG gelöscht. Projekte bleiben in der Organisation erhalten.</span>
+                    </div>
+                    <button class="vd-button vd-button--danger" type="button">Konto löschen</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ============================================================
+                   Organisation
+                   ============================================================ -->
+              <section class="vd-form-section" id="organisation">
+                <header class="vd-form-section-header">
+                  <h2 class="vd-form-section-title">
+                    <span class="vd-form-section-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 21h18"/>
+                        <path d="M5 21V7l8-4v18"/>
+                        <path d="M19 21V11l-6-4"/>
+                      </svg>
+                    </span>
+                    Organisation &amp; Rolle
+                  </h2>
+                  <p class="vd-form-section-desc">Deine Zuordnung in der Organisation Muster Hochbau AG.</p>
+                </header>
+
+                <div class="vd-form-grid">
+                  <div class="vd-field">
+                    <label class="vd-field-label" for="role">Rolle</label>
+                    <select class="vd-field-select" id="role">
+                      <option>Bauleiterin</option>
+                      <option>Projektleiterin</option>
+                      <option>Polierin</option>
+                      <option>Vorarbeiterin</option>
+                      <option>Architektin</option>
+                    </select>
+                  </div>
+
+                  <div class="vd-field">
+                    <label class="vd-field-label" for="department">Abteilung</label>
+                    <select class="vd-field-select" id="department">
+                      <option>Projektleitung Hochbau</option>
+                      <option>Projektleitung Tiefbau</option>
+                      <option>Werkhof</option>
+                      <option>Kalkulation</option>
+                    </select>
+                  </div>
+
+                  <div class="vd-field">
+                    <label class="vd-field-label" for="employee-id">Personalnummer</label>
+                    <input class="vd-field-input" type="text" id="employee-id" value="MA-0042" readonly>
+                  </div>
+
+                  <div class="vd-field">
+                    <label class="vd-field-label" for="entry-date">Eintrittsdatum</label>
+                    <input class="vd-field-input" type="text" id="entry-date" value="01.03.2021" readonly>
+                  </div>
+                </div>
+
+                <div style="margin-top: var(--space-4);">
+                  <h3 class="vd-form-section-title" style="font-size: 14px; margin-bottom: var(--space-3);">Meine Berechtigungen</h3>
+                  <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    <span class="vd-chip vd-chip--primary">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      Projekte erstellen
+                    </span>
+                    <span class="vd-chip vd-chip--primary">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      Pläne freigeben
+                    </span>
+                    <span class="vd-chip vd-chip--primary">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      Medien hochladen
+                    </span>
+                    <span class="vd-chip vd-chip--primary">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      Kommentare
+                    </span>
+                    <span class="vd-chip">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                      </svg>
+                      Team verwalten
+                    </span>
+                    <span class="vd-chip">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                      </svg>
+                      Audit-Log einsehen
+                    </span>
+                  </div>
+                  <p class="vd-form-section-desc" style="margin-top: var(--space-2);">Berechtigungen werden durch die Organisations-Administration vergeben.</p>
+                </div>
+              </section>
+
+              <!-- ============================================================
+                   Integrationen
+                   ============================================================ -->
+              <section class="vd-form-section" id="integrationen">
+                <header class="vd-form-section-header">
+                  <h2 class="vd-form-section-title">
+                    <span class="vd-form-section-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                      </svg>
+                    </span>
+                    Integrationen
+                  </h2>
+                  <p class="vd-form-section-desc">Verbundene Dienste und Datenquellen für deine Projekte.</p>
+                </header>
+
+                <div class="vd-token-list">
+                  <div class="vd-token-item">
+                    <div class="vd-token-icon" aria-hidden="true" style="background: var(--color-primary-soft); color: var(--color-primary);">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <line x1="3" y1="9" x2="21" y2="9"/>
+                      </svg>
+                    </div>
+                    <div class="vd-token-meta">
+                      <div class="vd-token-name">Microsoft 365 &middot; Kalender &amp; E-Mail</div>
+                      <div class="vd-token-detail">Verbunden seit 18.03.2026 &middot; Synchronisiert Termine und Benachrichtigungs-E-Mails</div>
+                    </div>
+                    <span class="vd-chip vd-chip--primary">
+                      <span class="vd-live-dot" aria-hidden="true"></span>
+                      Aktiv
+                    </span>
+                    <button class="vd-button vd-button--ghost" type="button">Trennen</button>
+                  </div>
+
+                  <div class="vd-token-item">
+                    <div class="vd-token-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <line x1="3" y1="9" x2="21" y2="9"/>
+                      </svg>
+                    </div>
+                    <div class="vd-token-meta">
+                      <div class="vd-token-name">SIA-Normenwerk</div>
+                      <div class="vd-token-detail">Nicht verbunden &middot; Verfügbar für Bauleiterinnen</div>
+                    </div>
+                    <button class="vd-button vd-button--secondary" type="button">Verbinden</button>
+                  </div>
+
+                  <div class="vd-token-item">
+                    <div class="vd-token-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <line x1="3" y1="9" x2="21" y2="9"/>
+                      </svg>
+                    </div>
+                    <div class="vd-token-meta">
+                      <div class="vd-token-name">OneDrive for Business</div>
+                      <div class="vd-token-detail">Nicht verbunden &middot; Auto-Backup von Originalfotos</div>
+                    </div>
+                    <button class="vd-button vd-button--secondary" type="button">Verbinden</button>
+                  </div>
+                </div>
+              </section>
+
+              <section class="vd-form-section" id="audit">
+                <header class="vd-form-section-header">
+                  <h2 class="vd-form-section-title">
+                    <span class="vd-form-section-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="9" y1="13" x2="15" y2="13"/>
+                        <line x1="9" y1="17" x2="15" y2="17"/>
+                      </svg>
+                    </span>
+                    Audit-Log
+                  </h2>
+                  <p class="vd-form-section-desc">Chronologische Protokollierung aller sicherheitsrelevanten Aktionen in deinem Konto.</p>
+                </header>
+
+                <div class="vd-empty" role="status">
+                  <div class="vd-empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="9"/>
+                      <polyline points="12 7 12 12 15 14"/>
+                    </svg>
+                  </div>
+                  <div class="vd-empty-title">Audit-Log wird vorbereitet</div>
+                  <div class="vd-empty-body">Sobald die Funktion verfügbar ist, findest du hier eine vollständige Übersicht aller Konto-Aktivitäten – Anmeldungen, Rollenänderungen, Exporte und mehr.</div>
+                </div>
+              </section>
+
+              <div class="vd-form-actions">
+                <button class="vd-button vd-button--ghost" type="reset">Änderungen verwerfen</button>
+                <button class="vd-button vd-button--primary" type="submit">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Änderungen speichern
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = "visidoc-theme";
+      const root = document.documentElement;
+      const toggle = document.querySelector(".vd-theme-pill");
+
+      function applyTheme(theme) {
+        root.setAttribute("data-theme", theme);
+        if (toggle) {
+          toggle.setAttribute("data-state", theme);
+          toggle.setAttribute("aria-checked", theme === "dark" ? "true" : "false");
+          toggle.setAttribute("aria-label",
+            theme === "dark" ? "Zu Light Theme wechseln" : "Zu Dark Theme wechseln");
+          toggle.setAttribute("title",
+            theme === "dark" ? "Light Mode aktivieren" : "Dark Mode aktivieren");
+        }
+      }
+
+      const stored = localStorage.getItem(STORAGE_KEY);
+      const prefersLight = window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: light)").matches;
+      const initial = stored || (prefersLight ? "light" : "dark");
+      applyTheme(initial);
+
+      if (toggle) {
+        toggle.addEventListener("click", function () {
+          const current = root.getAttribute("data-theme");
+          const next = current === "dark" ? "light" : "dark";
+          localStorage.setItem(STORAGE_KEY, next);
+          applyTheme(next);
+        });
+      }
+
+      // Sub-Nav: aktiven Link anhand des Scrolls setzen
+      const subnavLinks = Array.from(document.querySelectorAll(".vd-settings-subnav-item"));
+      const sections = subnavLinks
+        .map(link => {
+          const id = link.getAttribute("href") || "";
+          if (id.startsWith("#")) {
+            return { link, el: document.getElementById(id.slice(1)) };
+          }
+          return null;
+        })
+        .filter(s => s && s.el); // Einträge ohne Ziel-Section (z.B. tote Anker) ignorieren
+      function updateActive() {
+        const offset = 120;
+        const scrollY = window.scrollY + offset;
+        if (sections.length === 0) return;
+        let current = sections[0];
+        for (const s of sections) {
+          if (s.el.offsetTop <= scrollY) current = s;
+        }
+        for (const s of sections) {
+          s.link.classList.toggle("vd-settings-subnav-item--active", s === current);
+          if (s === current) s.link.setAttribute("aria-current", "true");
+          else s.link.removeAttribute("aria-current");
+        }
+      }
+      window.addEventListener("scroll", updateActive, { passive: true });
+      updateActive();
+    })();
+
+    /* ============================================================
+       HAUPT-SIDEBAR EINKLAPPBAR
+       Zustand wird in localStorage persistiert, damit der User-Toggle
+       beim Seitenwechsel zwischen Dashboard / Projekte / Galerie /
+       Archiv / Einstellung erhalten bleibt.
+       ============================================================ */
+    (function () {
+      const STORAGE_KEY = "visidoc-sidebar-collapsed";
+      const mainSidebarToggle = document.getElementById("vd-sidebar-collapse-toggle");
+      if (!mainSidebarToggle) return;
+      function applySidebarCollapsed(collapsed) {
+        document.body.classList.toggle("vd-app-sidebar-collapsed", collapsed);
+        mainSidebarToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        mainSidebarToggle.setAttribute(
+          "aria-label",
+          collapsed ? "Sidebar ausklappen" : "Sidebar einklappen"
+        );
+      }
+      let stored = null;
+      try { stored = localStorage.getItem(STORAGE_KEY); } catch (e) { /* Storage evtl. deaktiviert */ }
+      if (stored === "true") {
+        applySidebarCollapsed(true);
+      }
+      mainSidebarToggle.addEventListener("click", function () {
+        const collapsed = !document.body.classList.contains("vd-app-sidebar-collapsed");
+        applySidebarCollapsed(collapsed);
+        try { localStorage.setItem(STORAGE_KEY, collapsed ? "true" : "false"); } catch (e) { /* ignorieren */ }
+      });
+    })();
+  </script>
+</body>
+</html>

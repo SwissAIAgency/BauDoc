@@ -7,7 +7,7 @@ BauDoc ist eine Web- und Mobile/PWA-Anwendung für planbasierte Baufortschrittsd
 ## Verbindliche Quellen
 
 Vor Änderungen müssen passende Dokumente gelesen werden:
-
+- Github: https://github.com/SwissAIAgency/BauDoc.git
 - `PROJECT_DEFINITION.md`
 - `LEISTUNGSKATALOG.md`
 - `ARCHITECTURE.md`

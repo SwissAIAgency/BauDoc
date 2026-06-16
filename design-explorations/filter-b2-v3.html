@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BauDoc · Filter B2 v3 · Interaktiv + Responsive Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg-page: #0f1115;
+    --bg-panel: #16191f;
+    --bg-elevated: #1c2027;
+    --bg-input: #1c2027;
+    --bg-input-hover: #232830;
+    --border-subtle: #2a2f38;
+    --border-strong: #353b46;
+    --border-focus: #b8d24c;
+    --text-primary: #e6e8eb;
+    --text-secondary: #a4abb6;
+    --text-muted: #7d848f;
+    --accent: #b8d24c;
+    --accent-soft: rgba(184, 210, 76, 0.14);
+    --accent-soft-2: rgba(184, 210, 76, 0.22);
+    --accent-border: rgba(184, 210, 76, 0.5);
+    --warn: #f0b35e;
+    --ok: #6cd193;
+    --danger: #ef6c6c;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-pill: 999px;
+    --h-trigger: 30px;
+    --h-seg: 30px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: 13px;
+    -webkit-font-smoothing: antialiased;
+  }
+  body { padding: 24px 0 60px; }
+
+  .stage { max-width: 1480px; margin: 0 auto; padding: 0 24px; }
+  .stage-title {
+    color: var(--text-primary);
+    font-size: 18px; font-weight: 600; letter-spacing: -0.01em;
+    margin: 0 0 4px;
+  }
+  .stage-desc {
+    color: var(--text-secondary); font-size: 12.5px;
+    margin: 0 0 16px;
+  }
+  .stage-hint {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-border);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    color: var(--accent);
+    font-size: 12.5px;
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .stage-hint strong { font-weight: 600; }
+  .stage-hint .ico { color: var(--accent); }
+
+  .device {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 36px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  }
+  .device-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    font-size: 11.5px;
+  }
+  .device-bar .dots { display: inline-flex; gap: 6px; margin-right: 8px; }
+  .device-bar .dots span { width: 10px; height: 10px; border-radius: 50%; background: var(--border-strong); }
+  .device-bar .url {
+    flex: 1; text-align: center;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    padding: 3px 10px;
+    color: var(--text-secondary);
+    max-width: 360px; margin: 0 auto;
+    font-size: 11.5px;
+  }
+  .device-bar .meta { margin-left: auto; color: var(--text-muted); font-size: 11px; }
+  .device-bar .meta strong { color: var(--text-primary); font-weight: 600; }
+  .device-body { background: var(--bg-page); }
+
+  .app-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--bg-panel);
+  }
+  .app-header .title { font-weight: 600; font-size: 14px; }
+  .app-header .crumbs { color: var(--text-muted); font-size: 12px; margin-left: 6px; }
+  .app-header .crumbs a { color: var(--text-secondary); text-decoration: none; }
+  .app-header .crumbs a:hover { color: var(--text-primary); }
+  .app-header .actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .btn-primary {
+    background: var(--accent); color: #1a1d12; border: none; cursor: pointer;
+    font: inherit; font-weight: 600; font-size: 12.5px;
+    padding: 6px 12px; border-radius: var(--radius-md);
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: background .15s;
+  }
+  .btn-primary:hover { background: #c4dc5e; }
+  .btn-ghost {
+    background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-subtle);
+    font: inherit; font-size: 12.5px;
+    padding: 5px 11px; border-radius: var(--radius-md);
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    transition: background .15s;
+  }
+  .btn-ghost:hover { background: var(--bg-input-hover); }
+
+  .filter-bar {
+    padding: 8px 20px 10px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--bg-panel);
+  }
+  .fb-row { display: flex; align-items: center; gap: 6px; }
+  .fb-row + .fb-row { margin-top: 6px; }
+
+  .ico { width: 13px; height: 13px; flex: 0 0 13px; opacity: .85; }
+  .ico-sm { width: 12px; height: 12px; flex: 0 0 12px; opacity: .8; }
+  .caret {
+    width: 10px; height: 10px; opacity: .65; margin-left: 1px;
+    transition: transform .15s, opacity .15s;
+  }
+  .filter-trigger:hover .caret,
+  .seg button:hover .caret { opacity: 1; }
+  .filter-trigger.open .caret { transform: rotate(180deg); }
+
+  .search-wrap {
+    display: flex; align-items: center; gap: 6px;
+    flex: 1; min-width: 160px;
+  }
+  .search-input {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 0 10px;
+    height: var(--h-trigger);
+    color: var(--text-secondary);
+    flex: 1; min-width: 0;
+    transition: border-color .15s, background .15s, box-shadow .15s;
+  }
+  .search-input:hover { background: var(--bg-input-hover); }
+  .search-input:focus-within {
+    border-color: var(--border-focus);
+    background: var(--bg-input);
+    box-shadow: 0 0 0 3px rgba(184,210,76,0.12);
+  }
+  .search-input .search-ico {
+    color: var(--text-muted);
+    transition: color .15s;
+  }
+  .search-input:focus-within .search-ico { color: var(--accent); }
+  .search-input input {
+    flex: 1; min-width: 0;
+    background: transparent; border: none; outline: none;
+    color: var(--text-primary);
+    font: inherit; font-size: 12.5px;
+  }
+  .search-input input::placeholder { color: var(--text-muted); }
+  .search-kbd {
+    display: inline-flex; align-items: center; gap: 2px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    font-size: 10px; font-weight: 500;
+    padding: 1px 5px; border-radius: 4px;
+    font-family: inherit;
+    transition: opacity .15s;
+  }
+  .search-input:focus-within .search-kbd { opacity: 0; }
+
+  .result-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-pill);
+    padding: 0 10px 0 8px;
+    height: var(--h-trigger);
+    color: var(--text-secondary);
+    font-size: 11.5px;
+    white-space: nowrap;
+  }
+  .result-badge .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(184,210,76,0.15);
+  }
+  .result-badge strong { color: var(--text-primary); font-weight: 600; }
+
+  .seg {
+    display: inline-flex; align-items: center;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 2px; gap: 1px;
+    height: var(--h-seg);
+  }
+  .seg button {
+    background: transparent; border: none; cursor: pointer;
+    color: var(--text-secondary); font: inherit; font-size: 11.5px;
+    padding: 3px 8px; border-radius: 5px;
+    display: inline-flex; align-items: center; gap: 5px; height: calc(var(--h-seg) - 6px);
+    transition: background .12s, color .12s;
+  }
+  .seg button:hover { color: var(--text-primary); background: rgba(255,255,255,0.03); }
+  .seg button.is-active {
+    background: var(--bg-elevated); color: var(--text-primary);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset;
+  }
+  .seg .count {
+    font-size: 10.5px; font-weight: 600;
+    background: var(--border-subtle); color: var(--text-secondary);
+    padding: 1px 6px; border-radius: 999px;
+    min-width: 18px; text-align: center;
+  }
+  .seg button.is-active .count { background: var(--accent-soft-2); color: var(--accent); }
+
+  /* Filter trigger — Dropdown is SIBLING of trigger, not child */
+  .dd-wrap { position: relative; display: inline-block; }
+  .filter-trigger {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 0 8px 0 10px;
+    height: var(--h-trigger);
+    color: var(--text-primary);
+    font: inherit; font-size: 12px;
+    cursor: pointer; white-space: nowrap;
+    font-family: inherit;
+    transition: background .12s, border-color .12s, color .12s;
+  }
+  .filter-trigger:hover { background: var(--bg-input-hover); border-color: var(--border-strong); }
+  .filter-trigger.open { background: var(--bg-elevated); border-color: var(--border-strong); }
+  .filter-trigger.active {
+    background: var(--accent-soft);
+    border-color: var(--accent-border);
+  }
+  .filter-trigger.active .label,
+  .filter-trigger.active .value { color: var(--accent); }
+  .filter-trigger .label { color: var(--text-muted); transition: color .12s; }
+  .filter-trigger .value { font-weight: 500; }
+  .filter-trigger .trigger-count {
+    color: var(--text-muted);
+    font-size: 10.5px; font-weight: 500;
+    background: var(--border-subtle);
+    padding: 0 5px; border-radius: 999px;
+    min-width: 16px; text-align: center;
+  }
+  .filter-trigger.active .trigger-count { background: var(--accent-soft-2); color: var(--accent); }
+  .filter-trigger .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+  .ds-warn { background: var(--warn); }
+  .ds-ok { background: var(--ok); }
+  .ds-danger { background: var(--danger); }
+
+  .filter-group {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding-right: 8px; margin-right: 2px;
+    border-right: 1px solid var(--border-subtle);
+  }
+  .filter-group:last-child { border-right: none; padding-right: 0; }
+
+  /* Dropdown panel */
+  .dropdown {
+    position: absolute;
+    top: calc(100% + 4px); left: 0;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    padding: 6px; min-width: 220px; z-index: 1000;
+    display: none;
+    max-height: 360px; overflow-y: auto;
+  }
+  .dropdown.open { display: block; }
+  .dropdown .opt {
+    display: flex; align-items: center; gap: 8px;
+    width: 100%; background: transparent; border: none; cursor: pointer; text-align: left;
+    color: var(--text-primary); font: inherit; font-size: 13px;
+    padding: 7px 9px; border-radius: 5px;
+    font-family: inherit;
+  }
+  .dropdown .opt:hover { background: var(--bg-input-hover); }
+  .dropdown .opt.is-selected { color: var(--accent); }
+  .dropdown .opt .check { width: 14px; height: 14px; opacity: 0; color: var(--accent); flex: 0 0 14px; }
+  .dropdown .opt.is-selected .check { opacity: 1; }
+  .dropdown .opt .opt-count { margin-left: auto; color: var(--text-muted); font-size: 11px; }
+  .dropdown .opt .dot-status { width: 6px; height: 6px; border-radius: 50%; }
+  .dropdown .opt .ds-warn { background: var(--warn); }
+  .dropdown .opt .ds-ok { background: var(--ok); }
+  .dropdown .opt .ds-danger { background: var(--danger); }
+  .dropdown .sep { height: 1px; background: var(--border-subtle); margin: 4px 0; }
+
+  .icon-btn {
+    width: 28px; height: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background .12s, color .12s, border-color .12s;
+  }
+  .icon-btn:hover { background: var(--bg-input-hover); color: var(--text-primary); }
+  .icon-btn.is-active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-border); }
+
+  .text-link {
+    background: transparent; border: none; cursor: pointer;
+    color: var(--text-muted); font: inherit; font-size: 11.5px;
+    padding: 3px 6px; border-radius: 4px;
+    transition: color .12s;
+  }
+  .text-link:hover { color: var(--accent); }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    border-radius: var(--radius-pill);
+    padding: 1px 3px 1px 9px;
+    font-size: 11.5px;
+    line-height: 1.5;
+    transition: border-color .12s;
+  }
+  .chip:hover { border-color: var(--text-muted); }
+  .chip.active {
+    border-color: var(--accent-border);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .chip .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--warn); display: inline-block;
+  }
+  .chip button {
+    background: transparent; border: none; cursor: pointer; color: var(--text-muted);
+    width: 16px; height: 16px;
+    display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;
+    font-family: inherit; font-size: 13px; line-height: 1; padding: 0;
+    transition: color .12s, background .12s;
+  }
+  .chip button:hover { color: var(--text-primary); background: rgba(255,255,255,0.08); }
+  .chip.active button:hover { color: #1a1d12; background: rgba(184,210,76,0.3); }
+
+  .label-act {
+    color: var(--text-muted); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600;
+  }
+  .spacer { flex: 1; }
+  .muted { color: var(--text-muted); }
+  .divider-v { width: 1px; height: 18px; background: var(--border-subtle); flex: 0 0 auto; }
+
+  .grid-wrap {
+    padding: 14px 20px 18px;
+    background: var(--bg-page);
+    min-height: 280px;
+  }
+  .grid {
+    display: grid; gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  .card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color .12s, transform .12s;
+  }
+  .card:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+  .card .thumb {
+    aspect-ratio: 4/3;
+    background: linear-gradient(135deg, #2a2f38, #1c2027);
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.3);
+    font-size: 16px; font-weight: 600;
+  }
+  .card .thumb .num {
+    position: absolute; top: 5px; left: 5px;
+    background: rgba(0,0,0,0.6); color: rgba(255,255,255,0.85);
+    padding: 1px 5px; border-radius: 3px; font-size: 9.5px; font-weight: 600;
+  }
+  .card .thumb .pill {
+    position: absolute; top: 5px; right: 5px;
+    background: rgba(0,0,0,0.7);
+    padding: 1px 6px; border-radius: 3px;
+    font-size: 10px; font-weight: 600;
+  }
+  .pill.s-warn { color: #f5c47a; }
+  .pill.s-ok { color: #8ee0aa; }
+  .pill.s-danger { color: #ff8a8a; }
+  .card .body { padding: 7px 9px 9px; }
+  .card .body .ttl {
+    font-size: 12px; font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    color: var(--text-primary);
+  }
+  .card .body .meta {
+    margin-top: 2px; font-size: 10.5px; color: var(--text-muted);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .card .body .meta .pos { color: var(--accent); font-weight: 500; }
+
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state .icon {
+    width: 48px; height: 48px;
+    margin: 0 auto 12px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted);
+  }
+  .empty-state h3 {
+    margin: 0 0 4px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 14px;
+  }
+  .empty-state p { margin: 0 0 12px; font-size: 12.5px; }
+
+  .footer-bar {
+    padding: 8px 20px;
+    border-top: 1px solid var(--border-subtle);
+    color: var(--text-secondary); font-size: 11.5px;
+    background: var(--bg-panel);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .footer-bar strong { color: var(--text-primary); font-weight: 600; }
+
+  /* Reference badge for non-interactive viewports */
+  .ref-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--bg-elevated);
+    border: 1px dashed var(--border-strong);
+    color: var(--text-muted);
+    font-size: 11px;
+    padding: 3px 8px; border-radius: 999px;
+  }
+  .ref-badge .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <h1 class="stage-title">BauDoc · Filter B2 v3 · Interaktiv + Responsive</h1>
+  <p class="stage-desc">Desktop (1440px) ist voll interaktiv — alle Filter, Switcher, Zoom, Vollbild, Sort, Group. Tablet und Mobile sind responsive Referenzen (gleiches Design, andere Komposition).</p>
+
+  <div class="stage-hint">
+    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span><strong>Interaktiv:</strong> Klicke auf die Filter, Switcher, Zoom, Vollbild · Tipp in die Suche (⌘K-Hint) · Chips mit × entfernen · Reset-Button.</span>
+  </div>
+
+  <!-- ============================================================
+       DESKTOP — INTERAKTIV
+       ============================================================ -->
+  <h2 class="stage-title" style="font-size:15px;margin-top:8px">Desktop · 1440px · Interaktiv</h2>
+  <p class="stage-desc">3 Zeilen · Primäre Filter (Planposition, Status) | Sekundäre (Zeitraum, Ersteller, Tags) durch dünne Trennlinie separiert.</p>
+  <div class="device device-desktop" id="app">
+    <div class="device-bar">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="url">baudoc.swiss/projects/neubau-bahnhofstrasse-12</div>
+      <div class="meta"><strong>Desktop</strong> · 1440px · <span style="color:var(--accent)">●</span> live</div>
+    </div>
+    <div class="device-body">
+
+      <div class="app-header">
+        <div class="title">Projekte</div>
+        <div class="crumbs">/ <a href="#">Projekte</a> / <span style="color:var(--text-primary)">Neubau Bahnhofstrasse 12</span></div>
+        <div class="actions">
+          <button class="btn-ghost" type="button">Bearbeiten</button>
+          <button class="btn-ghost" type="button">+ Plan hochladen</button>
+          <button class="btn-primary" type="button">Foto aufnehmen</button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <!-- Row 1: Tabs | Suche | Result-Badge -->
+        <div class="fb-row">
+          <div class="seg" id="tabs">
+            <button class="is-active" data-tab="fotos" type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+              Fotos <span class="count">248</span>
+            </button>
+            <button data-tab="plaene" type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+              Pläne <span class="count">17</span>
+            </button>
+            <button data-tab="videos" type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+              Videos <span class="count">8</span>
+            </button>
+            <button data-tab="dokumente" type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Doku. <span class="count">5</span>
+            </button>
+            <button data-tab="aktivitaet" type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Aktiv. <span class="count">84</span>
+            </button>
+          </div>
+
+          <div class="search-wrap">
+            <div class="search-input">
+              <svg class="ico search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="searchInput" placeholder="Foto, EXIF, Tag oder Planposition" />
+              <span class="search-kbd">⌘K</span>
+            </div>
+            <span class="result-badge" id="resultBadge">
+              <span class="dot"></span>
+              <strong id="resultCount">32</strong>&nbsp;Treffer
+            </span>
+          </div>
+        </div>
+
+        <!-- Row 2: Primär-Filter | Sekundär-Filter | Tools -->
+        <div class="fb-row">
+          <!-- Primäre Filter -->
+          <div class="filter-group">
+            <div class="dd-wrap">
+              <button class="filter-trigger" id="trigger-planposition" type="button">
+                <span class="label">Planposition:</span>
+                <span class="value" id="display-planposition">Alle</span>
+                <span class="trigger-count" id="count-planposition">7</span>
+                <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="dropdown" id="dropdown-planposition"></div>
+            </div>
+            <div class="dd-wrap">
+              <button class="filter-trigger" id="trigger-status" type="button">
+                <span class="label">Status:</span>
+                <span class="value" id="display-status">Alle</span>
+                <span class="trigger-count" id="count-status">4</span>
+                <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="dropdown" id="dropdown-status"></div>
+            </div>
+          </div>
+
+          <!-- Sekundäre Filter -->
+          <div class="filter-group">
+            <div class="dd-wrap">
+              <button class="filter-trigger" id="trigger-zeitraum" type="button">
+                <span class="label">Zeitraum:</span>
+                <span class="value" id="display-zeitraum">Alle</span>
+                <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="dropdown" id="dropdown-zeitraum"></div>
+            </div>
+            <div class="dd-wrap">
+              <button class="filter-trigger" id="trigger-ersteller" type="button">
+                <span class="label">Ersteller:</span>
+                <span class="value" id="display-ersteller">Alle</span>
+                <span class="trigger-count" id="count-ersteller">5</span>
+                <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="dropdown" id="dropdown-ersteller"></div>
+            </div>
+            <div class="dd-wrap">
+              <button class="filter-trigger" id="trigger-tags" type="button">
+                <span class="label">Tags:</span>
+                <span class="value" id="display-tags">Alle</span>
+                <span class="trigger-count" id="count-tags">8</span>
+                <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="dropdown" id="dropdown-tags"></div>
+            </div>
+          </div>
+
+          <span class="spacer"></span>
+
+          <!-- Tools -->
+          <div class="dd-wrap">
+            <button class="filter-trigger" id="trigger-sort" type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="9" y2="18"/></svg>
+              <span class="label">Sortieren:</span>
+              <span class="value" id="display-sort">Neueste</span>
+              <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="dropdown" id="dropdown-sort"></div>
+          </div>
+          <div class="dd-wrap">
+            <button class="filter-trigger" id="trigger-group" type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              <span class="label">Gruppieren:</span>
+              <span class="value" id="display-group">Keine</span>
+              <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="dropdown" id="dropdown-group"></div>
+          </div>
+
+          <div class="divider-v"></div>
+
+          <div class="seg" id="viewSwitcher">
+            <button class="is-active" data-view="grid" title="Raster" type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </button>
+            <button data-view="mosaik" title="Mosaik" type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="6"/><rect x="11" y="3" width="4" height="4"/><rect x="17" y="3" width="4" height="6"/><rect x="3" y="11" width="4" height="4"/><rect x="9" y="9" width="6" height="6"/><rect x="17" y="11" width="4" height="4"/><rect x="3" y="17" width="4" height="4"/><rect x="9" y="19" width="4" height="2"/></svg>
+            </button>
+            <button data-view="list" title="Liste" type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="seg" id="previewSwitcher">
+            <button class="is-active" data-preview="grid" title="Raster-Vorschau" type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </button>
+            <button data-preview="card" title="Karten-Vorschau" type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
+          <div class="seg">
+            <button id="zoomOut" title="Verkleinern" type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            </button>
+            <button id="zoomIn" title="Vergrößern" type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            </button>
+            <button id="fullscreen" title="Vollbild" type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V3h4M21 7V3h-4M3 17v4h4M21 17v4h-4"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Row 3: Aktive Chips + Reset -->
+        <div class="fb-row">
+          <span class="label-act">Aktiv</span>
+          <div id="chipsContainer" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"></div>
+          <span class="spacer"></span>
+          <button class="text-link" id="resetBtn" type="button">Alle Filter zurücksetzen</button>
+        </div>
+      </div>
+
+      <div class="grid-wrap">
+        <div class="grid view-grid" id="grid"></div>
+      </div>
+
+      <div class="footer-bar">
+        <span id="footerInfo"><strong>32</strong> von <strong>248</strong> Fotos · sortiert nach <strong>Neueste</strong></span>
+        <span class="spacer"></span>
+        <span id="footerFilters"></span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       TABLET — REFERENZ
+       ============================================================ -->
+  <h2 class="stage-title" style="font-size:15px;margin-top:8px">Tablet · 820px <span class="ref-badge"><span class="dot"></span>Responsive Referenz</span></h2>
+  <p class="stage-desc">5 Zeilen · Filter-Labels ausgeblendet · Suchfeld mit ⌘K-Hint · Result-Badge bleibt in Suche-Reihe.</p>
+  <div class="device device-tablet" style="max-width: 820px">
+    <div class="device-bar">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="url">baudoc.swiss/projects/neubau-bahnhofstrasse-12</div>
+      <div class="meta"><strong>Tablet</strong> · 820px</div>
+    </div>
+    <div class="device-body">
+
+      <div class="app-header">
+        <div class="title">Projekte</div>
+        <div class="crumbs">/ <a href="#">Projekte</a> / <span style="color:var(--text-primary)">Neubau Bhfstr. 12</span></div>
+        <div class="actions">
+          <button class="btn-ghost" type="button">Bearbeiten</button>
+          <button class="btn-primary" type="button">Foto aufnehmen</button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="fb-row">
+          <div class="seg">
+            <button class="is-active" type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+              Fotos <span class="count">248</span>
+            </button>
+            <button type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+              Pläne <span class="count">17</span>
+            </button>
+            <button type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+              Videos <span class="count">8</span>
+            </button>
+            <button type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Doku. <span class="count">5</span>
+            </button>
+            <button type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Aktiv. <span class="count">84</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="fb-row">
+          <div class="search-wrap">
+            <div class="search-input">
+              <svg class="ico search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" placeholder="Foto, EXIF, Tag oder Planposition" />
+              <span class="search-kbd">⌘K</span>
+            </div>
+            <span class="result-badge">
+              <span class="dot"></span>
+              <strong>38</strong>&nbsp;Treffer
+            </span>
+          </div>
+        </div>
+
+        <div class="fb-row">
+          <button class="filter-trigger active" type="button">
+            <span class="value">EG – Erdgeschoss</span>
+            <span class="trigger-count">12</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <button class="filter-trigger" type="button">
+            <span class="dot ds-warn"></span>
+            <span class="value">In Prüfung</span>
+            <span class="trigger-count">24</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="fb-row">
+          <button class="filter-trigger" type="button">
+            <span class="value">7 Tage</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <button class="filter-trigger" type="button">
+            <span class="value">Alle</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <button class="filter-trigger" type="button">
+            <span class="value">Tags</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="fb-row">
+          <button class="filter-trigger" type="button">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="9" y2="18"/></svg>
+            <span class="value">Sortieren</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <button class="filter-trigger" type="button">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <span class="value">Gruppieren</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="divider-v"></div>
+          <div class="seg">
+            <button class="is-active" type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </button>
+            <button type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="6"/><rect x="11" y="3" width="4" height="4"/><rect x="17" y="3" width="4" height="6"/><rect x="3" y="11" width="4" height="4"/><rect x="9" y="9" width="6" height="6"/><rect x="17" y="11" width="4" height="4"/><rect x="3" y="17" width="4" height="4"/><rect x="9" y="19" width="4" height="2"/></svg>
+            </button>
+            <button type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="seg">
+            <button class="is-active" type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </button>
+            <button type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
+          <div class="seg">
+            <button type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            </button>
+            <button type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            </button>
+            <button type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V3h4M21 7V3h-4M3 17v4h4M21 17v4h-4"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="fb-row">
+          <span class="label-act">Aktiv</span>
+          <span class="chip active">EG – Erdgeschoss <button type="button">×</button></span>
+          <span class="chip"><span class="dot"></span>In Prüfung <button type="button">×</button></span>
+          <span class="chip">7 Tage <button type="button">×</button></span>
+          <span class="spacer"></span>
+          <button class="text-link" type="button">Zurücksetzen</button>
+        </div>
+      </div>
+
+      <div class="grid-wrap">
+        <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));">
+          <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#3a4252,#1c2027)"><span class="num">#001</span><span class="pill s-ok">OK</span><span style="font-size:18px;font-weight:600;color:rgba(255,255,255,0.25)">E</span></div><div class="body"><div class="ttl">EG-001 Eingangstreppe</div><div class="meta"><span class="pos">EG</span><span>Rohbau</span></div></div></div>
+          <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#523a40,#1c2027)"><span class="num">#002</span><span class="pill s-warn">Prüfg.</span><span style="font-size:18px;font-weight:600;color:rgba(255,255,255,0.25)">E</span></div><div class="body"><div class="ttl">EG-002 Empfangstresen</div><div class="meta"><span class="pos">EG</span><span>Innenausbau</span></div></div></div>
+          <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#3a5246,#1c2027)"><span class="num">#003</span><span class="pill s-ok">OK</span><span style="font-size:18px;font-weight:600;color:rgba(255,255,255,0.25)">E</span></div><div class="body"><div class="ttl">EG-003 Bodenplatte</div><div class="meta"><span class="pos">EG</span><span>Rohbau</span></div></div></div>
+          <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#523a4a,#1c2027)"><span class="num">#004</span><span class="pill s-danger">Offen</span><span style="font-size:18px;font-weight:600;color:rgba(255,255,255,0.25)">E</span></div><div class="body"><div class="ttl">EG-004 Fenster-Sued</div><div class="meta"><span class="pos">EG</span><span>Fassade</span></div></div></div>
+          <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#3a4252,#1c2027)"><span class="num">#005</span><span class="pill s-warn">Prüfg.</span><span style="font-size:18px;font-weight:600;color:rgba(255,255,255,0.25)">E</span></div><div class="body"><div class="ttl">EG-005 Treppenhaus</div><div class="meta"><span class="pos">EG</span><span>Rohbau</span></div></div></div>
+          <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#4a523a,#1c2027)"><span class="num">#006</span><span class="pill s-ok">OK</span><span style="font-size:18px;font-weight:600;color:rgba(255,255,255,0.25)">E</span></div><div class="body"><div class="ttl">EG-006 Wand Nord</div><div class="meta"><span class="pos">EG</span><span>Putz</span></div></div></div>
+        </div>
+      </div>
+
+      <div class="footer-bar">
+        <span><strong>6</strong> von <strong>248</strong> Fotos</span>
+        <span class="spacer"></span>
+        <span>EG · Prüfung · 7 Tage</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MOBILE — REFERENZ
+       ============================================================ -->
+  <h2 class="stage-title" style="font-size:15px;margin-top:8px">Mobile · 390px <span class="ref-badge"><span class="dot"></span>Responsive Referenz</span></h2>
+  <p class="stage-desc">Tabs scrollbar · Suche 100% · Result-Badge darunter · Filter horizontal scroll · Tools horizontal scroll · 2 Spalten Grid.</p>
+  <div class="device device-mobile" style="max-width: 390px; margin: 0 auto;">
+    <div class="device-bar">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="url">baudoc.swiss</div>
+      <div class="meta"><strong>Mobile</strong> · 390px</div>
+    </div>
+    <div class="device-body">
+
+      <div class="app-header">
+        <div class="title">Projekte</div>
+        <div class="actions">
+          <button class="btn-ghost" type="button">Bearbeiten</button>
+          <button class="btn-primary" type="button">+ Foto</button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="fb-row" style="overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap">
+          <div class="seg" style="flex-wrap:nowrap">
+            <button class="is-active" type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+              Fotos <span class="count">248</span>
+            </button>
+            <button type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+              Pläne <span class="count">17</span>
+            </button>
+            <button type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+              Videos <span class="count">8</span>
+            </button>
+            <button type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Doku. <span class="count">5</span>
+            </button>
+            <button type="button">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Aktiv. <span class="count">84</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="fb-row">
+          <div class="search-wrap">
+            <div class="search-input">
+              <svg class="ico search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" placeholder="Suchen…" />
+            </div>
+          </div>
+        </div>
+
+        <div class="fb-row">
+          <span class="result-badge">
+            <span class="dot"></span>
+            <strong>38</strong>&nbsp;Treffer in&nbsp;<strong>Fotos</strong>
+          </span>
+          <span class="spacer"></span>
+          <span class="muted" style="font-size:11px">14:32</span>
+        </div>
+
+        <div class="fb-row" style="overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap">
+          <button class="filter-trigger active" type="button" style="flex:0 0 auto">
+            <span class="value">EG – Erdgeschoss</span>
+            <span class="trigger-count">12</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <button class="filter-trigger" type="button" style="flex:0 0 auto">
+            <span class="dot ds-warn"></span>
+            <span class="value">Prüfung</span>
+            <span class="trigger-count">24</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <button class="filter-trigger" type="button" style="flex:0 0 auto">
+            <span class="value">7 Tage</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <button class="filter-trigger" type="button" style="flex:0 0 auto">
+            <span class="value">Ersteller</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <button class="filter-trigger" type="button" style="flex:0 0 auto">
+            <span class="value">Tags</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="fb-row" style="overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap">
+          <button class="filter-trigger" type="button" style="flex:0 0 auto">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="9" y2="18"/></svg>
+            <span class="value">Sortieren</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <button class="filter-trigger" type="button" style="flex:0 0 auto">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <span class="value">Gruppieren</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="seg" style="flex:0 0 auto">
+            <button class="is-active" type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </button>
+            <button type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="6"/><rect x="11" y="3" width="4" height="4"/><rect x="17" y="3" width="4" height="6"/><rect x="3" y="11" width="4" height="4"/><rect x="9" y="9" width="6" height="6"/><rect x="17" y="11" width="4" height="4"/><rect x="3" y="17" width="4" height="4"/><rect x="9" y="19" width="4" height="2"/></svg>
+            </button>
+            <button type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="seg" style="flex:0 0 auto">
+            <button class="is-active" type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </button>
+            <button type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
+          <div class="seg" style="flex:0 0 auto">
+            <button type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            </button>
+            <button type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            </button>
+            <button type="button">
+              <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V3h4M21 7V3h-4M3 17v4h4M21 17v4h-4"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="fb-row">
+          <span class="label-act">Aktiv</span>
+          <span class="chip active">EG <button type="button">×</button></span>
+          <span class="chip"><span class="dot"></span>Prüfung <button type="button">×</button></span>
+          <span class="chip">7T <button type="button">×</button></span>
+          <span class="spacer"></span>
+          <button class="text-link" type="button">Reset</button>
+        </div>
+      </div>
+
+      <div class="grid-wrap">
+        <div class="grid" style="grid-template-columns: repeat(2, 1fr);">
+          <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#3a4252,#1c2027)"><span class="num">#001</span><span class="pill s-ok">OK</span><span style="font-size:18px;font-weight:600;color:rgba(255,255,255,0.25)">E</span></div><div class="body"><div class="ttl">EG-001 Eingangstreppe</div><div class="meta"><span class="pos">EG</span><span>Rohbau</span></div></div></div>
+          <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#523a40,#1c2027)"><span class="num">#002</span><span class="pill s-warn">Prüfg.</span><span style="font-size:18px;font-weight:600;color:rgba(255,255,255,0.25)">E</span></div><div class="body"><div class="ttl">EG-002 Empfangstresen</div><div class="meta"><span class="pos">EG</span><span>Innen</span></div></div></div>
+          <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#3a5246,#1c2027)"><span class="num">#003</span><span class="pill s-ok">OK</span><span style="font-size:18px;font-weight:600;color:rgba(255,255,255,0.25)">E</span></div><div class="body"><div class="ttl">EG-003 Bodenplatte</div><div class="meta"><span class="pos">EG</span><span>Rohbau</span></div></div></div>
+          <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#523a4a,#1c2027)"><span class="num">#004</span><span class="pill s-danger">Offen</span><span style="font-size:18px;font-weight:600;color:rgba(255,255,255,0.25)">E</span></div><div class="body"><div class="ttl">EG-004 Fenster</div><div class="meta"><span class="pos">EG</span><span>Fassade</span></div></div></div>
+        </div>
+      </div>
+
+      <div class="footer-bar">
+        <span><strong>4</strong>&nbsp;/&nbsp;248</span>
+        <span class="spacer"></span>
+        <span>EG · Prüfung · 7T</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+'use strict';
+
+// ============================================================
+// SEED-DATEN
+// ============================================================
+const PLAN_POSITIONEN = [
+  'EG – Erdgeschoss', '1.OG – 1. Obergeschoss', '2.OG – 2. Obergeschoss',
+  'UG – Untergeschoss', 'DG – Dachgeschoss', 'Aussen – Fassade', 'Aussen – Umgebung'
+];
+const STATUS_OPTIONS = [
+  { id: 'offen',    label: 'Offen',         dot: 'ds-danger' },
+  { id: 'pruefung', label: 'In Prüfung',    dot: 'ds-warn'   },
+  { id: 'ok',       label: 'Abgenommen',    dot: 'ds-ok'     },
+  { id: 'mangel',   label: 'Mangelhaft',    dot: 'ds-danger' },
+];
+const ERSTELLER = ['M. Baumgartner', 'L. Studer', 'P. Keller', 'S. Moser', 'A. Iten'];
+const TAGS = ['Rohbau', 'Innenausbau', 'Elektro', 'Sanitär', 'Fassade', 'Dämmung', 'Putz', 'Estrich'];
+
+const SEED = [
+  { name: 'EG-001 Eingangstreppe',     pos: 'EG – Erdgeschoss',           status: 'ok',       ersteller: 'M. Baumgartner', tags: ['Rohbau','Fassade'],      gewerk: 'Rohbau',         d: 0 },
+  { name: 'EG-002 Empfangstresen',     pos: 'EG – Erdgeschoss',           status: 'pruefung', ersteller: 'L. Studer',       tags: ['Innenausbau','Putz'],   gewerk: 'Innenausbau',    d: 1 },
+  { name: 'EG-003 Bodenplatte',        pos: 'EG – Erdgeschoss',           status: 'ok',       ersteller: 'P. Keller',       tags: ['Rohbau','Estrich'],     gewerk: 'Rohbau',         d: 2 },
+  { name: 'EG-004 Fenster-Sued',       pos: 'EG – Erdgeschoss',           status: 'offen',    ersteller: 'S. Moser',        tags: ['Fassade','Putz'],       gewerk: 'Fassade',        d: 3 },
+  { name: 'EG-005 Treppenhaus',        pos: 'EG – Erdgeschoss',           status: 'pruefung', ersteller: 'A. Iten',         tags: ['Rohbau'],               gewerk: 'Rohbau',         d: 4 },
+  { name: 'EG-006 Wand Nord',          pos: 'EG – Erdgeschoss',           status: 'ok',       ersteller: 'M. Baumgartner', tags: ['Innenausbau','Putz'],   gewerk: 'Innenausbau',    d: 5 },
+  { name: 'EG-007 Empfang-Decke',      pos: 'EG – Erdgeschoss',           status: 'pruefung', ersteller: 'L. Studer',       tags: ['Elektro'],              gewerk: 'Gebäudetechnik', d: 6 },
+  { name: 'EG-008 Aufzug-Schacht',     pos: 'EG – Erdgeschoss',           status: 'mangel',   ersteller: 'P. Keller',       tags: ['Rohbau'],               gewerk: 'Rohbau',         d: 7 },
+  { name: 'OG1-101 Buero-Nord',        pos: '1.OG – 1. Obergeschoss',     status: 'ok',       ersteller: 'M. Baumgartner', tags: ['Innenausbau'],          gewerk: 'Innenausbau',    d: 8 },
+  { name: 'OG1-102 Buero-Sued',        pos: '1.OG – 1. Obergeschoss',     status: 'mangel',   ersteller: 'L. Studer',       tags: ['Innenausbau'],          gewerk: 'Innenausbau',    d: 9 },
+  { name: 'OG1-103 Sitzungsraum',      pos: '1.OG – 1. Obergeschoss',     status: 'pruefung', ersteller: 'P. Keller',       tags: ['Innenausbau','Elektro'],gewerk: 'Innenausbau',    d: 10 },
+  { name: 'OG1-104 Teekueche',         pos: '1.OG – 1. Obergeschoss',     status: 'ok',       ersteller: 'S. Moser',        tags: ['Sanitär'],              gewerk: 'Gebäudetechnik', d: 11 },
+  { name: 'OG1-105 Flur-Licht',        pos: '1.OG – 1. Obergeschoss',     status: 'ok',       ersteller: 'A. Iten',         tags: ['Elektro'],              gewerk: 'Gebäudetechnik', d: 12 },
+  { name: 'OG2-201 Konferenzraum',     pos: '2.OG – 2. Obergeschoss',     status: 'pruefung', ersteller: 'M. Baumgartner', tags: ['Innenausbau','Elektro'],gewerk: 'Innenausbau',    d: 13 },
+  { name: 'OG2-202 Open-Space',        pos: '2.OG – 2. Obergeschoss',     status: 'offen',    ersteller: 'L. Studer',       tags: ['Innenausbau'],          gewerk: 'Innenausbau',    d: 14 },
+  { name: 'OG2-203 Serverraum-Klima',  pos: '2.OG – 2. Obergeschoss',     status: 'pruefung', ersteller: 'P. Keller',       tags: ['Elektro','Sanitär'],    gewerk: 'Gebäudetechnik', d: 15 },
+  { name: 'OG2-204 Dachterrasse',      pos: '2.OG – 2. Obergeschoss',     status: 'ok',       ersteller: 'S. Moser',        tags: ['Fassade','Dämmung'],    gewerk: 'Fassade',        d: 16 },
+  { name: 'UG-K01 Technikzentrale',    pos: 'UG – Untergeschoss',        status: 'mangel',   ersteller: 'A. Iten',         tags: ['Elektro','Sanitär'],    gewerk: 'Gebäudetechnik', d: 17 },
+  { name: 'UG-K02 Tiefgarage',         pos: 'UG – Untergeschoss',        status: 'ok',       ersteller: 'M. Baumgartner', tags: ['Rohbau'],               gewerk: 'Rohbau',         d: 18 },
+  { name: 'UG-K03 Lagerraum',          pos: 'UG – Untergeschoss',        status: 'offen',    ersteller: 'L. Studer',       tags: ['Rohbau'],               gewerk: 'Rohbau',         d: 19 },
+  { name: 'UG-K04 Heizung',            pos: 'UG – Untergeschoss',        status: 'pruefung', ersteller: 'P. Keller',       tags: ['Sanitär'],              gewerk: 'Gebäudetechnik', d: 20 },
+  { name: 'DG-R01 Dachstuhl',          pos: 'DG – Dachgeschoss',          status: 'ok',       ersteller: 'S. Moser',        tags: ['Rohbau','Dämmung'],     gewerk: 'Rohbau',         d: 21 },
+  { name: 'DG-R02 Spengler',           pos: 'DG – Dachgeschoss',          status: 'pruefung', ersteller: 'A. Iten',         tags: ['Fassade'],              gewerk: 'Fassade',        d: 22 },
+  { name: 'DG-R03 Gauben-Sued',        pos: 'DG – Dachgeschoss',          status: 'mangel',   ersteller: 'M. Baumgartner', tags: ['Fassade'],              gewerk: 'Fassade',        d: 23 },
+  { name: 'DG-R04 PV-Anlage',          pos: 'DG – Dachgeschoss',          status: 'offen',    ersteller: 'L. Studer',       tags: ['Elektro'],              gewerk: 'Gebäudetechnik', d: 24 },
+  { name: 'FA-Sued-001 Verputz',       pos: 'Aussen – Fassade',           status: 'pruefung', ersteller: 'P. Keller',       tags: ['Putz','Fassade'],       gewerk: 'Fassade',        d: 25 },
+  { name: 'FA-Sued-002 Geraust',       pos: 'Aussen – Fassade',           status: 'ok',       ersteller: 'S. Moser',        tags: ['Fassade'],              gewerk: 'Fassade',        d: 26 },
+  { name: 'FA-West-001 Daemmplatten',  pos: 'Aussen – Fassade',           status: 'ok',       ersteller: 'A. Iten',         tags: ['Dämmung','Fassade'],    gewerk: 'Fassade',        d: 27 },
+  { name: 'FA-Nord-001 WDVS',          pos: 'Aussen – Fassade',           status: 'mangel',   ersteller: 'M. Baumgartner', tags: ['Dämmung','Putz'],       gewerk: 'Fassade',        d: 28 },
+  { name: 'UM-001 Baugrube',           pos: 'Aussen – Umgebung',          status: 'ok',       ersteller: 'L. Studer',       tags: ['Rohbau'],               gewerk: 'Rohbau',         d: 29 },
+  { name: 'UM-002 Zufahrt-Stahlpl.',   pos: 'Aussen – Umgebung',          status: 'pruefung', ersteller: 'P. Keller',       tags: ['Rohbau'],               gewerk: 'Rohbau',         d: 30 },
+  { name: 'UM-003 Kranstandplatz',     pos: 'Aussen – Umgebung',          status: 'ok',       ersteller: 'S. Moser',        tags: ['Rohbau'],               gewerk: 'Rohbau',         d: 31 },
+];
+
+const STATUS_MAP = Object.fromEntries(STATUS_OPTIONS.map(s => [s.id, s]));
+const SORT_LABELS = { 'neueste':'Neueste','aelteste':'Älteste','name-asc':'Name (A–Z)','name-desc':'Name (Z–A)','status':'Status' };
+const GROUP_LABELS = { 'keine':'Keine','planposition':'Planposition','status':'Status','gewerk':'Gewerk','ersteller':'Ersteller' };
+const ZEITRAUM_LABELS = { '7d':'Letzte 7 Tage','14d':'Letzte 14 Tage','30d':'Letzte 30 Tage','90d':'Letzte 90 Tage' };
+const ZEITRAUM_SHORT = { '7d':'7 Tage','14d':'14 Tage','30d':'30 Tage','90d':'90 Tage' };
+
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  tab: 'fotos',
+  search: '',
+  filters: { planposition: null, status: null, zeitraum: null, ersteller: null, tags: null },
+  sort: 'neueste',
+  group: 'keine',
+  view: 'grid',
+  preview: 'grid',
+  zoom: 'm',
+  fullscreen: false,
+};
+
+// ============================================================
+// HELPERS
+// ============================================================
+function $(id) { return document.getElementById(id); }
+function $$(sel) { return Array.from(document.querySelectorAll(sel)); }
+function el(tag, attrs={}, ...children) {
+  const e = document.createElement(tag);
+  Object.entries(attrs).forEach(([k,v]) => {
+    if (k === 'class') e.className = v;
+    else if (k.startsWith('on') && typeof v === 'function') e.addEventListener(k.slice(2).toLowerCase(), v);
+    else e.setAttribute(k, v);
+  });
+  children.forEach(c => { if (c == null) return; e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+  return e;
+}
+
+function statusPillHtml(statusId) {
+  const s = STATUS_MAP[statusId];
+  const dotClass = statusId === 'ok' ? 's-ok' : statusId === 'mangel' ? 's-danger' : statusId === 'pruefung' ? 's-warn' : 's-danger';
+  return `<span class="pill ${dotClass}">${s.label}</span>`;
+}
+
+function thumbHtml(item, idx) {
+  const initial = item.name.charAt(0);
+  return `<div class="thumb" style="background:linear-gradient(135deg, hsl(${(item.d*23)%360} 25% 22%), hsl(${(item.d*23+50)%360} 25% 16%))">
+    <span class="num">#${String(idx+1).padStart(3,'0')}</span>
+    ${statusPillHtml(item.status)}
+    <span style="font-size:18px;font-weight:600;color:rgba(255,255,255,0.25)">${initial}</span>
+  </div>`;
+}
+
+function bodyHtml(item) {
+  return `<div class="body">
+    <div class="ttl">${item.name}</div>
+    <div class="meta">
+      <span class="pos">${item.pos.split(' ')[0]}</span>
+      ${item.tags.slice(0,2).map(t => `<span>${t}</span>`).join('')}
+      <span style="margin-left:auto">${item.ersteller.split(' ')[0]}</span>
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// DROPDOWNS
+// ============================================================
+function buildOption(opts) {
+  const btn = el('button', { class: 'opt' + (opts.selected ? ' is-selected' : ''), type: 'button' });
+  btn.innerHTML = `
+    <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    ${opts.dot ? `<span class="dot-status ${opts.dot}"></span>` : ''}
+    <span>${opts.label}</span>
+    ${opts.count != null ? `<span class="opt-count">${opts.count}</span>` : ''}
+  `;
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    opts.onSelect(opts.value);
+    closeAllDropdowns();
+  });
+  return btn;
+}
+
+function buildDropdown(dropdownEl, items, currentValue, onSelect) {
+  dropdownEl.innerHTML = '';
+  items.forEach(it => {
+    if (it.separator) { dropdownEl.appendChild(el('div', { class: 'sep' })); return; }
+    dropdownEl.appendChild(buildOption({
+      value: it.value,
+      label: it.label,
+      selected: (it.value || null) === currentValue,
+      dot: it.dot,
+      count: it.count,
+      onSelect,
+    }));
+  });
+}
+
+function buildAllDropdowns() {
+  // Planposition
+  const planCount = SEED.reduce((acc, it) => (acc[it.pos] = (acc[it.pos]||0)+1, acc), {});
+  buildDropdown($('dropdown-planposition'), [
+    { value: '', label: 'Alle', count: SEED.length },
+    { separator: true },
+    ...PLAN_POSITIONEN.map(p => ({ value: p, label: p, count: planCount[p] || 0 })),
+  ], state.filters.planposition, val => { state.filters.planposition = val; refresh(); });
+
+  // Status
+  const statCount = SEED.reduce((acc, it) => (acc[it.status] = (acc[it.status]||0)+1, acc), {});
+  buildDropdown($('dropdown-status'), [
+    { value: '', label: 'Alle', count: SEED.length },
+    { separator: true },
+    ...STATUS_OPTIONS.map(s => ({ value: s.id, label: s.label, dot: s.dot, count: statCount[s.id] || 0 })),
+  ], state.filters.status, val => { state.filters.status = val; refresh(); });
+
+  // Zeitraum
+  buildDropdown($('dropdown-zeitraum'), [
+    { value: '', label: 'Alle' },
+    { value: '7d',  label: 'Letzte 7 Tage' },
+    { value: '14d', label: 'Letzte 14 Tage' },
+    { value: '30d', label: 'Letzte 30 Tage' },
+    { value: '90d', label: 'Letzte 90 Tage' },
+  ], state.filters.zeitraum, val => { state.filters.zeitraum = val; refresh(); });
+
+  // Ersteller
+  const erstCount = SEED.reduce((acc, it) => (acc[it.ersteller] = (acc[it.ersteller]||0)+1, acc), {});
+  buildDropdown($('dropdown-ersteller'), [
+    { value: '', label: 'Alle', count: SEED.length },
+    { separator: true },
+    ...ERSTELLER.map(e => ({ value: e, label: e, count: erstCount[e] || 0 })),
+  ], state.filters.ersteller, val => { state.filters.ersteller = val; refresh(); });
+
+  // Tags
+  const tagCount = SEED.reduce((acc, it) => it.tags.forEach(t => acc[t] = (acc[t]||0)+1), {});
+  buildDropdown($('dropdown-tags'), [
+    { value: '', label: 'Alle' },
+    { separator: true },
+    ...TAGS.map(t => ({ value: t, label: '#' + t, count: tagCount[t] || 0 })),
+  ], state.filters.tags, val => { state.filters.tags = val; refresh(); });
+
+  // Sort
+  buildDropdown($('dropdown-sort'), [
+    { value: 'neueste',   label: 'Neueste zuerst' },
+    { value: 'aelteste',  label: 'Älteste zuerst' },
+    { value: 'name-asc',  label: 'Name (A–Z)' },
+    { value: 'name-desc', label: 'Name (Z–A)' },
+    { value: 'status',    label: 'Nach Status' },
+  ], state.sort, val => { state.sort = val; refresh(); });
+
+  // Group
+  buildDropdown($('dropdown-group'), [
+    { value: 'keine',        label: 'Keine Gruppierung' },
+    { value: 'planposition', label: 'Planposition' },
+    { value: 'status',       label: 'Status' },
+    { value: 'gewerk',       label: 'Gewerk' },
+    { value: 'ersteller',    label: 'Ersteller' },
+  ], state.group, val => { state.group = val; refresh(); });
+}
+
+function closeAllDropdowns() {
+  $$('.dropdown.open').forEach(d => d.classList.remove('open'));
+  $$('.filter-trigger.open').forEach(b => b.classList.remove('open'));
+}
+
+function openDropdown(id) {
+  closeAllDropdowns();
+  const dd = $(id);
+  const tr = $(id.replace('dropdown-', 'trigger-'));
+  if (dd) dd.classList.add('open');
+  if (tr) tr.classList.add('open');
+}
+
+// ============================================================
+// FILTER LOGIK
+// ============================================================
+function applyFilters() {
+  let list = SEED.slice();
+  if (state.filters.planposition) list = list.filter(i => i.pos === state.filters.planposition);
+  if (state.filters.status)      list = list.filter(i => i.status === state.filters.status);
+  if (state.filters.ersteller)   list = list.filter(i => i.ersteller === state.filters.ersteller);
+  if (state.filters.tags)        list = list.filter(i => i.tags.includes(state.filters.tags));
+  if (state.filters.zeitraum) {
+    const days = parseInt(state.filters.zeitraum, 10);
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
+    list = list.filter(i => { const date = new Date(); date.setDate(date.getDate() - i.d); return date >= cutoff; });
+  }
+  if (state.search) {
+    const q = state.search.toLowerCase();
+    list = list.filter(i =>
+      i.name.toLowerCase().includes(q) ||
+      i.pos.toLowerCase().includes(q) ||
+      i.ersteller.toLowerCase().includes(q) ||
+      i.tags.some(t => t.toLowerCase().includes(q)) ||
+      i.gewerk.toLowerCase().includes(q)
+    );
+  }
+  return list;
+}
+
+function applySort(list) {
+  const arr = list.slice();
+  switch (state.sort) {
+    case 'neueste':   return arr.sort((a,b) => a.d - b.d);
+    case 'aelteste':  return arr.sort((a,b) => b.d - a.d);
+    case 'name-asc':  return arr.sort((a,b) => a.name.localeCompare(b.name));
+    case 'name-desc': return arr.sort((a,b) => b.name.localeCompare(a.name));
+    case 'status':    return arr.sort((a,b) => STATUS_MAP[a.status].label.localeCompare(STATUS_MAP[b.status].label));
+    default: return arr;
+  }
+}
+
+function groupItems(list) {
+  if (state.group === 'keine') return [{ key: null, items: list }];
+  const map = {};
+  list.forEach(it => { const k = it[state.group] || '(leer)'; (map[k] = map[k] || []).push(it); });
+  const ordered = [];
+  const seen = new Set();
+  list.forEach(it => {
+    const k = it[state.group] || '(leer)';
+    if (!seen.has(k)) { seen.add(k); ordered.push({ key: k, items: map[k] }); }
+  });
+  return ordered;
+}
+
+function groupLabel(key) {
+  if (state.group === 'status') return STATUS_MAP[key] ? STATUS_MAP[key].label : key;
+  return key;
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+  const filtered = applyFilters();
+  const sorted = applySort(filtered);
+  const groups = groupItems(sorted);
+
+  const grid = $('grid');
+  grid.className = `grid view-${state.view}`;
+
+  if (sorted.length === 0) {
+    grid.innerHTML = `<div class="empty-state">
+      <div class="icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      </div>
+      <h3>Keine Treffer für deine Filter</h3>
+      <p>Versuche einen Filter zu lockern oder die Suche anzupassen.</p>
+      <button class="btn-ghost" type="button" onclick="document.getElementById('resetBtn').click()">Alle Filter zurücksetzen</button>
+    </div>`;
+  } else {
+    let html = '';
+    let globalIdx = 0;
+    groups.forEach(g => {
+      if (g.key !== null) {
+        html += `<div style="grid-column:1/-1;padding:10px 0 4px;color:var(--text-secondary);font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;display:flex;align-items:center;gap:8px">
+          ${groupLabel(g.key)} <span style="color:var(--text-muted);font-weight:500">· ${g.items.length}</span>
+          <span style="flex:1;height:1px;background:var(--border-subtle)"></span>
+        </div>`;
+      }
+      g.items.forEach(item => {
+        html += `<div class="card">${thumbHtml(item, globalIdx)}${bodyHtml(item)}</div>`;
+        globalIdx++;
+      });
+    });
+    grid.innerHTML = html;
+  }
+
+  $('resultCount').textContent = sorted.length;
+  $('footerInfo').innerHTML = `<strong>${sorted.length}</strong> von <strong>248</strong> Fotos · sortiert nach <strong>${SORT_LABELS[state.sort]}</strong>${state.group!=='keine' ? ` · gruppiert nach <strong>${GROUP_LABELS[state.group]}</strong>` : ''}`;
+  $('footerFilters').textContent = activeFilterLabels().join(' · ');
+}
+
+function activeFilterLabels() {
+  const out = [];
+  if (state.filters.planposition) out.push(state.filters.planposition);
+  if (state.filters.status)       out.push(STATUS_MAP[state.filters.status].label);
+  if (state.filters.zeitraum)     out.push(ZEITRAUM_SHORT[state.filters.zeitraum]);
+  if (state.filters.ersteller)    out.push(state.filters.ersteller);
+  if (state.filters.tags)         out.push('#' + state.filters.tags);
+  return out;
+}
+
+function updateFilterDisplays() {
+  // Planposition
+  $('display-planposition').textContent = state.filters.planposition || 'Alle';
+  $('trigger-planposition').classList.toggle('active', !!state.filters.planposition);
+  if (state.filters.planposition) $('count-planposition').textContent = SEED.filter(i => i.pos === state.filters.planposition).length;
+  else $('count-planposition').textContent = PLAN_POSITIONEN.length;
+
+  // Status
+  $('display-status').textContent = state.filters.status ? STATUS_MAP[state.filters.status].label : 'Alle';
+  $('trigger-status').classList.toggle('active', !!state.filters.status);
+  if (state.filters.status) $('count-status').textContent = SEED.filter(i => i.status === state.filters.status).length;
+  else $('count-status').textContent = STATUS_OPTIONS.length;
+
+  // Zeitraum (no count badge)
+  $('display-zeitraum').textContent = state.filters.zeitraum ? ZEITRAUM_LABELS[state.filters.zeitraum] : 'Alle';
+  $('trigger-zeitraum').classList.toggle('active', !!state.filters.zeitraum);
+
+  // Ersteller
+  $('display-ersteller').textContent = state.filters.ersteller || 'Alle';
+  $('trigger-ersteller').classList.toggle('active', !!state.filters.ersteller);
+  $('count-ersteller').textContent = state.filters.ersteller ? SEED.filter(i => i.ersteller === state.filters.ersteller).length : ERSTELLER.length;
+
+  // Tags
+  $('display-tags').textContent = state.filters.tags ? '#' + state.filters.tags : 'Alle';
+  $('trigger-tags').classList.toggle('active', !!state.filters.tags);
+  $('count-tags').textContent = state.filters.tags ? SEED.filter(i => i.tags.includes(state.filters.tags)).length : TAGS.length;
+
+  $('display-sort').textContent = SORT_LABELS[state.sort];
+  $('display-group').textContent = GROUP_LABELS[state.group];
+}
+
+function renderChips() {
+  const chips = [];
+  if (state.filters.planposition) chips.push({ key: 'planposition', label: state.filters.planposition, type: 'pos' });
+  if (state.filters.status)       chips.push({ key: 'status', label: STATUS_MAP[state.filters.status].label, type: 'status' });
+  if (state.filters.zeitraum)     chips.push({ key: 'zeitraum', label: ZEITRAUM_SHORT[state.filters.zeitraum], type: 'plain' });
+  if (state.filters.ersteller)    chips.push({ key: 'ersteller', label: state.filters.ersteller, type: 'plain' });
+  if (state.filters.tags)         chips.push({ key: 'tags', label: '#' + state.filters.tags, type: 'plain' });
+
+  const container = $('chipsContainer');
+  if (chips.length === 0) {
+    container.innerHTML = `<span class="muted" style="font-size:12px">— keine Filter aktiv</span>`;
+  } else {
+    container.innerHTML = chips.map(c => {
+      if (c.type === 'pos') return `<span class="chip active">${c.label} <button data-remove="${c.key}" type="button" title="Filter entfernen">×</button></span>`;
+      if (c.type === 'status') return `<span class="chip"><span class="dot"></span>${c.label} <button data-remove="${c.key}" type="button" title="Filter entfernen">×</button></span>`;
+      return `<span class="chip">${c.label} <button data-remove="${c.key}" type="button" title="Filter entfernen">×</button></span>`;
+    }).join('');
+  }
+}
+
+function updateResetButton() {
+  const hasFilter = state.search || Object.values(state.filters).some(Boolean);
+  $('resetBtn').disabled = !hasFilter;
+  $('resetBtn').style.opacity = hasFilter ? '1' : '0.4';
+  $('resetBtn').style.cursor = hasFilter ? 'pointer' : 'not-allowed';
+}
+
+function refresh() {
+  buildAllDropdowns();
+  updateFilterDisplays();
+  renderChips();
+  updateResetButton();
+  render();
+}
+
+// ============================================================
+// EVENTS
+// ============================================================
+function setupEvents() {
+  // Tabs
+  $('tabs').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-tab]');
+    if (!btn) return;
+    $$('#tabs button').forEach(b => b.classList.toggle('is-active', b === btn));
+    state.tab = btn.dataset.tab;
+  });
+
+  // Search
+  const searchInput = $('searchInput');
+  searchInput.addEventListener('input', e => {
+    state.search = e.target.value;
+    updateResetButton();
+    render();
+  });
+
+  // Dropdown triggers
+  const triggers = [
+    'planposition', 'status', 'zeitraum', 'ersteller', 'tags', 'sort', 'group'
+  ];
+  triggers.forEach(key => {
+    const btn = $('trigger-' + key);
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const dd = $('dropdown-' + key);
+      const wasOpen = dd.classList.contains('open');
+      closeAllDropdowns();
+      if (!wasOpen) openDropdown('dropdown-' + key);
+    });
+  });
+
+  // Click outside closes
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.dd-wrap')) closeAllDropdowns();
+  });
+
+  // Esc
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeAllDropdowns();
+  });
+
+  // ⌘K / Ctrl+K focuses search
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      searchInput.focus();
+    }
+  });
+
+  // View switcher
+  $('viewSwitcher').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-view]');
+    if (!btn) return;
+    $$('#viewSwitcher button').forEach(b => b.classList.toggle('is-active', b === btn));
+    state.view = btn.dataset.view;
+    render();
+  });
+
+  // Preview switcher
+  $('previewSwitcher').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-preview]');
+    if (!btn) return;
+    $$('#previewSwitcher button').forEach(b => b.classList.toggle('is-active', b === btn));
+    state.preview = btn.dataset.preview;
+  });
+
+  // Zoom
+  $('zoomIn').addEventListener('click', () => {
+    state.zoom = state.zoom === 's' ? 'm' : 'l';
+    applyZoom();
+  });
+  $('zoomOut').addEventListener('click', () => {
+    state.zoom = state.zoom === 'l' ? 'm' : 's';
+    applyZoom();
+  });
+
+  // Fullscreen (hide device chrome)
+  $('fullscreen').addEventListener('click', () => {
+    state.fullscreen = !state.fullscreen;
+    const app = $('app');
+    if (state.fullscreen) {
+      app.style.maxWidth = '100%';
+      app.style.borderRadius = '0';
+      app.style.border = 'none';
+    } else {
+      app.style.maxWidth = '';
+      app.style.borderRadius = '';
+      app.style.border = '';
+    }
+  });
+
+  // Chip remove
+  $('chipsContainer').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-remove]');
+    if (!btn) return;
+    state.filters[btn.dataset.remove] = null;
+    refresh();
+  });
+
+  // Reset
+  $('resetBtn').addEventListener('click', () => {
+    if ($('resetBtn').disabled) return;
+    state.search = '';
+    searchInput.value = '';
+    Object.keys(state.filters).forEach(k => state.filters[k] = null);
+    refresh();
+  });
+}
+
+function applyZoom() {
+  const grid = $('grid');
+  if (!grid) return;
+  if (state.zoom === 's') grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(110px, 1fr))';
+  else if (state.zoom === 'l') grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(220px, 1fr))';
+  else grid.style.gridTemplateColumns = '';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  buildAllDropdowns();
+  updateFilterDisplays();
+  renderChips();
+  updateResetButton();
+  setupEvents();
+  render();
+}
+
+init();
+</script>
+
+</body>
+</html>

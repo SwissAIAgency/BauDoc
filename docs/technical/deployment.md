@@ -2,31 +2,28 @@
 
 ## Status
 
-Phase-1-Planungsdokument. Es gibt noch keine deploybare Anwendung.
+Phase-2-Planungsbaseline. Es gibt noch keine deploybare Anwendung.
+
+## Lokale Entwicklung
+
+Geplant:
+
+- Laravel API in `backend/`.
+- Vue 3 PWA in `frontend/`.
+- Docker Compose für PostgreSQL, Redis und MinIO.
+- `.env.example` als Vorlage ohne echte Secrets.
 
 ## Zielumgebung
 
 - Hosting in der Schweiz oder EU prüfen.
 - HTTPS im produktiven Betrieb erzwingen.
-- Backend, Frontend, PostgreSQL, Redis, Queue Worker und Object Storage getrennt planbar halten.
-
-## Lokale Entwicklung
-
-Voraussichtlich benötigt:
-
-- PHP und Composer.
-- Node.js und Paketmanager.
-- PostgreSQL.
-- Redis.
-- MinIO oder S3-kompatibler lokaler Storage.
-
-Konkrete Versionen werden nach Technologieentscheidung dokumentiert.
+- Backend, Frontend, PostgreSQL, Redis, Queue Worker und Object Storage getrennt betreibbar halten.
 
 ## Umgebungskonfiguration
 
-- `.env.example` enthält nur Platzhalter.
 - Produktive Secrets nicht ins Repository.
 - Datenbank-, Redis-, Storage- und Mail-Konfiguration über Umgebungsvariablen.
+- Object Storage immer privat konfigurieren.
 
 ## Betrieb
 
@@ -39,7 +36,7 @@ Konkrete Versionen werden nach Technologieentscheidung dokumentiert.
 
 Zu planen:
 
-- Health Check.
+- API Health Check.
 - Queue-Fehler.
 - Upload-Fehler.
 - Storage-Erreichbarkeit.
@@ -53,3 +50,4 @@ Zu planen:
 - Datenschutz Review.
 - Keine offenen kritischen Bugs.
 - Dokumentation aktuell.
+- Keine echten Secrets im Repository.

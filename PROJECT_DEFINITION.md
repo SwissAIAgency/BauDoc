@@ -139,11 +139,18 @@ Die Software soll Baufortschritte strukturiert erfassen, verorten, schützen, fi
 
 ## Offene Fragen
 
-- Frontend-Stack finalisieren: Vue 3, React oder Inertia.
 - Lizenzmodell festlegen.
 - Audit-Retention final bestimmen.
 - IP-Adresse und User-Agent im Audit rechtlich und fachlich bewerten.
 - Hosting Schweiz oder EU konkret entscheiden.
+- Produktive Anbieter für Mail und Object Storage auswählen.
+
+## Phase-2-Entscheidungen
+
+- Frontend-Stack: Vue 3 + Vite + TypeScript als eigenständige PWA.
+- Auth: Laravel Sanctum für First-Party-PWA.
+- Lokale Dienste: PostgreSQL, Redis und MinIO über Docker Compose planen.
+- Inertia wird nicht verwendet, solange API-first gilt.
 
 ## Risiken
 

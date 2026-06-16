@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="de-CH" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BauDoc · Timeline-Varianten für die Galerie</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       DESIGN-TOKENS (gem. UI_STANDARDS.md)
+       ============================================================ */
+    :root {
+      /* Pflicht-Farben aus UI_STANDARDS.md */
+      --bg-page: #0f1720;
+      --bg-panel: #151f2b;
+      --bg-panel-2: #1c2938;
+      --text-hi: #f3f6f9;
+      --text-mid: #aab7c4;
+      --text-low: #6c7e8e;
+      --border: #2c3b4d;
+      --border-strong: #3a4d63;
+      --accent: #41b6c4;
+      --accent-hover: #5ec9d6;
+      --accent-soft: rgba(65, 182, 196, 0.16);
+      --secondary: #7c8cff;
+      --success: #5dd39e;
+      --warn: #f5c768;
+      --danger: #ff7b7b;
+
+      /* Abstaende / Radien */
+      --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px; --s-6: 24px; --s-8: 32px;
+      --r-sm: 6px; --r-md: 8px; --r-lg: 12px; --r-pill: 999px;
+
+      /* Typo */
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg-page);
+      color: var(--text-hi);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============================================================
+       PAGE-CHROME
+       ============================================================ */
+    .page { max-width: 1480px; margin: 0 auto; padding: var(--s-6) var(--s-6) var(--s-8); }
+    .page-head {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      flex-wrap: wrap; gap: var(--s-3);
+      padding-bottom: var(--s-4);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--s-6);
+    }
+    .page-head-title {
+      font-size: 22px; font-weight: 600; letter-spacing: -0.01em;
+      margin: 0 0 4px;
+    }
+    .page-head-sub {
+      color: var(--text-mid); font-size: 13px; margin: 0; max-width: 720px; line-height: 1.5;
+    }
+    .legend {
+      display: inline-flex; align-items: center; gap: var(--s-3);
+      font-size: 12px; color: var(--text-mid);
+    }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+    /* ============================================================
+       VARIANTEN-GRID
+       ============================================================ */
+    .variants {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--s-5);
+    }
+    @media (max-width: 1100px) { .variants { grid-template-columns: 1fr; } }
+
+    .variant {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .variant-head {
+      display: flex; align-items: center; gap: var(--s-3);
+      padding: var(--s-4);
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(65, 182, 196, 0.04), transparent);
+    }
+    .variant-num {
+      width: 28px; height: 28px;
+      border-radius: var(--r-sm);
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+      flex-shrink: 0;
+    }
+    .variant-title { font-size: 14px; font-weight: 600; margin: 0; }
+    .variant-tag {
+      font-size: 11px; font-weight: 500;
+      color: var(--text-low);
+      margin-left: auto; padding: 2px 8px;
+      border: 1px solid var(--border); border-radius: var(--r-pill);
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .variant-body {
+      padding: var(--s-4);
+      display: flex; flex-direction: column; gap: var(--s-3);
+      flex: 1; min-height: 360px;
+    }
+    .variant-meta {
+      display: flex; gap: var(--s-3); flex-wrap: wrap;
+      font-size: 11.5px; color: var(--text-mid);
+      padding: var(--s-3); background: var(--bg-panel-2);
+      border-radius: var(--r-sm); border: 1px solid var(--border);
+    }
+    .variant-meta b { color: var(--text-hi); font-weight: 600; }
+    .variant-actions {
+      display: flex; gap: var(--s-2); flex-wrap: wrap;
+      padding: var(--s-3) var(--s-4);
+      border-top: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.12);
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 28px; padding: 0 12px;
+      background: transparent; border: 1px solid var(--border-strong);
+      color: var(--text-hi); border-radius: var(--r-sm);
+      font-family: var(--font-sans); font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: 120ms ease;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn--primary { background: var(--accent); border-color: var(--accent); color: #0a1216; font-weight: 600; }
+    .btn--primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: #0a1216; }
+    .btn svg { width: 12px; height: 12px; }
+
+    /* ============================================================
+       SHARED TIMELINE STYLES
+       ============================================================ */
+    .tl-demo { display: flex; flex-direction: column; gap: var(--s-3); flex: 1; }
+    .tl-breadcrumb {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--text-mid);
+    }
+    .tl-breadcrumb b { color: var(--text-hi); font-weight: 600; }
+    .tl-sep { color: var(--text-low); }
+
+    .tl-window {
+      background: var(--bg-panel-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: var(--s-3);
+      position: relative;
+    }
+    .tl-window-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: var(--s-2);
+    }
+    .tl-window-title {
+      font-size: 12px; font-weight: 600; color: var(--text-hi);
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .tl-window-title .legend-dot { background: var(--accent); }
+    .tl-window-meta { font-family: var(--font-mono); font-size: 11px; color: var(--text-low); }
+
+    /* Aktiver Zeitraum / "Now"-Marker */
+    .tl-active-info {
+      display: flex; align-items: center; gap: var(--s-2);
+      font-size: 11.5px; color: var(--text-mid);
+      padding: 6px 10px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(65, 182, 196, 0.3);
+      border-radius: var(--r-sm);
+    }
+    .tl-active-info b { color: var(--accent); font-weight: 600; }
+    .tl-active-info code {
+      font-family: var(--font-mono); font-size: 10.5px;
+      color: var(--text-hi);
+      background: rgba(0, 0, 0, 0.25); padding: 1px 5px; border-radius: 3px;
+    }
+
+    /* ============================================================
+       VARIANTE 1: HORIZONTAL SCRUBBER
+       (kompakte Zeitleiste unter dem Filter, mit Range-Slider-Feel)
+       ============================================================ */
+    .scrubber { position: relative; padding: 8px 12px 14px; }
+    .scrubber-track {
+      position: relative;
+      height: 56px;
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      overflow: hidden;
+    }
+    /* Hitze-Bars (Bauaktivitaets-Dichte pro Tag) */
+    .scrubber-bars {
+      position: absolute; left: 0; right: 0; bottom: 0; top: 0;
+      display: flex; align-items: flex-end;
+      gap: 1px; padding: 4px 0;
+    }
+    .scrubber-bars span {
+      flex: 1;
+      background: linear-gradient(180deg, var(--accent) 0%, rgba(65, 182, 196, 0.18) 100%);
+      border-radius: 1px 1px 0 0;
+      min-height: 2px;
+    }
+    .scrubber-bars span.muted { background: linear-gradient(180deg, var(--text-low) 0%, rgba(108, 126, 142, 0.18) 100%); }
+
+    /* Monats-Ticks */
+    .scrubber-ticks {
+      display: flex; justify-content: space-between;
+      margin-top: 6px;
+      font-size: 10.5px; color: var(--text-low);
+      font-family: var(--font-mono);
+    }
+
+    /* Range-Slider Overlay (zwei Griffe) */
+    .scrubber-range {
+      position: absolute;
+      top: 0; bottom: 0;
+      background: rgba(65, 182, 196, 0.12);
+      border-left: 2px solid var(--accent);
+      border-right: 2px solid var(--accent);
+      pointer-events: none;
+    }
+    .scrubber-handle {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 14px;
+      background: var(--accent);
+      cursor: ew-resize;
+      pointer-events: auto;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .scrubber-handle::after {
+      content: ""; width: 2px; height: 22px;
+      background: #0a1216; border-radius: 1px;
+    }
+    .scrubber-handle--left { border-radius: 4px 0 0 4px; transform: translateX(-7px); }
+    .scrubber-handle--right { border-radius: 0 4px 4px 0; transform: translateX(-7px); }
+
+    /* Jetzt-Marker (vertikale Linie) */
+    .scrubber-now {
+      position: absolute; top: 0; bottom: 0;
+      width: 2px; background: var(--warn);
+      box-shadow: 0 0 0 2px rgba(245, 199, 104, 0.18);
+    }
+    .scrubber-now::after {
+      content: "Heute";
+      position: absolute; top: -18px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px; font-weight: 600; color: var(--warn);
+      white-space: nowrap;
+    }
+
+    /* Preset-Chips */
+    .scrubber-presets {
+      display: flex; gap: 6px; margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .preset-chip {
+      height: 24px; padding: 0 10px;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-mid); border-radius: var(--r-pill);
+      font-size: 11.5px; font-weight: 500;
+      cursor: pointer;
+    }
+    .preset-chip:hover { color: var(--text-hi); border-color: var(--text-low); }
+    .preset-chip--active { background: var(--accent); border-color: var(--accent); color: #0a1216; }
+
+    /* ============================================================
+       VARIANTE 2: VERTIKALE SPALTE (linke Sidebar, in Galerie klappbar)
+       ============================================================ */
+    .vlayout { display: grid; grid-template-columns: 220px 1fr; gap: var(--s-3); }
+    @media (max-width: 700px) { .vlayout { grid-template-columns: 1fr; } }
+
+    .vcol {
+      background: var(--bg-panel-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: var(--s-3);
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .vcol-year {
+      font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-low);
+      padding: 8px 8px 4px;
+    }
+    .vcol-year:first-child { padding-top: 4px; }
+    .vcol-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 8px;
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      font-size: 12.5px;
+      color: var(--text-mid);
+      position: relative;
+    }
+    .vcol-item:hover { background: rgba(65, 182, 196, 0.08); color: var(--text-hi); }
+    .vcol-item--active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .vcol-item--active::before {
+      content: ""; position: absolute; left: 0; top: 4px; bottom: 4px;
+      width: 2px; background: var(--accent); border-radius: 2px;
+    }
+    .vcol-item-count {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-low);
+    }
+    .vcol-item--active .vcol-item-count { color: var(--accent); }
+    .vcol-pill {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 600; font-family: var(--font-mono);
+      background: var(--bg-page);
+      color: var(--text-mid);
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+    }
+    .vcol-item--active .vcol-pill { background: var(--accent); color: #0a1216; border-color: var(--accent); }
+
+    .vcol-preview {
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: var(--s-3);
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .vcol-preview-head {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; color: var(--text-mid);
+    }
+    .vcol-preview-head b { color: var(--text-hi); }
+    .vcol-preview-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+    }
+    .vcol-preview-grid .vd-gallery-thumb {
+      aspect-ratio: 1; border-radius: 4px;
+      background: var(--bg-raised);
+    }
+    .vcol-preview-grid .vd-gallery-thumb--photo {
+      background: linear-gradient(135deg, #2a3a4a, #1c2938);
+    }
+    .vcol-preview-grid .vd-gallery-thumb--plan {
+      background: var(--bg-base);
+      position: relative;
+    }
+    .vcol-preview-grid .vd-gallery-thumb--plan::after {
+      content: ""; position: absolute; inset: 4px;
+      border: 1px solid var(--accent); border-radius: 1px;
+    }
+    .vcol-preview-grid .vd-gallery-thumb--video {
+      background: radial-gradient(circle at 50% 50%, #2a3a4a, #0f1720);
+    }
+    .vcol-more {
+      font-size: 11.5px; color: var(--accent);
+      text-align: center; padding-top: 4px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ============================================================
+       VARIANTE 3: CARD-STACK (eigenstaendige Bereich, vertikal scrollend)
+       ============================================================ */
+    .stack { display: flex; flex-direction: column; gap: var(--s-2); max-height: 300px; overflow-y: auto; padding-right: 4px; }
+    .stack::-webkit-scrollbar { width: 6px; }
+    .stack::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+    .stack-month {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 10px;
+      font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-low);
+      position: sticky; top: 0;
+      background: var(--bg-panel-2);
+      z-index: 1;
+    }
+    .stack-month-line { flex: 1; height: 1px; background: var(--border); }
+
+    .stack-row {
+      display: grid;
+      grid-template-columns: 56px 1fr 90px;
+      gap: var(--s-3);
+      align-items: center;
+      padding: 8px 10px;
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      transition: 120ms ease;
+    }
+    .stack-row:hover { border-color: var(--accent); background: rgba(65, 182, 196, 0.05); }
+    .stack-day {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 4px 6px;
+      background: var(--bg-panel-2);
+      border-radius: var(--r-sm);
+    }
+    .stack-day-num { font-size: 16px; font-weight: 600; color: var(--text-hi); line-height: 1; }
+    .stack-day-dow { font-size: 9.5px; color: var(--text-low); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+    .stack-day--today .stack-day-num { color: var(--accent); }
+    .stack-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .stack-title {
+      font-size: 12.5px; color: var(--text-hi); font-weight: 500;
+      display: flex; align-items: center; gap: 6px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .stack-title .vd-pill { font-size: 10px; height: 18px; padding: 0 6px; }
+    .stack-sub { font-size: 11px; color: var(--text-low); display: flex; align-items: center; gap: 8px; }
+    .stack-sub-sep { color: var(--border-strong); }
+    .stack-thumbs { display: flex; gap: 4px; justify-content: flex-end; }
+    .stack-thumbs .vd-gallery-thumb {
+      width: 22px; height: 22px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .stack-thumbs .vd-gallery-thumb--photo { background: linear-gradient(135deg, #2a3a4a, #1c2938); }
+    .stack-thumbs .vd-gallery-thumb--plan { background: var(--bg-base); position: relative; }
+    .stack-thumbs .vd-gallery-thumb--plan::after { content: ""; position: absolute; inset: 2px; border: 1px solid var(--accent); }
+    .stack-thumbs .vd-gallery-thumb--video { background: radial-gradient(circle at 50% 50%, #2a3a4a, #0f1720); position: relative; }
+    .stack-thumbs .vd-gallery-thumb--video::before {
+      content: ""; position: absolute; inset: 0; margin: auto;
+      width: 0; height: 0;
+      border-left: 5px solid var(--accent);
+      border-top: 3px solid transparent; border-bottom: 3px solid transparent;
+    }
+    .stack-thumbs-more {
+      width: 22px; height: 22px;
+      border-radius: 4px;
+      background: var(--bg-raised);
+      color: var(--text-mid);
+      font-size: 9.5px; font-family: var(--font-mono);
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+
+    /* ============================================================
+       VARIANTE 4: MINI-MAP (subtile Heatmap-Zeile + Dropdown)
+       ============================================================ */
+    .minimap-wrap { display: flex; flex-direction: column; gap: var(--s-3); }
+
+    .minimap-trigger {
+      display: flex; align-items: center; gap: var(--s-2);
+      padding: 8px 12px;
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      cursor: pointer;
+      font-size: 12.5px;
+    }
+    .minimap-trigger:hover { border-color: var(--accent); }
+    .minimap-trigger-label { color: var(--text-low); }
+    .minimap-trigger-value { color: var(--text-hi); font-weight: 600; }
+    .minimap-trigger-sep { color: var(--text-low); margin: 0 2px; }
+    .minimap-trigger-chev { margin-left: auto; color: var(--text-low); }
+    .minimap-trigger-chev svg { width: 14px; height: 14px; transition: transform 200ms ease; }
+    .minimap-trigger[aria-expanded="true"] .minimap-trigger-chev svg { transform: rotate(180deg); }
+
+    .minimap-rail {
+      position: relative;
+      height: 28px;
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      display: flex;
+      gap: 1px;
+      padding: 3px;
+    }
+    .minimap-cell {
+      flex: 1;
+      border-radius: 1px;
+      background: rgba(65, 182, 196, 0.08);
+      position: relative;
+    }
+    .minimap-cell[data-density="1"] { background: rgba(65, 182, 196, 0.28); }
+    .minimap-cell[data-density="2"] { background: rgba(65, 182, 196, 0.55); }
+    .minimap-cell[data-density="3"] { background: var(--accent); }
+    .minimap-cell[data-empty="1"] { background: rgba(108, 126, 142, 0.10); }
+    .minimap-cell[data-current="1"] { box-shadow: inset 0 0 0 1.5px var(--warn); }
+
+    .minimap-axis {
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: var(--text-low); font-family: var(--font-mono);
+      margin-top: 4px;
+    }
+
+    /* Erweiterter Picker (Detail-Zeitleiste) */
+    .minimap-detail {
+      background: var(--bg-panel-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: var(--s-3);
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .minimap-detail-head {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .minimap-detail-title { font-size: 12.5px; font-weight: 600; }
+    .minimap-detail-sub { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-low); }
+    .minimap-detail-ticks {
+      display: grid; grid-template-columns: repeat(12, 1fr);
+      gap: 1px; height: 36px;
+    }
+    .minimap-detail-tick {
+      background: rgba(65, 182, 196, 0.10);
+      border-radius: 2px 2px 0 0;
+      align-self: end;
+    }
+    .minimap-detail-months {
+      display: grid; grid-template-columns: repeat(12, 1fr);
+      font-size: 9.5px; color: var(--text-low);
+      text-align: center; font-family: var(--font-mono);
+    }
+    .minimap-detail-scale {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 10.5px; color: var(--text-low);
+      justify-content: flex-end;
+    }
+    .minimap-detail-scale-bar {
+      display: inline-flex; gap: 2px;
+    }
+    .minimap-detail-scale-bar span {
+      width: 14px; height: 8px;
+      background: rgba(65, 182, 196, 0.15);
+      border-radius: 1px;
+    }
+    .minimap-detail-scale-bar span:nth-child(2) { background: rgba(65, 182, 196, 0.40); }
+    .minimap-detail-scale-bar span:nth-child(3) { background: rgba(65, 182, 196, 0.70); }
+    .minimap-detail-scale-bar span:nth-child(4) { background: var(--accent); }
+
+    /* ============================================================
+       EINKLAPP-/AUSKLAPP-VERHALTEN (alle Varianten)
+       ============================================================ */
+    /* Wenn der Container 'is-collapsed' hat, wird der Body-Inhalt
+       ausgeblendet. Der Header bleibt sichtbar + bekommt einen
+       gelben Wieder-Einklappen-Hinweis. */
+    .variant.is-collapsed .variant-body {
+      display: none;
+    }
+    .variant.is-collapsed .variant-actions {
+      border-top: none;
+      background: rgba(245, 199, 104, 0.08);
+    }
+    .variant.is-collapsed .variant-actions .btn:not(.btn--reopen) {
+      display: none;
+    }
+    .variant.is-collapsed .btn--reopen {
+      background: rgba(245, 199, 104, 0.12);
+      border-color: var(--warn);
+      color: var(--warn);
+      width: 100%;
+      justify-content: center;
+    }
+    .variant.is-collapsed .btn--reopen:hover {
+      background: rgba(245, 199, 104, 0.20);
+    }
+    .variant.is-collapsed .btn--reopen::before {
+      content: "▴";
+      font-size: 10px; line-height: 1;
+    }
+    .variant.is-collapsed .btn--reopen::after {
+      content: "Ausklappen, um Vorschau zu sehen";
+      font-size: 12px; font-weight: 500;
+    }
+    .variant:not(.is-collapsed) .btn--reopen {
+      display: none;
+    }
+
+    /* Schmaler "Eingeklappt"-Hinweis-Streifen oben am Body */
+    .variant.is-collapsed {
+      position: relative;
+    }
+    .collapsed-hint {
+      display: none;
+      padding: 24px var(--s-4);
+      text-align: center;
+      color: var(--text-low);
+      font-size: 12px;
+    }
+    .variant.is-collapsed .collapsed-hint {
+      display: block;
+    }
+    .collapsed-hint-icon {
+      display: block;
+      margin: 0 auto 6px;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: rgba(245, 199, 104, 0.14);
+      color: var(--warn);
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Hinweis-Pille im Body (welche Taste klickt) */
+    .collapse-hint {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--text-low);
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.18);
+      border-radius: var(--r-pill);
+    }
+    .collapse-hint kbd {
+      font-family: var(--font-mono); font-size: 10px;
+      background: var(--bg-page); border: 1px solid var(--border);
+      padding: 1px 5px; border-radius: 3px; color: var(--text-hi);
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <header class="page-head">
+      <div>
+        <h1 class="page-head-title">Galerie · Timeline-Varianten</h1>
+        <p class="page-head-sub">
+          Vier Konzepte, um den zeitlichen Verlauf der Baufortschritts-Dokumentation
+          sichtbar zu machen. Jede Variante ist eigenstaendig einklappbar.
+          <b>Zum Einklappen:</b> Button "Einklappen" im Footer der Variante.
+          <b>Zum Ausklappen:</b> der gelbe "Ausklappen"-Streifen erscheint am unteren Rand
+          (volle Breite, gut sichtbar).
+        </p>
+      </div>
+      <div class="legend">
+        <span class="legend-dot" style="background: var(--accent);"></span> Medien
+        <span class="legend-dot" style="background: var(--warn);"></span> Heute
+        <span class="legend-dot" style="background: var(--text-low);"></span> Leer
+      </div>
+    </header>
+
+    <main class="variants">
+
+      <!-- ============================================================
+           VARIANTE 1 · HORIZONTAL SCRUBBER
+           ============================================================ -->
+      <section class="variant" id="v1">
+        <header class="variant-head">
+          <span class="variant-num">01</span>
+          <h2 class="variant-title">Horizontaler Scrubber</h2>
+          <span class="variant-tag">Unter Filter</span>
+        </header>
+
+        <div class="variant-body">
+          <p class="tl-breadcrumb">
+            <b>Bahnhofstrasse 12</b>
+            <span class="tl-sep">›</span>
+            <span>Gewerk Rohbau</span>
+            <span class="tl-sep">›</span>
+            <span>Mai 2026</span>
+          </p>
+
+          <div class="tl-window">
+            <div class="tl-window-head">
+              <span class="tl-window-title"><span class="legend-dot"></span> Zeitraum</span>
+              <span class="tl-window-meta">01.01.2026 – 13.06.2026</span>
+            </div>
+
+            <div class="scrubber">
+              <div class="scrubber-track">
+                <div class="scrubber-bars" id="v1-bars" aria-hidden="true"></div>
+                <!-- Range-Slider Overlay (visuell) -->
+                <div class="scrubber-range" style="left: 28%; right: 12%;"></div>
+                <div class="scrubber-handle scrubber-handle--left" style="left: 28%;" title="Start"></div>
+                <div class="scrubber-handle scrubber-handle--right" style="left: 88%;" title="Ende"></div>
+                <!-- Heute-Marker -->
+                <div class="scrubber-now" style="left: 92%;"></div>
+              </div>
+              <div class="scrubber-ticks">
+                <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span>
+                <span>Mai</span><span>Jun</span><span>Jul</span><span>Aug</span>
+                <span>Sep</span><span>Okt</span><span>Nov</span><span>Dez</span>
+              </div>
+            </div>
+
+            <div class="scrubber-presets">
+              <button class="preset-chip" type="button">Letzte 7 Tage</button>
+              <button class="preset-chip" type="button">Letzte 30 Tage</button>
+              <button class="preset-chip preset-chip--active" type="button">Aktives Quartal</button>
+              <button class="preset-chip" type="button">Gesamtes Projekt</button>
+              <button class="preset-chip" type="button">Custom…</button>
+            </div>
+          </div>
+
+          <div class="tl-active-info">
+            <span class="legend-dot" style="background: var(--accent);"></span>
+            Auswahl: <code>01.04.2026 – 13.06.2026</code> &nbsp;·&nbsp;
+            <b>184 Medien</b> in diesem Zeitraum
+          </div>
+        </div>
+
+        <div class="collapsed-hint">
+          <span class="collapsed-hint-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+          Variante eingeklappt – klicke unten auf "Ausklappen"
+        </div>
+
+        <footer class="variant-actions">
+          <span class="collapse-hint">
+            <kbd>Esc</kbd> klappt ein · <kbd>Shift+Esc</kbd> klappt wieder aus
+          </span>
+          <button class="btn" type="button" data-action="reset">Zuruecksetzen</button>
+          <button class="btn btn--primary" type="button" data-action="apply" style="margin-left: auto;">Anwenden</button>
+          <button class="btn" type="button" data-action="collapse">Einklappen ▾</button>
+          <button class="btn btn--reopen" type="button" data-action="reopen" aria-label="Variante 1 ausklappen"></button>
+        </footer>
+      </section>
+
+      <!-- ============================================================
+           VARIANTE 2 · VERTIKALE SPALTE
+           ============================================================ -->
+      <section class="variant" id="v2">
+        <header class="variant-head">
+          <span class="variant-num">02</span>
+          <h2 class="variant-title">Vertikale Zeit-Spalte</h2>
+          <span class="variant-tag">Sidebar links</span>
+        </header>
+
+        <div class="variant-body">
+          <p class="tl-breadcrumb">
+            <b>Gesamte Galerie</b>
+            <span class="tl-sep">›</span>
+            <span>1'284 Medien</span>
+          </p>
+
+          <div class="vlayout">
+            <aside class="vcol" aria-label="Zeitliche Auswahl">
+              <div class="vcol-year">2026</div>
+              <div class="vcol-item vcol-item--active" tabindex="0">
+                <span class="vcol-pill">JUN</span>
+                <span>Juni</span>
+                <span class="vcol-item-count">14</span>
+              </div>
+              <div class="vcol-item" tabindex="0">
+                <span class="vcol-pill">MAI</span>
+                <span>Mai</span>
+                <span class="vcol-item-count">112</span>
+              </div>
+              <div class="vcol-item" tabindex="0">
+                <span class="vcol-pill">APR</span>
+                <span>April</span>
+                <span class="vcol-item-count">58</span>
+              </div>
+              <div class="vcol-item" tabindex="0">
+                <span class="vcol-pill">MAR</span>
+                <span>Maerz</span>
+                <span class="vcol-item-count">76</span>
+              </div>
+              <div class="vcol-item" tabindex="0">
+                <span class="vcol-pill">FEB</span>
+                <span>Februar</span>
+                <span class="vcol-item-count">44</span>
+              </div>
+              <div class="vcol-item" tabindex="0">
+                <span class="vcol-pill">JAN</span>
+                <span>Januar</span>
+                <span class="vcol-item-count">22</span>
+              </div>
+              <div class="vcol-year" style="margin-top: 8px;">2025</div>
+              <div class="vcol-item" tabindex="0">
+                <span class="vcol-pill">DEZ</span>
+                <span>Dezember</span>
+                <span class="vcol-item-count">31</span>
+              </div>
+              <div class="vcol-item" tabindex="0">
+                <span class="vcol-pill">NOV</span>
+                <span>November</span>
+                <span class="vcol-item-count">48</span>
+              </div>
+            </aside>
+
+            <div class="vcol-preview">
+              <div class="vcol-preview-head">
+                <b>Juni 2026</b>
+                <span>14 Medien</span>
+              </div>
+              <div class="vcol-preview-grid">
+                <div class="vd-gallery-thumb vd-gallery-thumb--photo"></div>
+                <div class="vd-gallery-thumb vd-gallery-thumb--photo"></div>
+                <div class="vd-gallery-thumb vd-gallery-thumb--plan"></div>
+                <div class="vd-gallery-thumb vd-gallery-thumb--video"></div>
+                <div class="vd-gallery-thumb vd-gallery-thumb--photo"></div>
+                <div class="vd-gallery-thumb vd-gallery-thumb--plan"></div>
+                <div class="vd-gallery-thumb vd-gallery-thumb--photo"></div>
+                <div class="vd-gallery-thumb vd-gallery-thumb--photo"></div>
+              </div>
+              <div class="vcol-more">Alle 14 Medien anzeigen →</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="collapsed-hint">
+          <span class="collapsed-hint-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+          Vertikale Spalte eingeklappt – unten "Ausklappen" klicken
+        </div>
+
+        <footer class="variant-actions">
+          <span class="collapse-hint">
+            Sidebar bleibt sticky · Mobile: hinter Burger-Menue
+          </span>
+          <button class="btn" type="button">Heute</button>
+          <button class="btn" type="button" data-action="collapse" style="margin-left: auto;">Einklappen ▾</button>
+          <button class="btn btn--reopen" type="button" data-action="reopen" aria-label="Variante 2 ausklappen"></button>
+        </footer>
+      </section>
+
+      <!-- ============================================================
+           VARIANTE 3 · CARD-STACK
+           ============================================================ -->
+      <section class="variant" id="v3">
+        <header class="variant-head">
+          <span class="variant-num">03</span>
+          <h2 class="variant-title">Chronologischer Card-Stack</h2>
+          <span class="variant-tag">Eigener Tab</span>
+        </header>
+
+        <div class="variant-body">
+          <p class="tl-breadcrumb">
+            <b>Bahnhofstrasse 12</b>
+            <span class="tl-sep">›</span>
+            <span>Verlauf der letzten 14 Tage</span>
+          </p>
+
+          <div class="tl-active-info">
+            <span class="legend-dot" style="background: var(--accent);"></span>
+            Sortiert nach <b>Aufnahmedatum</b> · neueste zuerst
+          </div>
+
+          <div class="stack" role="list">
+
+            <div class="stack-month">
+              JUNI 2026 <span class="stack-month-line"></span>
+            </div>
+
+            <div class="stack-row" role="listitem">
+              <div class="stack-day stack-day--today">
+                <span class="stack-day-num">13</span>
+                <span class="stack-day-dow">Fr</span>
+              </div>
+              <div class="stack-body">
+                <span class="stack-title">
+                  <span class="vd-pill vd-pill--primary">Foto</span>
+                  Betonage Decke UG – Suedfluegel
+                </span>
+                <span class="stack-sub">
+                  <span>von M. Brunner</span>
+                  <span class="stack-sub-sep">·</span>
+                  <span>14:32</span>
+                  <span class="stack-sub-sep">·</span>
+                  <span>3 Medien</span>
+                </span>
+              </div>
+              <div class="stack-thumbs">
+                <div class="vd-gallery-thumb vd-gallery-thumb--photo"></div>
+                <div class="vd-gallery-thumb vd-gallery-thumb--photo"></div>
+                <div class="vd-gallery-thumb vd-gallery-thumb--video"></div>
+              </div>
+            </div>
+
+            <div class="stack-row" role="listitem">
+              <div class="stack-day">
+                <span class="stack-day-num">12</span>
+                <span class="stack-day-dow">Do</span>
+              </div>
+              <div class="stack-body">
+                <span class="stack-title">
+                  <span class="vd-pill vd-pill--info">Plan</span>
+                  Plan v3 freigegeben – Grundriss EG
+                </span>
+                <span class="stack-sub">
+                  <span>von T. Hofer</span>
+                  <span class="stack-sub-sep">·</span>
+                  <span>09:15</span>
+                  <span class="stack-sub-sep">·</span>
+                  <span>2 Plaene</span>
+                </span>
+              </div>
+              <div class="stack-thumbs">
+                <div class="vd-gallery-thumb vd-gallery-thumb--plan"></div>
+                <div class="vd-gallery-thumb vd-gallery-thumb--plan"></div>
+              </div>
+            </div>
+
+            <div class="stack-row" role="listitem">
+              <div class="stack-day">
+                <span class="stack-day-num">10</span>
+                <span class="stack-day-dow">Di</span>
+              </div>
+              <div class="stack-body">
+                <span class="stack-title">
+                  <span class="vd-pill vd-pill--primary">Foto</span>
+                  Bewehrungsabnahme – Treppenhaus Kern 2
+                </span>
+                <span class="stack-sub">
+                  <span>von A. Keller</span>
+                  <span class="stack-sub-sep">·</span>
+                  <span>11:48</span>
+                  <span class="stack-sub-sep">·</span>
+                  <span>7 Medien</span>
+                </span>
+              </div>
+              <div class="stack-thumbs">
+                <div class="vd-gallery-thumb vd-gallery-thumb--photo"></div>
+                <div class="vd-gallery-thumb vd-gallery-thumb--photo"></div>
+                <div class="vd-gallery-thumb vd-gallery-thumb--photo"></div>
+                <div class="stack-thumbs-more">+4</div>
+              </div>
+            </div>
+
+            <div class="stack-month">
+              MAI 2026 <span class="stack-month-line"></span>
+            </div>
+
+            <div class="stack-row" role="listitem">
+              <div class="stack-day">
+                <span class="stack-day-num">28</span>
+                <span class="stack-day-dow">Do</span>
+              </div>
+              <div class="stack-body">
+                <span class="stack-title">
+                  <span class="vd-pill vd-pill--primary">Foto</span>
+                  Schalungsarbeiten – Aussenwand Nord
+                </span>
+                <span class="stack-sub">
+                  <span>von M. Brunner</span>
+                  <span class="stack-sub-sep">·</span>
+                  <span>16:02</span>
+                </span>
+              </div>
+              <div class="stack-thumbs">
+                <div class="vd-gallery-thumb vd-gallery-thumb--photo"></div>
+                <div class="vd-gallery-thumb vd-gallery-thumb--photo"></div>
+              </div>
+            </div>
+
+            <div class="stack-row" role="listitem">
+              <div class="stack-day">
+                <span class="stack-day-num">22</span>
+                <span class="stack-day-dow">Fr</span>
+              </div>
+              <div class="stack-body">
+                <span class="stack-title">
+                  <span class="vd-pill vd-pill--info">Plan</span>
+                  Plan v2 abgelöst durch v3
+                </span>
+                <span class="stack-sub">
+                  <span>von T. Hofer</span>
+                  <span class="stack-sub-sep">·</span>
+                  <span>08:30</span>
+                </span>
+              </div>
+              <div class="stack-thumbs">
+                <div class="vd-gallery-thumb vd-gallery-thumb--plan"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="collapsed-hint">
+          <span class="collapsed-hint-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+          Card-Stack eingeklappt
+        </div>
+
+        <footer class="variant-actions">
+          <span class="collapse-hint">
+            Sinnvoll als zweiter Tab in der Galerie ("Raster" / "Verlauf")
+          </span>
+          <button class="btn" type="button">Neuer Eintrag</button>
+          <button class="btn" type="button" data-action="collapse" style="margin-left: auto;">Einklappen ▾</button>
+          <button class="btn btn--reopen" type="button" data-action="reopen" aria-label="Variante 3 ausklappen"></button>
+        </footer>
+      </section>
+
+      <!-- ============================================================
+           VARIANTE 4 · MINI-MAP (kompakt + expandierbar)
+           ============================================================ -->
+      <section class="variant" id="v4">
+        <header class="variant-head">
+          <span class="variant-num">04</span>
+          <h2 class="variant-title">Mini-Map</h2>
+          <span class="variant-tag">Im Filter-Header</span>
+        </header>
+
+        <div class="variant-body">
+          <p class="tl-breadcrumb">
+            <b>Gesamte Galerie</b>
+            <span class="tl-sep">›</span>
+            <span>1'284 Medien</span>
+          </p>
+
+          <button class="minimap-trigger" type="button" aria-expanded="true" aria-controls="v4-detail">
+            <span class="minimap-trigger-label">Zeitraum:</span>
+            <span class="minimap-trigger-value">Q2 2026</span>
+            <span class="minimap-trigger-sep">·</span>
+            <span class="minimap-trigger-value" style="color: var(--text-mid);">184 Medien</span>
+            <span class="minimap-trigger-chev">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </button>
+
+          <!-- Schmale Rail-Version (immer sichtbar, ~30px hoch) -->
+          <div class="minimap-wrap">
+            <div>
+              <div class="minimap-rail" id="v4-rail" aria-hidden="true">
+                <!-- wird per JS befuellt -->
+              </div>
+              <div class="minimap-axis">
+                <span>KW 1</span><span>KW 14</span><span>KW 27</span><span>KW 40</span><span>KW 52</span>
+              </div>
+            </div>
+
+            <!-- Detail-Picker (ausgeklappt) -->
+            <div class="minimap-detail" id="v4-detail">
+              <div class="minimap-detail-head">
+                <span class="minimap-detail-title">Dokumentations-Dichte pro Monat</span>
+                <span class="minimap-detail-sub">2026 · YTD</span>
+              </div>
+              <div class="minimap-detail-ticks" id="v4-ticks">
+                <!-- 12 Monate -->
+              </div>
+              <div class="minimap-detail-months">
+                <span>Jan</span><span>Feb</span><span>Mrz</span><span>Apr</span>
+                <span>Mai</span><span>Jun</span><span>Jul</span><span>Aug</span>
+                <span>Sep</span><span>Okt</span><span>Nov</span><span>Dez</span>
+              </div>
+              <div class="minimap-detail-scale">
+                <span>0</span>
+                <span class="minimap-detail-scale-bar">
+                  <span></span><span></span><span></span><span></span>
+                </span>
+                <span>max</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-active-info">
+            <span class="legend-dot" style="background: var(--warn);"></span>
+            Aktuelles Datum: <code>13.06.2026</code> (gelb umrandet)
+          </div>
+        </div>
+
+        <div class="collapsed-hint">
+          <span class="collapsed-hint-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+          Mini-Map eingeklappt – nur Rail sichtbar
+        </div>
+
+        <footer class="variant-actions">
+          <span class="collapse-hint">
+            Klick auf Rail oeffnet Detail-Picker
+          </span>
+          <button class="btn" type="button">Auf Jahr springen</button>
+          <button class="btn" type="button" data-action="collapse" style="margin-left: auto;">Einklappen ▾</button>
+          <button class="btn btn--reopen" type="button" data-action="reopen" aria-label="Variante 4 ausklappen"></button>
+        </footer>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script>
+    // ============================================================
+    // TIMELINE-DATEN (deterministisch, kein Random)
+    // ============================================================
+    const railData = [
+      // KW 1-52, 52 Zellen, Werte 0-3, ein paar leere
+      1,1,2,2,3,1,0,2,2,3,1,2,1,3,3,2,1,2,0,1,2,2,3,1,1,2,3,0,2,1,
+      1,2,3,2,1,1,2,0,1,3,2,2,1,1,2,3,2,1,1,2,2,3
+    ];
+    const monthData = [22, 44, 76, 58, 112, 14, 0, 0, 0, 0, 0, 0]; // 12 Monate 2026
+    const currentWeekIdx = 24; // ~Mitte Juni
+
+    // Scrubber-Bars (12 Monate, 12 Balken pro Monat = 144, vereinfacht 36)
+    const barsHTML = (() => {
+      let html = '';
+      const densities = [1,1,2,1,2,3,0,1,2,1,2,2,1,3,2,1,0,2,1,1,2,3,1,1,2,2,3,0,1,1,2,1,2,1,3,1];
+      for (let i = 0; i < densities.length; i++) {
+        const d = densities[i];
+        const muted = d === 0 ? 'muted' : '';
+        const h = d === 0 ? 2 : Math.max(8, d * 18);
+        html += `<span class="${muted}" style="height: ${h}%;"></span>`;
+      }
+      return html;
+    })();
+    document.getElementById('v1-bars').innerHTML = barsHTML;
+
+    // Rail (52 KW)
+    const railHTML = (() => {
+      let html = '';
+      for (let i = 0; i < railData.length; i++) {
+        const d = railData[i];
+        const empty = d === 0 ? 'data-empty="1"' : '';
+        const cur = i === currentWeekIdx ? 'data-current="1"' : '';
+        const density = d === 0 ? '' : `data-density="${d}"`;
+        html += `<div class="minimap-cell" ${density} ${empty} ${cur}></div>`;
+      }
+      return html;
+    })();
+    document.getElementById('v4-rail').innerHTML = railHTML;
+
+    // 12-Monats-Ticks
+    const ticksHTML = (() => {
+      const max = Math.max(...monthData);
+      let html = '';
+      for (let i = 0; i < monthData.length; i++) {
+        const v = monthData[i];
+        const pct = v === 0 ? 6 : Math.max(12, (v / max) * 100);
+        html += `<div class="minimap-detail-tick" style="height: ${pct}%; ${v === 0 ? 'background: rgba(108,126,142,0.15);' : ''}"></div>`;
+      }
+      return html;
+    })();
+    document.getElementById('v4-ticks').innerHTML = ticksHTML;
+
+    // ============================================================
+    // EINKLAPP-/AUSKLAPP-VERHALTEN
+    // ============================================================
+    document.querySelectorAll('.variant').forEach(variant => {
+      const collapseBtn = variant.querySelector('[data-action="collapse"]');
+      const reopenBtn = variant.querySelector('[data-action="reopen"]');
+      if (collapseBtn) collapseBtn.addEventListener('click', () => variant.classList.add('is-collapsed'));
+      if (reopenBtn) reopenBtn.addEventListener('click', () => variant.classList.remove('is-collapsed'));
+    });
+
+    // Globale Tastatur: Esc = alle einklappen, Shift+Esc = alle ausklappen
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !e.shiftKey) {
+        document.querySelectorAll('.variant').forEach(v => v.classList.add('is-collapsed'));
+      } else if (e.key === 'Escape' && e.shiftKey) {
+        document.querySelectorAll('.variant').forEach(v => v.classList.remove('is-collapsed'));
+      }
+    });
+
+    // Mini-Map Trigger toggelt aria-expanded (rein dekorativ, Inhalt bleibt sichtbar)
+    const trigger = document.querySelector('.minimap-trigger');
+    if (trigger) {
+      trigger.addEventListener('click', () => {
+        const open = trigger.getAttribute('aria-expanded') === 'true';
+        trigger.setAttribute('aria-expanded', String(!open));
+      });
+    }
+  </script>
+</body>
+</html>

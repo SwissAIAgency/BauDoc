@@ -2,6 +2,15 @@
 
 Alle relevanten Änderungen an diesem Projekt werden hier dokumentiert.
 
+## 0.2.0 - 2026-05-29
+
+- Phase-2-Analyse vor Implementierung ergänzt.
+- Architektur-, Datenmodell- und Technologieentscheidungen dokumentiert.
+- Vue 3 + Vite + TypeScript PWA, Laravel API, Laravel Sanctum, PostgreSQL, Redis und MinIO als Stack festgelegt.
+- Security Threat Model, Risk Register und Security-Testplan ergänzt.
+- Datenschutz Review und aktualisierte Datenschutz-Checklisten ergänzt.
+- Priorisierten Entwicklungsplan für Foundation bis Release Check erstellt.
+
 ## 0.1.1 - 2026-05-29
 
 - Phase-1-Standardstruktur nach Unternehmensanleitung vervollständigt.

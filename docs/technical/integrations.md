@@ -2,15 +2,20 @@
 
 ## Status
 
-Produktive Drittintegrationen sind nicht Teil des MVP. Phase 1 dokumentiert nur Regeln und vorbereitete Integrationsflächen.
+Produktive Drittintegrationen sind nicht Teil des MVP. Phase 2 definiert nur Integrationsregeln und vorbereitete Schnittstellen.
 
-## Geplante oder mögliche Integrationen
+## MVP-nahe Dienste
 
-- S3-kompatibler Object Storage oder MinIO.
-- E-Mail-Dienst für Benachrichtigungen.
-- Spätere Webhooks.
-- Spätere Drittprodukt-Integrationen.
-- Späterer KI-Processing-Layer.
+- MinIO lokal oder S3-kompatibler Object Storage für private Dateien.
+- Mail-Transport für Benachrichtigungen; lokal zunächst Log-Mailer.
+- Redis für Queue, Cache und Sessions.
+
+## Spätere Integrationen
+
+- Webhooks.
+- Drittprodukt-Adapter.
+- KI-Processing-Layer.
+- Externe semantische Suche oder Embedding-Dienste.
 
 ## Adapter-Regeln
 
@@ -19,13 +24,14 @@ Produktive Drittintegrationen sind nicht Teil des MVP. Phase 1 dokumentiert nur 
 - Timeouts definieren.
 - Retries kontrolliert und begrenzt einsetzen.
 - Fehlerfälle dokumentieren.
+- Integrationslogs ohne sensible Payloads.
 
 ## Security-Regeln
 
 - Keine Secrets im Frontend.
 - API Keys nur über Umgebungskonfiguration.
 - Webhooks mit Signaturprüfung und Replay-Schutz.
-- Logs ohne sensible Payloads.
+- Keine öffentlichen Datei-URLs.
 
 ## Datenschutz-Regeln
 
@@ -35,7 +41,7 @@ Produktive Drittintegrationen sind nicht Teil des MVP. Phase 1 dokumentiert nur 
 
 ## Offene Entscheidungen
 
-- Konkreter Mail-Anbieter.
-- Konkreter Storage-Anbieter für produktiven Betrieb.
+- Konkreter produktiver Mail-Anbieter.
+- Konkreter produktiver Storage-Anbieter.
 - Webhook-Umfang.
 - KI-Anbieter und Datenstandort, falls später relevant.

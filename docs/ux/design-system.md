@@ -33,6 +33,12 @@ Die UI ist ein ruhiges, dichtes Arbeitswerkzeug für Baustelle, Bauleitung und P
 - Planviewer mit sichtbarer Planversion.
 - Galerie mit Datum, Ort, Gewerk und Berechtigungsstatus.
 
+## Modul-Konzepte
+
+Ausgearbeitete Spezifikationen pro Modul liegen unter `docs/ux/concepts/`:
+
+- `galerie-medienverwaltung.md` — Split-Layout-Container, Tabs, Filter, Listen-/Grid-Toggle, Preview-Pane, Tastatur- und A11y-Spec, API-Hinweise.
+
 ## Layout
 
 - Mobile-first für Aufnahme.

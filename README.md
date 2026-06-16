@@ -4,9 +4,9 @@ BauDoc ist das Projektfundament für eine Web- und Mobile/PWA-Anwendung zur plan
 
 ## Status
 
-Phase: Phase 1 Projektsetup abgeschlossen.
+Phase: Phase 2 Planung abgeschlossen.
 
-Dieses Repository enthält bewusst noch keinen Produktivcode und keine installierten Dependencies. Es legt zuerst Struktur, Dokumentation, Agentenrollen, Sicherheitsregeln, Datenschutzregeln, UI-Standards und Teststrategie fest.
+Dieses Repository enthält bewusst noch keinen Produktivcode und keine installierten Dependencies. Phase 2 finalisiert Analyse, Architektur, Datenmodell, Security Review, Datenschutz Review, Entwicklungsplan und Technologie-Stack als Grundlage für die spätere Umsetzung.
 
 ## Kurzbeschreibung
 
@@ -26,12 +26,18 @@ BauDoc dokumentiert Baufortschritt mit Fotos, Plänen, Planversionen, Planpositi
 - `SECURITY_PRIVACY.md`: Sicherheits- und Datenschutzgrundlage.
 - `UI_STANDARDS.md`: UI-, Brand- und Accessibility-Regeln.
 - `TESTING.md`: Teststrategie.
-- `DECISIONS/0001-project-baseline.md`: Baseline-Entscheidung.
+- `docs/technical/project-analysis.md`: Projektanalyse vor Implementierung.
+- `docs/technical/development-plan.md`: priorisierter Entwicklungsplan.
+- `security/threat-model.md`: Threat Model.
+- `security/risk-register.md`: Security Risk Register.
+- `docs/legal/privacy-review.md`: Datenschutz Review vor Implementierung.
+- `DECISIONS/0004-technology-stack.md`: finalisierte Stackentscheidung.
 
 ## Zielarchitektur
 
 - Backend: Laravel API.
-- Frontend: Web-App / Mobile PWA, Stackentscheidung zwischen Vue 3, React oder Inertia bleibt für Phase 2 offen.
+- Auth: Laravel Sanctum.
+- Frontend: Vue 3 + Vite + TypeScript als eigenständige PWA.
 - Datenbank: PostgreSQL, später optional pgvector.
 - Queue/Cache: Redis + Laravel Queues.
 - Dateien: S3-kompatibler Object Storage oder MinIO lokal.
@@ -72,18 +78,18 @@ BauDoc/
 
 ## Lokales Setup
 
-Noch keine Anwendung startbar. In Phase 1 werden keine Dependencies installiert und kein Produktivcode erzeugt.
+Noch keine Anwendung startbar. In Phase 2 werden keine Dependencies installiert und kein Produktivcode erzeugt.
 
-Für spätere Umsetzung voraussichtlich nötig:
+Für spätere Umsetzung vorgesehen:
 
 - PHP und Composer für Laravel.
-- Node.js und Paketmanager für das Frontend.
+- Node.js und npm für Vue/Vite.
 - PostgreSQL.
 - Redis.
-- S3-kompatibler Object Storage oder MinIO.
-- Git und GitHub-Zugang.
+- MinIO oder S3-kompatibler Object Storage.
+- Docker Compose für lokale Dienste.
 
-Konkrete Versionen werden nach Technologieentscheidung dokumentiert.
+Konkrete Versionen werden bei der technischen Foundation gepinnt und dokumentiert.
 
 ## Umgebungsvariablen
 
@@ -98,7 +104,7 @@ Regeln:
 ## Entwicklungsregeln
 
 - Vor Codeänderungen `AGENTS.md` und relevante Bereichs-`AGENTS.md` lesen.
-- Produktivcode erst nach Abschluss der Planungs- und Architekturphase.
+- Produktivcode erst ab Umsetzung des Entwicklungsplans.
 - Kleine, testbare Tasks.
 - Keine neuen Dependencies ohne Begründung.
 - Keine personenbezogenen Produktivdaten.
@@ -106,7 +112,7 @@ Regeln:
 
 ## Testbefehle
 
-Phase 1 enthält nur Dokumentation und Struktur. Es gibt noch keine ausführbaren Build-, Lint- oder Testbefehle. Verfügbare Checks sind Struktur-, Inhalts- und Git-Checks.
+Phase 2 enthält nur Dokumentation und Struktur. Es gibt noch keine ausführbaren Build-, Lint- oder Testbefehle. Verfügbare Checks sind Struktur-, Inhalts- und Git-Checks.
 
 ## Deployment-Hinweise
 
@@ -149,4 +155,4 @@ Noch nicht festgelegt. Vor öffentlicher oder externer Nutzung muss entschieden 
 
 ## Nächster empfohlener Schritt
 
-Phase 2 starten: Inhalte und Planung finalisieren, insbesondere Projektanalyse, Architekturverfeinerung, Datenmodell, Security Review, Datenschutz Review, Entwicklungsplan und finale Technologieentscheidung.
+Phase 3 starten: technische Foundation gemäß `docs/technical/development-plan.md` mit BD-001 umsetzen.

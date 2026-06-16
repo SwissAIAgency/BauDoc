@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leistungskatalog – Planbasierte Baufortschrittsdokumentation</title>
+  <style>
+    :root {
+      --bg: #0f1720;
+      --panel: #151f2b;
+      --panel-2: #1c2938;
+      --text: #f3f6f9;
+      --muted: #aab7c4;
+      --line: #2c3b4d;
+      --accent: #41b6c4;
+      --accent-2: #7c8cff;
+      --success: #5dd39e;
+      --warn: #f5c768;
+      --danger: #ff7b7b;
+      --white: #ffffff;
+      --paper: #ffffff;
+      --paper-text: #17202a;
+      --paper-muted: #586574;
+      --paper-line: #dde4ec;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 48px 24px 72px;
+    }
+
+    .hero {
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at top right, rgba(65, 182, 196, 0.18), transparent 34%),
+        radial-gradient(circle at bottom left, rgba(124, 140, 255, 0.12), transparent 38%),
+        linear-gradient(135deg, #111c28 0%, #0d141d 100%);
+      border-radius: 28px;
+      padding: 44px;
+      margin-bottom: 28px;
+      box-shadow: 0 22px 70px rgba(0,0,0,0.28);
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.03;
+      letter-spacing: -0.04em;
+    }
+
+    .lead {
+      max-width: 860px;
+      font-size: 20px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 32px;
+    }
+
+    .meta-card {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.035);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .meta-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .meta-value {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    section {
+      margin-top: 28px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 24px;
+      padding: 30px;
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 28px;
+      letter-spacing: -0.025em;
+    }
+
+    h3 {
+      margin: 30px 0 12px;
+      font-size: 21px;
+      letter-spacing: -0.02em;
+    }
+
+    h4 {
+      margin: 22px 0 8px;
+      font-size: 17px;
+    }
+
+    p {
+      margin: 0 0 14px;
+      color: var(--muted);
+    }
+
+    .strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .card h3,
+    .card h4 {
+      margin-top: 0;
+    }
+
+    ul, ol {
+      color: var(--muted);
+      padding-left: 22px;
+      margin-top: 8px;
+      margin-bottom: 0;
+    }
+
+    li {
+      margin-bottom: 7px;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.045);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .phase {
+      border-left: 4px solid var(--accent);
+      padding-left: 18px;
+      margin-top: 28px;
+    }
+
+    .phase .tag {
+      display: inline-block;
+      color: #061316;
+      background: var(--accent);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .module {
+      margin-top: 18px;
+      background: rgba(255,255,255,0.035);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .module-title {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .module-title h4 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .priority {
+      white-space: nowrap;
+      font-size: 12px;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-weight: 700;
+    }
+
+    .mvp { background: rgba(93,211,158,0.14); color: var(--success); border: 1px solid rgba(93,211,158,0.35); }
+    .phase2 { background: rgba(245,199,104,0.12); color: var(--warn); border: 1px solid rgba(245,199,104,0.35); }
+    .phase3 { background: rgba(124,140,255,0.14); color: #aeb7ff; border: 1px solid rgba(124,140,255,0.35); }
+    .later { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--line); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      overflow: hidden;
+      border-radius: 14px;
+    }
+
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+      padding: 12px;
+      color: var(--muted);
+    }
+
+    th {
+      color: var(--text);
+      background: rgba(255,255,255,0.05);
+      font-size: 14px;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    code, pre {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    pre {
+      background: #0a1119;
+      border: 1px solid var(--line);
+      color: #dce7f0;
+      padding: 18px;
+      border-radius: 16px;
+      overflow-x: auto;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .notice {
+      border: 1px solid rgba(245,199,104,0.34);
+      background: rgba(245,199,104,0.09);
+      border-radius: 18px;
+      padding: 18px;
+      color: var(--muted);
+    }
+
+    .notice strong {
+      color: var(--warn);
+    }
+
+    .acceptance {
+      border: 1px solid rgba(93,211,158,0.25);
+      background: rgba(93,211,158,0.07);
+      border-radius: 16px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    .acceptance strong {
+      color: var(--success);
+    }
+
+    .footer {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .print-note {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        padding: 30px;
+      }
+
+      .meta-grid,
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      section {
+        padding: 22px;
+      }
+
+      .module-title {
+        flex-direction: column;
+      }
+    }
+
+    @media print {
+      body {
+        background: var(--paper);
+        color: var(--paper-text);
+      }
+
+      .page {
+        max-width: none;
+        padding: 0;
+      }
+
+      .hero, section, .card, .module, .notice, .acceptance {
+        background: var(--paper) !important;
+        color: var(--paper-text);
+        border-color: var(--paper-line);
+        box-shadow: none;
+        break-inside: avoid;
+      }
+
+      h1, h2, h3, h4, .strong, th {
+        color: var(--paper-text);
+      }
+
+      p, li, td, ul, ol, .meta-label, .lead {
+        color: var(--paper-muted);
+      }
+
+      pre {
+        background: #f7f9fb;
+        color: var(--paper-text);
+        border-color: var(--paper-line);
+      }
+
+      .print-note {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="eyebrow">Projektumfang & Entwickler-Briefing</div>
+      <h1>Planbasierte Baufortschritts­dokumentation</h1>
+      <p class="lead">
+        Leistungskatalog für eine Web- und Mobile-Applikation zur strukturierten Dokumentation von Baustellenfotos,
+        Panoramabildern, Plänen, Planpositionen, Kommentaren, Sprachkommentaren, Berechtigungen, Audit-Logs und späterer KI-Suche.
+      </p>
+
+      <div class="meta-grid">
+        <div class="meta-card">
+          <div class="meta-label">Projektart</div>
+          <div class="meta-value">Web-App + Mobile/PWA</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Primärer Markt</div>
+          <div class="meta-value">Schweiz / Bauprojekte</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Backend</div>
+          <div class="meta-value">Laravel API</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Datenbank</div>
+          <div class="meta-value">PostgreSQL empfohlen</div>
+        </div>
+      </div>
+    </header>
+
+    <section>
+      <h2>1. Projektvorstellung</h2>
+      <p>
+        Die Applikation soll Baufortschritte mit normalen Fotos und Panoramafotos dokumentieren. Bilder werden regelmässig
+        auf der Baustelle aufgenommen und strukturiert Projekten, Gebäuden, Etagen, Räumen, Planpositionen, Gewerken und Arbeiten zugeordnet.
+      </p>
+      <p>
+        Zusätzlich werden Pläne verwaltet, versioniert und nach Plangattungen organisiert. Beim Erfassen eines Bildes kann der
+        Aufnahmepunkt direkt auf dem Plan markiert werden. Dadurch entsteht eine chronologische, ortsbezogene und fachlich
+        nachvollziehbare Baudokumentation.
+      </p>
+      <p>
+        Später soll eine KI Bilder, Kommentare und Sprachtranskripte analysieren, damit Benutzer semantisch suchen können,
+        ohne das exakte Datum oder den exakten Ablageort zu kennen.
+      </p>
+
+      <div class="notice">
+        <strong>Kritische Projektabgrenzung:</strong>
+        Der MVP soll nicht versuchen, eine vollständige Baumanagement-Plattform, ein komplettes Mängelmanagement,
+        BIM-System oder Reality-Capture-System zu ersetzen. Der erste Kern ist: Foto, Plan, Ort, Zeit, Gewerk, Rechte und Audit.
+      </div>
+    </section>
+
+    <section>
+      <h2>2. Zielbild der Applikation</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Business-Ziel</h3>
+          <ul>
+            <li>Baufortschritt nachvollziehbar dokumentieren.</li>
+            <li>Fotos über Plan, Raum, Zeitraum und Gewerk auffindbar machen.</li>
+            <li>Planänderungen kontrolliert kommunizieren.</li>
+            <li>Zugriffe und Aktionen revisionsnah protokollieren.</li>
+            <li>Spätere KI-Suche auf Bildinhalt, Kommentaren und Transkripten ermöglichen.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Technisches Ziel</h3>
+          <ul>
+            <li>Modulare Laravel-API als stabile Backend-Basis.</li>
+            <li>Responsive Web-App und mobile Aufnahmeoberfläche.</li>
+            <li>Private Dateiablage für Fotos, Pläne, Panoramen und Audio.</li>
+            <li>PostgreSQL für relationale Daten, Planpositionen und spätere Vektorsuche.</li>
+            <li>Queue-basierte Verarbeitung für Benachrichtigungen, Transkription und KI-Analyse.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>3. Nutzerrollen und Grundrechte</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Rolle</th>
+            <th>Zweck</th>
+            <th>Typische Rechte</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>System Admin</td>
+            <td>Systemweite Verwaltung</td>
+            <td>Mandanten, Benutzer, globale Einstellungen, technische Logs</td>
+          </tr>
+          <tr>
+            <td>Organisations Admin</td>
+            <td>Verwaltung einer Firma / Organisation</td>
+            <td>Projekte, Benutzer, Rollen, Standard-Gewerke, Organisationseinstellungen</td>
+          </tr>
+          <tr>
+            <td>Projektleiter</td>
+            <td>Operative Projektverantwortung</td>
+            <td>Projektstruktur, Pläne, Rechte, Bilder, Audit-Logs im Projekt</td>
+          </tr>
+          <tr>
+            <td>Bauleiter</td>
+            <td>Baustellendokumentation</td>
+            <td>Fotos aufnehmen, Planposition setzen, kommentieren, Fortschritt prüfen</td>
+          </tr>
+          <tr>
+            <td>Planer / Architekt</td>
+            <td>Plan- und Fachkoordination</td>
+            <td>Pläne hochladen, Versionen verwalten, Planänderungen kommentieren</td>
+          </tr>
+          <tr>
+            <td>Gewerk-Benutzer</td>
+            <td>Fachbereichsspezifische Nutzung</td>
+            <td>Nur freigegebene Projekte, Pläne, Bilder und Kommentare sehen</td>
+          </tr>
+          <tr>
+            <td>Externer Betrachter</td>
+            <td>Kontrollierte Einsicht</td>
+            <td>Nur freigegebene Inhalte, optional ohne Downloadrecht</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>4. Logische Phasen des Leistungskatalogs</h2>
+
+      <div class="phase">
+        <span class="tag">Phase 0</span>
+        <h3>Projektfundament, Architektur und Standards</h3>
+        <p>
+          Diese Phase legt die technische und organisatorische Grundlage. Sie ist zwingend vor der Fachentwicklung umzusetzen.
+        </p>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>0.1 Projektstruktur und Repository</h4>
+            <span class="priority mvp">Grundlage</span>
+          </div>
+          <ul>
+            <li>Laravel-Projektstruktur erstellen.</li>
+            <li>Frontend-Struktur definieren: Vue 3, React oder Inertia.</li>
+            <li>API-first-Struktur mit klaren Modulen anlegen.</li>
+            <li>Ordnerstruktur für Domain-Module definieren.</li>
+            <li>README, technische Dokumentation und Setup-Anleitung erstellen.</li>
+            <li>Umgebungsdateien und Konfigurationen vorbereiten.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Lokales System ist startbar, Datenbankverbindung funktioniert, Projektstruktur ist dokumentiert.
+          </div>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>0.2 Technische Basisdienste</h4>
+            <span class="priority mvp">Grundlage</span>
+          </div>
+          <ul>
+            <li>PostgreSQL Datenbank einrichten.</li>
+            <li>Redis für Queues und Cache vorbereiten.</li>
+            <li>Object Storage einbinden: S3-kompatibel oder MinIO für lokale Entwicklung.</li>
+            <li>Queue Worker vorbereiten.</li>
+            <li>Logging- und Fehlerbehandlung strukturieren.</li>
+            <li>Docker-Setup optional vorbereiten.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Dateien können privat gespeichert werden, Queue Worker laufen, Logs sind verfügbar.
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <span class="tag">Phase 1</span>
+        <h3>Benutzer, Authentifizierung, Rollen und Berechtigungen</h3>
+        <p>
+          Die Zugriffskontrolle ist ein Kernbestandteil des Systems und darf nicht erst später ergänzt werden.
+        </p>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>1.1 Authentifizierung</h4>
+            <span class="priority mvp">MVP</span>
+          </div>
+          <ul>
+            <li>Login und Logout.</li>
+            <li>API-Authentifizierung für Web und Mobile.</li>
+            <li>Token-Verwaltung.</li>
+            <li>Passwort-Zurücksetzen.</li>
+            <li>Session- und Sicherheitseinstellungen.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Geschützte API-Endpunkte sind ohne gültige Anmeldung nicht erreichbar.
+          </div>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>1.2 Rollen- und Rechteverwaltung</h4>
+            <span class="priority mvp">MVP</span>
+          </div>
+          <ul>
+            <li>Rollenmodell für Admin, Projektleiter, Bauleiter, Planer, Gewerk und Betrachter.</li>
+            <li>Rechte pro Organisation, Projekt, Gebäude, Gewerk, Plan und Bild.</li>
+            <li>Serverseitige Berechtigungsprüfung für alle geschützten Ressourcen.</li>
+            <li>Projektmitgliedschaften mit Rollen und Gewerken.</li>
+            <li>Downloadrechte separat von Ansichtsrechten steuern.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Ein Gewerk-Benutzer sieht nur freigegebene Projekte, Pläne und Bilder. Direkte API-Aufrufe auf fremde Daten werden blockiert.
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <span class="tag">Phase 2</span>
+        <h3>Projekt-, Gebäude-, Raum- und Gewerkstruktur</h3>
+        <p>
+          Diese Struktur ist die organisatorische Grundlage für alle späteren Fotos, Pläne, Filter und Suchfunktionen.
+        </p>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>2.1 Projektverwaltung</h4>
+            <span class="priority mvp">MVP</span>
+          </div>
+          <ul>
+            <li>Projekte erstellen, bearbeiten, archivieren.</li>
+            <li>Projektadresse, Status, Laufzeit und Beschreibung verwalten.</li>
+            <li>Projektmitglieder zuweisen.</li>
+            <li>Projektberechtigungen definieren.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Ein Projektleiter kann ein Projekt mit Grunddaten anlegen und Benutzer zuweisen.
+          </div>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>2.2 Gebäude-, Etagen-, Raum- und Zonenstruktur</h4>
+            <span class="priority mvp">MVP</span>
+          </div>
+          <ul>
+            <li>Gebäude innerhalb eines Projekts verwalten.</li>
+            <li>Etagen je Gebäude verwalten.</li>
+            <li>Räume je Etage verwalten.</li>
+            <li>Optionale Zonen wie Wand Nord, Wand Süd, Decke, Boden oder Installationsbereich erfassen.</li>
+            <li>Raumstruktur für Fotozuordnung und Filter verwenden.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Ein Bild kann mindestens Projekt, Gebäude, Etage und Raum zugeordnet werden.
+          </div>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>2.3 Gewerke und Arbeitstypen</h4>
+            <span class="priority mvp">MVP</span>
+          </div>
+          <ul>
+            <li>Gewerke verwalten: Elektro, Sanitär, Heizung, Lüftung, Spengler, Gipser, Maler usw.</li>
+            <li>Arbeitstypen verwalten: Rohinstallation, Leitungsführung, Montage, Prüfung, Abschluss usw.</li>
+            <li>Benutzer und Firmen Gewerken zuordnen.</li>
+            <li>Bilder und Pläne einem oder mehreren Gewerken zuordnen.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Pläne und Bilder können gewerkespezifisch gefiltert und berechtigt werden.
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <span class="tag">Phase 3</span>
+        <h3>Planverwaltung und Planversionierung</h3>
+        <p>
+          Pläne sind zentrale Referenzobjekte. Jedes Bild mit Planposition muss immer auf eine konkrete Planversion zeigen.
+        </p>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>3.1 Planverwaltung</h4>
+            <span class="priority mvp">MVP</span>
+          </div>
+          <ul>
+            <li>Pläne pro Projekt hochladen.</li>
+            <li>Pläne nach Plangattung organisieren: Architektur, Elektro, Sanitär, Heizung, Lüftung, Statik usw.</li>
+            <li>Planmetadaten verwalten: Titel, Nummer, Geschoss, Gebäude, Gewerk, Status.</li>
+            <li>Planrechte nach Rolle und Gewerk steuern.</li>
+            <li>PDF- und Bildpläne im Viewer anzeigen.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Ein berechtigter Benutzer kann einen Plan öffnen, unberechtigte Benutzer erhalten keinen Zugriff.
+          </div>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>3.2 Planversionierung</h4>
+            <span class="priority mvp">MVP</span>
+          </div>
+          <ul>
+            <li>Neue Versionen eines Plans hochladen.</li>
+            <li>Alte Versionen behalten und archivieren.</li>
+            <li>Aktive Planversion markieren.</li>
+            <li>Änderungsnotiz pro Version speichern.</li>
+            <li>Bildpositionen immer mit Planversion verknüpfen.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Ein Bild bleibt auch nach Planupdate mit der ursprünglich verwendeten Planversion verbunden.
+          </div>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>3.3 Benachrichtigung bei Planänderungen</h4>
+            <span class="priority mvp">MVP Light</span>
+          </div>
+          <ul>
+            <li>Verantwortliche Personen bei neuer Planversion informieren.</li>
+            <li>Benachrichtigung nach Gewerk und Projektmitgliedschaft steuern.</li>
+            <li>E-Mail-Benachrichtigung im MVP.</li>
+            <li>In-App- und Push-Benachrichtigung später ergänzen.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Beim Upload einer neuen Planversion erhalten berechtigte Verantwortliche eine Nachricht.
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <span class="tag">Phase 4</span>
+        <h3>Foto- und Baufortschrittsdokumentation</h3>
+        <p>
+          Dies ist der fachliche Kern des MVP: Aufnahme, Ablage, Zuordnung, Chronologie und Zugriffsschutz von Baustellenbildern.
+        </p>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>4.1 Fotoaufnahme und Upload</h4>
+            <span class="priority mvp">MVP</span>
+          </div>
+          <ul>
+            <li>Foto über mobile Oberfläche aufnehmen.</li>
+            <li>Foto über Web-App hochladen.</li>
+            <li>Automatische Speicherung von Aufnahmedatum und Uploadzeitpunkt.</li>
+            <li>Optionales Auslesen von EXIF-Daten.</li>
+            <li>Originalbild, komprimierte Version und Thumbnail speichern.</li>
+            <li>Private Dateiablage ohne öffentliche Direktlinks.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Ein Bild kann mobil aufgenommen, gespeichert, geschützt und in der Projektgalerie angezeigt werden.
+          </div>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>4.2 Bildzuordnung</h4>
+            <span class="priority mvp">MVP</span>
+          </div>
+          <ul>
+            <li>Bild Projekt, Gebäude, Etage und Raum zuordnen.</li>
+            <li>Bild einem Gewerk und Arbeitstyp zuordnen.</li>
+            <li>Bild mit Plan und Planversion verbinden.</li>
+            <li>Textkommentar erfassen.</li>
+            <li>Status setzen: Entwurf, aktiv, archiviert, gesperrt.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Jedes Bild besitzt eine klare fachliche und räumliche Zuordnung.
+          </div>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>4.3 Chronologische Fortschrittsansicht</h4>
+            <span class="priority mvp">MVP</span>
+          </div>
+          <ul>
+            <li>Bilder automatisch nach Aufnahmedatum sortieren.</li>
+            <li>Zeitachse pro Projekt, Gebäude, Raum und Planpunkt anzeigen.</li>
+            <li>Filter nach Zeitraum, Gewerk, Raum, Benutzer und Arbeitstyp.</li>
+            <li>Galerie- und Listenansicht bereitstellen.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Ein Benutzer kann den Baufortschritt eines Raums über einen Zeitraum chronologisch prüfen.
+          </div>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>4.4 Panorama- und 360°-Bilder</h4>
+            <span class="priority phase2">Phase 2</span>
+          </div>
+          <ul>
+            <li>Panoramabilder hochladen.</li>
+            <li>360°-Viewer integrieren.</li>
+            <li>Panorama mit Planposition verbinden.</li>
+            <li>Panorama zeitlich und gewerkespezifisch filtern.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Ein Panoramabild kann geöffnet und interaktiv betrachtet werden.
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <span class="tag">Phase 5</span>
+        <h3>Planpositionen und bildbasierte Ortssuche</h3>
+        <p>
+          Dieses Modul unterscheidet das Produkt von einer einfachen Fotoablage. Der Plan wird zur Such- und Navigationsoberfläche.
+        </p>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>5.1 Foto-Standpunkt auf Plan markieren</h4>
+            <span class="priority mvp">MVP</span>
+          </div>
+          <ul>
+            <li>Beim Erfassen eines Bildes Plan auswählen.</li>
+            <li>Aufnahmepunkt per Klick oder Touch auf dem Plan setzen.</li>
+            <li>X-/Y-Koordinate relativ zum Plan speichern.</li>
+            <li>Blickrichtung optional speichern.</li>
+            <li>Bild mit Plan und Planversion verbinden.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Ein Bild zeigt, an welcher Stelle auf welchem Plan es aufgenommen wurde.
+          </div>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>5.2 Suche über Planposition</h4>
+            <span class="priority mvp">MVP</span>
+          </div>
+          <ul>
+            <li>Benutzer klickt auf eine Planstelle.</li>
+            <li>System zeigt Bilder an dieser Stelle oder im Umkreis.</li>
+            <li>Filter nach Zeitraum und Gewerk.</li>
+            <li>Chronologische Anzeige aller Bilder an dieser Position.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Beim Klick auf eine Wand oder Planposition werden passende Bilder angezeigt.
+          </div>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>5.3 Zonen, Wandbereiche und Polygone</h4>
+            <span class="priority phase2">Phase 2</span>
+          </div>
+          <ul>
+            <li>Bereiche auf dem Plan markieren.</li>
+            <li>Wände, Decken, Böden und Installationszonen als Flächen definieren.</li>
+            <li>Bilder einer Zone zuordnen.</li>
+            <li>Suche nach Bildern innerhalb einer Fläche ermöglichen.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Bilder können nicht nur Punkten, sondern baulichen Zonen zugeordnet werden.
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <span class="tag">Phase 6</span>
+        <h3>Kommentare, Sprache und Transkription</h3>
+        <p>
+          Kommentare erweitern die Bilddokumentation um fachlichen Kontext. Sprache ist für die Baustelle besonders wertvoll, aber nicht zwingend im MVP.
+        </p>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>6.1 Textkommentare</h4>
+            <span class="priority mvp">MVP</span>
+          </div>
+          <ul>
+            <li>Kommentar beim Bild erfassen.</li>
+            <li>Kommentar nachträglich ergänzen.</li>
+            <li>Kommentarhistorie optional speichern.</li>
+            <li>Kommentare in klassischer Suche berücksichtigen.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Ein Bild kann fachlich kommentiert und über Kommentartext gefunden werden.
+          </div>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>6.2 Sprachkommentare und Transkription</h4>
+            <span class="priority phase2">Phase 2</span>
+          </div>
+          <ul>
+            <li>Sprachkommentar in mobiler App aufnehmen.</li>
+            <li>Audiodatei geschützt speichern.</li>
+            <li>Audio automatisch transkribieren.</li>
+            <li>Transkript mit Bild verbinden.</li>
+            <li>Transkript in Suche und später KI-Suche aufnehmen.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Ein gesprochener Kommentar ist als Text sichtbar und durchsuchbar.
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <span class="tag">Phase 7</span>
+        <h3>Audit-Log, Zugriffshistorie und Sicherheit</h3>
+        <p>
+          Der Zugriff auf Bilder und Pläne muss nachvollziehbar sein. Dieses Modul ist kein optionales Reporting, sondern Teil des Sicherheitskonzepts.
+        </p>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>7.1 Audit-Log</h4>
+            <span class="priority mvp">MVP</span>
+          </div>
+          <ul>
+            <li>Login protokollieren.</li>
+            <li>Bild-Upload protokollieren.</li>
+            <li>Bildansicht protokollieren.</li>
+            <li>Plandownload und Planansicht protokollieren.</li>
+            <li>Rechteänderungen protokollieren.</li>
+            <li>Filterbare Audit-Ansicht für Admins.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Es ist nachvollziehbar, wer ein Bild hochgeladen oder angeschaut hat.
+          </div>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>7.2 Sicherer Dateizugriff</h4>
+            <span class="priority mvp">MVP</span>
+          </div>
+          <ul>
+            <li>Keine öffentlichen Bild- oder Plan-URLs.</li>
+            <li>Zugriff nur nach serverseitiger Berechtigungsprüfung.</li>
+            <li>Zeitlich begrenzte Download- oder Anzeige-URLs.</li>
+            <li>Download optional separat berechtigen.</li>
+            <li>Audit-Event bei Ansicht oder Download erzeugen.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Ein unberechtigter Benutzer kann Datei-URLs nicht direkt öffnen.
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <span class="tag">Phase 8</span>
+        <h3>Berichte, Export und Baustellen-Workflow</h3>
+        <p>
+          Diese Funktionen erhöhen den operativen Nutzen und sind für reale Bauprojekte sehr wertvoll.
+        </p>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>8.1 PDF- und ZIP-Export</h4>
+            <span class="priority phase2">Phase 2</span>
+          </div>
+          <ul>
+            <li>PDF-Bericht pro Projekt, Raum, Zeitraum oder Gewerk.</li>
+            <li>Export mit Bild, Datum, Benutzer, Kommentar, Planversion und Planposition.</li>
+            <li>ZIP-Export mit Bildern und Metadaten.</li>
+            <li>Exportrechte separat steuern.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Ein Projektleiter kann einen nachvollziehbaren Fotobericht exportieren.
+          </div>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>8.2 QR-Code pro Raum oder Planbereich</h4>
+            <span class="priority phase2">Phase 2</span>
+          </div>
+          <ul>
+            <li>QR-Code für Projekt, Raum oder Planbereich generieren.</li>
+            <li>Scan öffnet direkt die passende Aufnahmeansicht.</li>
+            <li>Projekt, Gebäude, Etage und Raum werden automatisch vorausgewählt.</li>
+            <li>Fehlzuordnungen auf der Baustelle reduzieren.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Nach QR-Scan kann direkt ein korrekt zugeordnetes Bild aufgenommen werden.
+          </div>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>8.3 Mängel- und Issue-Light</h4>
+            <span class="priority phase2">Phase 2</span>
+          </div>
+          <ul>
+            <li>Aus Bild eine Aufgabe oder einen Mangel erstellen.</li>
+            <li>Zuständiges Gewerk und verantwortliche Person zuweisen.</li>
+            <li>Status: offen, in Bearbeitung, erledigt, geprüft.</li>
+            <li>Frist und Abschlussbild speichern.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Ein Bild kann in eine nachverfolgbare Aufgabe umgewandelt werden.
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <span class="tag">Phase 9</span>
+        <h3>KI-Bildanalyse und semantische Suche</h3>
+        <p>
+          KI wird als Assistenz- und Suchsystem eingesetzt. KI-Ausgaben gelten nicht als rechtlich verbindliche Wahrheit.
+        </p>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>9.1 Automatische Bildbeschreibung</h4>
+            <span class="priority phase3">Phase 3</span>
+          </div>
+          <ul>
+            <li>Bild nach Upload in Queue einreihen.</li>
+            <li>KI erstellt Beschreibung des sichtbaren Inhalts.</li>
+            <li>KI erkennt mögliche Bauteile, Gewerke, Materialien und Arbeitssituationen.</li>
+            <li>Beschreibung als automatisch generiert kennzeichnen.</li>
+            <li>Manuelle Korrektur oder Bestätigung ermöglichen.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Ein Bild erhält eine KI-Beschreibung und maschinenlesbare Tags.
+          </div>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>9.2 Semantische Suche</h4>
+            <span class="priority phase3">Phase 3</span>
+          </div>
+          <ul>
+            <li>Suche über natürliche Sprache.</li>
+            <li>Suche über Kommentare, Transkripte, KI-Beschreibungen und Tags.</li>
+            <li>Vektorsuche über Embeddings.</li>
+            <li>Ergebnisse nach Relevanz, Datum, Ort und Berechtigung filtern.</li>
+            <li>Trefferbegründung anzeigen.</li>
+          </ul>
+          <div class="acceptance">
+            <strong>Abnahme:</strong> Eine Suchanfrage wie „Finde Bilder mit Leitungen in der Wand im Bad“ liefert passende, berechtigte Ergebnisse.
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <span class="tag">Phase 10</span>
+        <h3>Drittintegrationen und Erweiterbarkeit</h3>
+        <p>
+          Integrationen sollen vorbereitet, aber nicht im MVP umgesetzt werden. Wichtig ist ein Datenmodell, das spätere Mappings erlaubt.
+        </p>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>10.1 Integrationsgrundlage</h4>
+            <span class="priority phase2">Vorbereitung</span>
+          </div>
+          <ul>
+            <li>Externe Systeme als Entität vorbereiten.</li>
+            <li>Mapping-Tabellen für Projekte, Benutzer, Pläne und Dateien vorbereiten.</li>
+            <li>Webhook-Events definieren.</li>
+            <li>Integration-Logs speichern.</li>
+            <li>API-Tokens und technische Benutzer vorbereiten.</li>
+          </ul>
+        </div>
+
+        <div class="module">
+          <div class="module-title">
+            <h4>10.2 Mögliche Drittprodukte</h4>
+            <span class="priority later">Später</span>
+          </div>
+          <ul>
+            <li>Procore: Projekt-, Foto- und Dokumentenabgleich.</li>
+            <li>Dalux: Plan- und Projektdatenabgleich.</li>
+            <li>PlanRadar: Mängel- oder Fotodaten-Schnittstelle, falls strategisch sinnvoll.</li>
+            <li>Autodesk Construction Cloud: Plan-, Dokumenten- oder BIM-Anbindung.</li>
+            <li>SharePoint / OneDrive: Dateiimport und Planablage.</li>
+            <li>BIM / IFC: spätere 3D-Verortung und Modellbezug.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>5. MVP-Umfang</h2>
+      <p>
+        Der MVP muss beweisen, dass die Kernlogik funktioniert: Bild erfassen, Ort bestimmen, Planposition speichern,
+        Zugriff schützen, chronologisch suchen und Aktionen protokollieren.
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>MVP enthalten</h3>
+          <ul>
+            <li>Login und Rollenmodell</li>
+            <li>Projektverwaltung</li>
+            <li>Gebäude-, Etagen- und Raumstruktur</li>
+            <li>Gewerke und Arbeitstypen</li>
+            <li>Planverwaltung mit Versionen</li>
+            <li>Planviewer für PDF/Bild</li>
+            <li>Fotoaufnahme über mobile Web-App</li>
+            <li>Foto-Upload über Web-App</li>
+            <li>Fotozuordnung zu Projekt, Raum, Gewerk und Plan</li>
+            <li>Planpunkt setzen</li>
+            <li>Textkommentare</li>
+            <li>Chronologische Galerie</li>
+            <li>Filter nach Zeitraum, Ort und Gewerk</li>
+            <li>Private Dateiablage</li>
+            <li>Audit-Log</li>
+            <li>E-Mail-Benachrichtigung bei neuer Planversion</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Nicht im MVP</h3>
+          <ul>
+            <li>Native Mobile App</li>
+            <li>Offline-Synchronisation</li>
+            <li>360°-Viewer</li>
+            <li>Sprachkommentare und Transkription</li>
+            <li>KI-Bildanalyse</li>
+            <li>Semantische Suche</li>
+            <li>Mängelmanagement vollständig</li>
+            <li>Bautagebuch vollständig</li>
+            <li>BIM-/IFC-Anbindung</li>
+            <li>Automatische Planverortung</li>
+            <li>Automatische Fortschrittserkennung</li>
+            <li>Drittprodukt-Integrationen</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>6. Empfohlene technische Architektur</h2>
+      <pre>Mobile PWA / Web-App
+        |
+        | HTTPS / JSON API
+        v
+Laravel Backend
+        |
+        |-- Authentifizierung
+        |-- Rollen und Berechtigungen
+        |-- Projektverwaltung
+        |-- Planverwaltung
+        |-- Fotoverwaltung
+        |-- Planpositionen
+        |-- Audit-Log
+        |-- Benachrichtigungen
+        |-- KI-Job-Dispatcher
+        |
+        v
+PostgreSQL + optional pgvector
+        |
+        |-- Relationale Projektdaten
+        |-- Planpositionen
+        |-- Rechte
+        |-- Audit
+        |-- Such- und KI-Metadaten
+        |
+        v
+S3-kompatibler Object Storage
+        |
+        |-- Fotos
+        |-- Thumbnails
+        |-- Panoramen
+        |-- Pläne
+        |-- Audiodateien
+        |
+        v
+Queue / Worker / KI-Service
+        |
+        |-- Bildanalyse
+        |-- Transkription
+        |-- Embeddings
+        |-- Benachrichtigungen</pre>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Bereich</th>
+            <th>Empfehlung</th>
+            <th>Begründung</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Backend</td>
+            <td>Laravel</td>
+            <td>Gute Basis für API, Auth, Queues, Notifications, Storage und modulare Businesslogik.</td>
+          </tr>
+          <tr>
+            <td>Frontend</td>
+            <td>Vue 3 oder React</td>
+            <td>Geeignet für interaktive Planviewer, Galerien, Filter und mobile Oberflächen.</td>
+          </tr>
+          <tr>
+            <td>Mobile</td>
+            <td>PWA zuerst</td>
+            <td>Schneller MVP, weniger Komplexität als native App, später erweiterbar.</td>
+          </tr>
+          <tr>
+            <td>Datenbank</td>
+            <td>PostgreSQL</td>
+            <td>Stark für relationale Daten, räumliche Logik und spätere Vektorsuche.</td>
+          </tr>
+          <tr>
+            <td>Dateien</td>
+            <td>S3-kompatibler Object Storage</td>
+            <td>Bilder und Pläne gehören nicht direkt in die Datenbank.</td>
+          </tr>
+          <tr>
+            <td>Queue</td>
+            <td>Redis + Laravel Queues</td>
+            <td>Für Benachrichtigungen, Bildverarbeitung, Transkription und KI-Jobs.</td>
+          </tr>
+          <tr>
+            <td>KI</td>
+            <td>Separater Processing Layer</td>
+            <td>KI soll entkoppelt sein und asynchron arbeiten.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>7. Datenmodell – fachliche Kernobjekte</h2>
+      <pre>organizations
+users
+roles
+permissions
+projects
+project_members
+buildings
+floors
+rooms
+room_zones
+trades
+work_types
+plans
+plan_versions
+plan_categories
+photos
+photo_files
+photo_locations
+photo_comments
+photo_audio_comments
+photo_trade_assignments
+photo_ai_descriptions
+photo_tags
+audit_logs
+notifications
+external_systems
+external_project_mappings
+integration_logs</pre>
+
+      <h3>Wichtige Modellregel</h3>
+      <p>
+        Jedes Bild muss immer mit einem konkreten Plan und einer konkreten Planversion verknüpft werden, wenn es auf einem Plan markiert wurde.
+        Sonst wird die Dokumentation bei späteren Planupdates unzuverlässig.
+      </p>
+
+      <pre>photo_id
+project_id
+building_id
+floor_id
+room_id
+trade_id
+plan_id
+plan_version_id
+x_coordinate
+y_coordinate
+direction_angle
+captured_at
+uploaded_by</pre>
+    </section>
+
+    <section>
+      <h2>8. Anforderungen an Sicherheit und Datenschutz</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Muss-Anforderungen</h3>
+          <ul>
+            <li>Serverseitige Zugriffskontrolle für alle Ressourcen.</li>
+            <li>Keine öffentlichen Direktlinks auf Bilder und Pläne.</li>
+            <li>Audit-Log für kritische Aktionen.</li>
+            <li>Rollen- und Gewerke-basierte Berechtigungen.</li>
+            <li>Trennung von Ansichtsrecht und Downloadrecht.</li>
+            <li>Lösch- und Archivierungskonzept.</li>
+            <li>Backup-Konzept für Datenbank und Dateien.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Empfohlene Zusatzanforderungen</h3>
+          <ul>
+            <li>2-Faktor-Authentifizierung für Admins.</li>
+            <li>Mandantenfähigkeit von Anfang an vorbereiten.</li>
+            <li>Hosting in der Schweiz oder EU prüfen.</li>
+            <li>Datenexport je Projekt ermöglichen.</li>
+            <li>Retention-Regeln für Audit-Logs definieren.</li>
+            <li>KI-Datenverarbeitung vertraglich und technisch abgrenzen.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>9. Entwickler-Briefing: Arbeitsregeln für die Umsetzung</h2>
+      <ul>
+        <li>Keine Fachlogik direkt im Frontend erzwingen. Berechtigungen müssen im Backend geprüft werden.</li>
+        <li>Keine öffentlichen Dateipfade speichern oder ausgeben.</li>
+        <li>Jede Datei erhält Metadaten, Besitzer, Projektbezug und Zugriffskontext.</li>
+        <li>Planpositionen relativ zum Plan speichern, nicht als absolute Bildschirmkoordinaten.</li>
+        <li>Planversionen sind unveränderliche Referenzen für historische Bilder.</li>
+        <li>KI-Funktionen asynchron über Queue umsetzen.</li>
+        <li>KI-Ergebnisse als automatisch generiert kennzeichnen.</li>
+        <li>Alle Module mit Feature Tests absichern.</li>
+        <li>MVP klar halten und Erweiterungen nicht in Grundmodule vermischen.</li>
+        <li>API-Endpunkte konsistent dokumentieren.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>10. Empfohlene Codex-Agenten</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Agent</th>
+            <th>Verantwortung</th>
+            <th>Output</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Architektur-Agent</td>
+            <td>Projektstruktur, Modulgrenzen, technische Standards</td>
+            <td>README, Architekturkonzept, Ordnerstruktur</td>
+          </tr>
+          <tr>
+            <td>Datenbank-Agent</td>
+            <td>Migrationen, Beziehungen, Indexe, Seed-Daten</td>
+            <td>Migrations, Models, DB-Dokumentation</td>
+          </tr>
+          <tr>
+            <td>Auth-/Security-Agent</td>
+            <td>Login, Rollen, Rechte, Zugriffsschutz</td>
+            <td>Policies, Middleware, Tests</td>
+          </tr>
+          <tr>
+            <td>Projektstruktur-Agent</td>
+            <td>Projekte, Gebäude, Etagen, Räume, Gewerke</td>
+            <td>CRUD, APIs, UI-Komponenten</td>
+          </tr>
+          <tr>
+            <td>Plan-Agent</td>
+            <td>Planverwaltung, Versionen, Viewer</td>
+            <td>Planmodule, Uploads, Versionierung</td>
+          </tr>
+          <tr>
+            <td>Foto-Agent</td>
+            <td>Fotoaufnahme, Upload, Galerie, Kommentare</td>
+            <td>Foto-API, Upload-UI, mobile Aufnahme</td>
+          </tr>
+          <tr>
+            <td>Planposition-Agent</td>
+            <td>Koordinatenlogik, Planmarker, Ortssuche</td>
+            <td>Planmarker, Suchlogik, Tests</td>
+          </tr>
+          <tr>
+            <td>Audit-Agent</td>
+            <td>Zugriffsprotokolle und Admin-Ansichten</td>
+            <td>Audit Events, Audit UI, Filter</td>
+          </tr>
+          <tr>
+            <td>KI-Agent</td>
+            <td>Bildanalyse, Transkription, semantische Suche</td>
+            <td>Worker, KI-Metadaten, Suchschnittstelle</td>
+          </tr>
+          <tr>
+            <td>Test-Agent</td>
+            <td>Feature Tests, Rechte-Tests, Upload-Tests</td>
+            <td>Test-Suite und Testbericht</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>11. Risiken und Gegenmassnahmen</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Risiko</th>
+            <th>Auswirkung</th>
+            <th>Gegenmassnahme</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>MVP wird zu gross</td>
+            <td>Projekt verzögert sich, Codex-Agenten arbeiten unscharf</td>
+            <td>MVP hart auf Foto, Plan, Position, Rechte, Audit und Chronologie begrenzen</td>
+          </tr>
+          <tr>
+            <td>Planpositionen falsch modelliert</td>
+            <td>Spätere Suche wird unbrauchbar</td>
+            <td>Planposition als eigenes Kernmodul mit Planversion behandeln</td>
+          </tr>
+          <tr>
+            <td>Rechte nur im Frontend</td>
+            <td>Sicherheitsrisiko</td>
+            <td>Backend Policies, private Dateien und Zugriffstests erzwingen</td>
+          </tr>
+          <tr>
+            <td>KI wird überschätzt</td>
+            <td>Falsche fachliche Aussagen</td>
+            <td>KI nur als Assistenz- und Suchfunktion, mit Kennzeichnung und manueller Korrektur</td>
+          </tr>
+          <tr>
+            <td>Drittintegrationen zu früh</td>
+            <td>Hoher Aufwand vor stabilem Kern</td>
+            <td>Integrationstabellen vorbereiten, echte Integrationen erst später umsetzen</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>12. Zusammenfassung für Entwickler</h2>
+      <p>
+        Der erste Projektumfang ist eine sichere, planbasierte Baufortschrittsdokumentation. Der MVP muss keine vollständige
+        Bauplattform sein. Entscheidend ist, dass Bilder korrekt aufgenommen, verortet, geschützt, chronologisch angezeigt,
+        gefiltert und protokolliert werden.
+      </p>
+      <p>
+        Die Architektur muss so vorbereitet werden, dass spätere Erweiterungen wie Panorama, Sprachtranskription, KI-Suche,
+        QR-Codes, Exporte, Mängel-Light und Drittintegrationen sauber ergänzt werden können.
+      </p>
+
+      <div class="pill-row">
+        <span class="pill">Laravel</span>
+        <span class="pill">PostgreSQL</span>
+        <span class="pill">Object Storage</span>
+        <span class="pill">PWA</span>
+        <span class="pill">Planpositionen</span>
+        <span class="pill">Private Dateien</span>
+        <span class="pill">Audit-Log</span>
+        <span class="pill">pgvector später</span>
+        <span class="pill">KI später</span>
+      </div>
+    </section>
+
+    <div class="footer">
+      Leistungskatalog Version 1.0 · erstellt als Projektumfang und Entwickler-Briefing
+    </div>
+  </main>
+</body>
+</html>

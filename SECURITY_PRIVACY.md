@@ -46,7 +46,8 @@ Berechtigungen gelten pro Organisation, Projekt und Ressource.
 - Geschützte Bereiche nur mit gültiger Anmeldung.
 - Passwort-Reset sicher umsetzen.
 - Admin-2FA prüfen.
-- Session- oder Token-Strategie in Phase 2 finalisieren.
+- Laravel Sanctum für First-Party-PWA-Authentifizierung verwenden.
+- Token-Strategie für spätere native Apps erst bei Bedarf prüfen.
 
 ## Autorisierung
 
@@ -142,7 +143,7 @@ Zu prüfen bei EU-Benutzern, EU-Projekten, EU-Auftraggebern, EU-Hosting oder EU-
 
 ## Security Review Checklist
 
-- [ ] Authentifizierung definiert.
+- [x] Authentifizierung als Laravel Sanctum geplant.
 - [ ] Autorisierung serverseitig umgesetzt.
 - [ ] Rollen und Rechte getestet.
 - [ ] Eingaben validiert.
@@ -155,11 +156,11 @@ Zu prüfen bei EU-Benutzern, EU-Projekten, EU-Auftraggebern, EU-Hosting oder EU-
 
 ## Privacy Review Checklist
 
-- [ ] Personenbezogene Daten identifiziert.
-- [ ] Datenminimierung geprüft.
-- [ ] Zwecke dokumentiert.
-- [ ] Lösch- und Aufbewahrungsregeln definiert.
+- [x] Personenbezogene Daten identifiziert.
+- [x] Datenminimierung geprüft.
+- [x] Zwecke dokumentiert.
+- [ ] Lösch- und Aufbewahrungsregeln final definiert.
 - [ ] Export-/Auskunftsfähigkeit geprüft.
-- [ ] Externe Dienstleister dokumentiert.
+- [ ] Externe Dienstleister final dokumentiert.
 - [ ] Hosting Schweiz/EU geprüft.
-- [ ] KI-Verarbeitung separat geprüft, falls aktiviert.
+- [x] KI-Verarbeitung als nicht-MVP markiert.
