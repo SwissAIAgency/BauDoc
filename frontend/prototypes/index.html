@@ -858,10 +858,13 @@
       flex-wrap: wrap;
     }
     .vd-proj-pills {
-      display: inline-flex;
+      display: flex;
       align-items: center;
       gap: 6px;
       flex-wrap: wrap;
+      min-width: 0;        /* darf unter Inhaltsbreite schrumpfen */
+      flex: 1 1 280px;      /* Min-Baseline 280px; w├ñchst mit der Reihe
+                               bis .vd-proj-tools rechts anst├Â├ƒt */
     }
     .vd-proj-pill {
       position: relative;
@@ -917,9 +920,15 @@
     .vd-proj-tools {
       display: inline-flex;
       align-items: center;
-      gap: var(--space-1);
-      margin-left: auto;
-      flex-shrink: 0;
+      gap: var(--space-2);
+      margin-left: auto;     /* pusht Tools an den rechten Card-Rand,
+                               erzeugt Breathing-Room zwischen Pills und
+                               Border-Left-Separator */
+      flex-shrink: 0;        /* Tools schrumpfen nie unter ihre
+                               Mindestbreite (Neueste + 3 View-Icons
+                               + Padding) */
+      padding-left: var(--space-3);
+      border-left: 1px solid var(--border-subtle);
     }
     .vd-proj-toolgrp {
       display: inline-flex;
@@ -2140,14 +2149,14 @@
             <path d="M8 10v4"/><path d="M12 10v2"/><path d="M16 10v6"/>
           </svg>
           <span class="vd-nav-item-label">Projekte</span>
-          <span class="vd-nav-item-count">12</span>
+          <span class="vd-nav-item-count" id="vd-count-sidebar-projekte" data-demo-counts="true" title="Aus window.VISIDOC_DEMO (deterministisch)">—</span>
         </a>
         <a class="vd-nav-item" href="#" data-nav="galerie" data-label="Galerie">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
           </svg>
           <span class="vd-nav-item-label">Galerie</span>
-          <span class="vd-nav-item-count">1'284</span>
+          <span class="vd-nav-item-count" id="vd-count-sidebar-galerie" data-demo-counts="true" title="Aus window.VISIDOC_DEMO (deterministisch)">—</span>
         </a>
         <a class="vd-nav-item" href="#" data-nav="archiv" data-label="Archiv">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -2216,21 +2225,7 @@
               <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
             </svg>
           </button>
-          <button class="vd-theme-pill" type="button" role="switch" aria-checked="true" data-state="dark" aria-label="Theme wechseln" title="Theme wechseln" id="vd-theme-toggle">
-            <span class="vd-theme-pill-sun" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/>
-                <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/>
-                <line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/>
-                <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/>
-              </svg>
-            </span>
-            <span class="vd-theme-pill-thumb" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-              </svg>
-            </span>
-          </button>
+          <vd-theme-toggle></vd-theme-toggle>
         </div>
       </header>
       <div class="vd-app-scroll">
@@ -2278,19 +2273,19 @@
         <div class="vd-kpi-grid">
           <div class="vd-kpi">
             <span class="vd-kpi-label">Aktive Projekte</span>
-            <span class="vd-kpi-value">12</span>
+            <span class="vd-kpi-value" id="vd-count-kpi-projekte" data-demo-counts="true" title="Aus window.VISIDOC_DEMO (deterministisch)">—</span>
             <span class="vd-kpi-delta vd-kpi-delta--up">+2 seit letztem Monat</span>
             <div class="vd-kpi-spark"><svg viewBox="0 0 80 24" preserveAspectRatio="none"><path d="M 0.0,24.0 L 13.3,18.0 L 26.7,12.0 L 40.0,12.0 L 53.3,6.0 L 66.7,0.0 L 80.0,0.0" fill="none" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           </div>
           <div class="vd-kpi">
             <span class="vd-kpi-label">Medien (gesamt)</span>
-            <span class="vd-kpi-value">1'284</span>
+            <span class="vd-kpi-value" id="vd-count-kpi-medien" data-demo-counts="true" title="Aus window.VISIDOC_DEMO (deterministisch)">—</span>
             <span class="vd-kpi-delta vd-kpi-delta--up">+148 diese Woche</span>
             <div class="vd-kpi-spark"><svg viewBox="0 0 80 24" preserveAspectRatio="none"><path d="M 0.0,24.0 L 13.3,20.4 L 26.7,17.3 L 40.0,13.7 L 53.3,9.5 L 66.7,4.3 L 80.0,0.0" fill="none" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           </div>
           <div class="vd-kpi vd-kpi--info">
             <span class="vd-kpi-label">Pläne gesamt</span>
-            <span class="vd-kpi-value">142</span>
+            <span class="vd-kpi-value" id="vd-count-kpi-plaene" data-demo-counts="true" title="Aus window.VISIDOC_DEMO (deterministisch)">—</span>
             <span class="vd-kpi-delta">17 im aktiven Projekt</span>
             <div class="vd-kpi-spark"><svg viewBox="0 0 80 24" preserveAspectRatio="none"><path d="M 0.0,24.0 L 13.3,18.5 L 26.7,15.3 L 40.0,10.9 L 53.3,7.6 L 66.7,2.2 L 80.0,0.0" fill="none" stroke="var(--status-info)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           </div>
@@ -2432,7 +2427,7 @@
         <div class="vd-page-head">
           <div>
             <h1 class="vd-page-title">Projekte</h1>
-            <p class="vd-page-subtitle">12 aktive Projekte · 1'284 Medien gesamt · 4 in Prüfung · 1 abgelehnt</p>
+            <p class="vd-page-subtitle"><span id="vd-count-page-projekte" data-demo-counts="true" title="Aus window.VISIDOC_DEMO (deterministisch)">—</span> aktive Projekte · <span id="vd-count-page-medien" data-demo-counts="true" title="Aus window.VISIDOC_DEMO (deterministisch)">—</span> Medien gesamt · <span id="vd-count-page-pruefung" data-demo-counts="true" title="Aus window.VISIDOC_DEMO (deterministisch)">—</span> in Prüfung · <span id="vd-count-page-abgelehnt" data-demo-counts="true" title="Aus window.VISIDOC_DEMO (deterministisch)">—</span> abgelehnt</p>
           </div>
         </div>
 
@@ -3725,6 +3720,8 @@
     </div>
   </div>
 
+  <script src="components/vd-theme-toggle.js"></script>
+
   <script>
   // ============================================================
   // VISIDOC PROJEKT-DETAIL MODULE (inline-migriert aus data/*.js)
@@ -4002,6 +3999,51 @@
       tags: TAGS
     };
   })(window);
+
+  // ============================================================
+  // DEMO-COUNTS: befüllt alle [data-demo-counts="true"] Spans
+  // mit Live-Werten aus window.VISIDOC_DEMO. Tausender-Apostroph
+  // für grosse Zahlen. Deterministisch via Mulberry32-PRNG.
+  // Setzt "—" als Initialwert in HTML, damit vor dem Script-Lauf
+  // kein "12" / "1'284" als veraltete Demo-Literatur sichtbar ist.
+  // ============================================================
+  (function () {
+    'use strict';
+    var D = window.VISIDOC_DEMO;
+    if (!D || !D.projekte || !D.medien) return;
+    var fmt = function (n) {
+      return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+    };
+    var aktiveProjekte = D.projekte.filter(function (p) {
+      return p.status === 'Aktiv';
+    }).length;
+    var medienGesamt = D.medien.length;
+    var plaeneGesamt = D.medien.filter(function (m) {
+      return m.typ === 'plan';
+    }).length;
+    var inPruefung = D.projekte.filter(function (p) {
+      return p.prüfStatus === 'In Prüfung';
+    }).length;
+    var abgelehnt = D.projekte.filter(function (p) {
+      return p.prüfStatus === 'Abgelehnt';
+    }).length;
+    function set(id, value) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = value;
+    }
+    // Sidebar (Platzhalter — am prominentesten sichtbar)
+    set('vd-count-sidebar-projekte', aktiveProjekte);
+    set('vd-count-sidebar-galerie', fmt(medienGesamt));
+    // KPI-Kacheln im Dashboard-Hero
+    set('vd-count-kpi-projekte', aktiveProjekte);
+    set('vd-count-kpi-medien', fmt(medienGesamt));
+    set('vd-count-kpi-plaene', fmt(plaeneGesamt));
+    // Page-Subtitle auf dem Projekte-Screen
+    set('vd-count-page-projekte', aktiveProjekte);
+    set('vd-count-page-medien', fmt(medienGesamt));
+    set('vd-count-page-pruefung', inPruefung);
+    set('vd-count-page-abgelehnt', abgelehnt);
+  })();
 
   // ---- data/thumbnails.js (inline) ----
   /* ============================================================
@@ -4388,10 +4430,10 @@
       const ctx = {
         rect: (x, y, w, h, fill, stroke, sw) => {
           const a = `M${x} ${y}h${w}v${h}h-${w}z`;
-          ops.push(`<path d="${a}" fill="${fill}"${stroke ? ` stroke="${stroke}" stroke-width="${sw || 0.4}"` : ''}/>`);
+          ops.push(`<path d="${a}" fill="${fill}"${stroke ? \` stroke="${stroke}" stroke-width="${sw || 0.4}"\` : ''}/>`);
         },
         circle: (x, y, r, fill, stroke, sw) => {
-          ops.push(`<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}"${stroke ? ` stroke="${stroke}" stroke-width="${sw || 0.4}"` : ''}/>`);
+          ops.push(`<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}"${stroke ? \` stroke="${stroke}" stroke-width="${sw || 0.4}"\` : ''}/>`);
         },
         line: (x1, y1, x2, y2, stroke, sw) => {
           ops.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${sw || 0.5}" stroke-linecap="round"/>`);
@@ -5455,23 +5497,10 @@
   'use strict';
 
   // ============================================================
-  // THEME PERSISTENZ
+  // THEME PERSISTENZ — ausgelagert nach components/vd-theme-toggle.js
+  // (Custom Element <vd-theme-toggle>). Die alte inline-Logik wurde
+  // am 2026-06-19 ersetzt. Siehe COMPONENTS.md.
   // ============================================================
-  const themeBtn = document.getElementById('vd-theme-toggle');
-  function setTheme(next) {
-    document.documentElement.setAttribute('data-theme', next);
-    themeBtn.setAttribute('data-state', next);
-    themeBtn.setAttribute('aria-checked', next === 'dark');
-    try { localStorage.setItem('visidoc-theme', next); } catch (_) {}
-  }
-  try {
-    const stored = localStorage.getItem('visidoc-theme');
-    const system = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-    setTheme(stored || system);
-  } catch (_) {}
-  themeBtn.addEventListener('click', () => {
-    setTheme(themeBtn.getAttribute('data-state') === 'dark' ? 'light' : 'dark');
-  });
 
   // ============================================================
   // SIDEBAR TOGGLE
