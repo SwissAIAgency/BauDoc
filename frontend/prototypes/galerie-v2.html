@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<!--
+  LAYOUT-SANDBOX — NICHT TEIL DER LIVE-APP
+  =========================================
+  Diese Datei ist ein eigenständiges Layout-Sandboxing für eine
+  alternative Serpentine-Galerie-Visualisierungsidee. Sie wird
+  NICHT von `index.html` instanziiert oder referenziert, nicht
+  über die Sidebar erreicht, und teilt keine Daten mit der
+  Live-App (eigener statischer `MEDIA`-Pool, 32 Bilder aus
+  `assets/generated/`).
+
+  Status: 🟠 READ-ONLY (siehe frontend/prototypes/COMPONENTS.md,
+         Sektion "Standalone-Sandboxes").
+
+  Workflow:
+  - Wer die Serpentine-Idee in die App übernehmen will, baut sie
+    in `index.html` ein — diese Sandbox bleibt parallel bestehen
+    und wird erst nach Live-Schaltung in `archive/vN/` snapshoten.
+  - Diese Datei direkt anpassen ist verboten. Änderungen werden
+    in `index.html` gemacht, nicht hier.
+-->
+<html lang="de-CH" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VisiDoc – Galerie (Serpentine mit Keimlinie) · LAYOUT-SANDBOX</title>
+<style>
+/* ============================================================
+   DESIGN-TOKENS — strikt aus frontend/prototypes/DESIGN.md
+   ============================================================ */
+:root, [data-theme="dark"] {
+  --bg-base:        #14181B;
+  --bg-panel:       #1F2429;
+  --bg-raised:      #2A2F35;
+  --border-default: #2F353C;
+  --border-subtle:  rgba(255, 255, 255, 0.06);
+  --text-high:      #F2F4F7;
+  --text-mid:       #A3ACB8;
+  --text-low:       #6B7480;
+  --color-primary:  #668048;  /* Salwei — einziger Akzent */
+  --color-primary-hover: #7A9359;
+  --color-primary-press: #566B3D;
+  --color-primary-soft:  rgba(102, 128, 72, 0.14);
+  --font-sans: Inter, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --radius-container: 10px;
+  --radius-small:    8px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+}
+
+[data-theme="light"] {
+  --bg-base:        #F7F8F5;
+  --bg-panel:       #FFFFFF;
+  --bg-raised:      #EDEFE9;
+  --border-default: #D9DCD3;
+  --border-subtle:  rgba(31, 36, 41, 0.08);
+  --text-high:      #1F2429;
+  --text-mid:       #5A636C;
+  --text-low:       #8B929B;
+  --color-primary:  #668048;
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--bg-base);
+  color: var(--text-high);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   PAGE-CHROME (minimal — Topbar + Layout-Switcher)
+   ============================================================ */
+.page-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+  padding: 24px 40px 16px;
+  border-bottom: 1px solid var(--border-default);
+}
+.page-head h1 {
+  font-size: 26px; font-weight: 600; margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+.page-head-sub { color: var(--text-mid); font-size: 13px; margin: 0; }
+.layout-switcher {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px; background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-small);
+}
+.layout-switcher button {
+  width: 32px; height: 28px; border: none; background: transparent;
+  color: var(--text-mid); font: 500 12px var(--font-mono);
+  cursor: pointer; border-radius: 5px;
+  transition: all 0.2s ease;
+}
+.layout-switcher button:hover { color: var(--text-high); }
+.layout-switcher button[aria-pressed="true"] {
+  background: var(--color-primary-soft); color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+}
+
+/* ============================================================
+   TIMELINE-CONTAINER
+   ============================================================ */
+.serpentine {
+  position: relative;
+  padding: 0 80px;
+  margin: 0 auto;
+  max-width: 1400px;
+  width: 100%;
+}
+
+/* SVG-Overlay für Keimlinie */
+.serpentine-svg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 5;
+  overflow: visible;
+}
+
+/* Path: Salwei-Akzent, 2.5px, leichter Glow via opacity */
+.serpentine-path {
+  stroke: var(--color-primary);
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px rgba(102, 128, 72, 0.35));
+  opacity: 0.7;
+}
+.serpentine-arrow-head { fill: var(--color-primary); }
+
+/* Path-Knoten (Marker auf der Linie) */
+.path-node {
+  fill: var(--color-primary);
+  stroke: var(--bg-base);
+  stroke-width: 2;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.path-node:hover {
+  transform: scale(1.3);
+  filter: brightness(1.2);
+}
+
+/* ============================================================
+   GRID + CELLS
+   ============================================================ */
+.rows {
+  position: relative;
+  z-index: 10;
+}
+.row {
+  position: relative;
+  display: grid;
+  gap: 32px;  /* gutter */
+}
+
+/* Cell: Bild + Stamm (Strich) + Marker-Reihe (Datum • Zeit) */
+.cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  max-width: 240px;        /* begrenzt → sideOffset kann konsistent ausserhalb bleiben */
+}
+.cell-img {
+  width: 100%;
+  aspect-ratio: 16 / 9;     /* aspect-video */
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-small);
+  overflow: hidden;
+  position: relative;
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.cell:hover .cell-img {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  transform: translateY(-10px);
+  z-index: 20;
+  border-color: var(--color-primary);
+}
+
+/* Feiner vertikaler Strich vom Bild zum Marker-Punkt.
+   Wird im Layout nicht mehr separat gerendert — der mini-stem
+   uebernimmt die durchgehende Linie vom Timestamp bis zum Punkt. */
+.cell-stem {
+  width: 1px;
+  height: 0;
+  margin: 0;
+  background: var(--color-primary);
+  opacity: 0;
+}
+
+/* Marker-Punkt: 5px-Kreis, zentriert unter dem Strich.
+   Position dieses Elements ist der SVG-Pfad-Anker (Linie läuft durch ihn). */
+.cell-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px var(--bg-base);
+}
+
+/* Mini-Stem: langer vertikaler Strich vom Stempel-Bereich (mit Margin)
+   bis kurz vor dem Punkt. 1px Salwei, halbtransparent. "Bis fast zum
+   Bild" = der Strich faellt visuell auf, ohne das Bild zu beruehren.
+   Margin kommt aus .cell-stamp margin-bottom (12px oben). */
+.cell-mini-stem {
+  width: 1px;
+  height: 56px;
+  background: var(--color-primary);
+  opacity: 0.5;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+/* Stempel-Reihe (zwischen Bild und Timeline): jetzt LEER (Spacer).
+   Datum/Zeit sind in die Timeline-Zelle gewandert (siehe .cell-tl-stamp).
+   Margin halbiert (war 6/12, jetzt 3/6) damit Bild -> Timeline ~50% enger wird. */
+.cell-stamp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin: 3px 0 6px;        /* halbiert: 3px oben (Bild-Stempel), 6px unten (Stempel-Strich) */
+}
+.cell-stamp:empty {
+  min-height: 0;
+  height: 0;
+}
+.cell-sep {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 300;          /* duenner Strich */
+  color: var(--color-primary);
+  opacity: 0.45;             /* etwas dezenter als Datum/Zeit */
+  line-height: 1;
+  user-select: none;
+}
+
+/* Timeline-Reihe: Strich + Punkt + Datum/Zeit (unter dem Punkt).
+   Datum/Zeit sind aus .cell-stamp HIERHER gewandert. */
+.cell-timeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;       /* Strich + Punkt + Stempel -> Bildmitte */
+  width: 100%;
+  gap: 4px;                  /* Abstand zwischen Strich-Punkt-Stempel */
+  margin-top: 0;
+}
+.cell-tl-stamp {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+.cell-date, .cell-time {
+  font-family: var(--font-mono);
+  font-size: 10px;           /* kompakte Galerie-Groesse */
+  font-weight: 500;
+  color: var(--color-primary);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  text-transform: uppercase;
+  opacity: 0.7;
+  line-height: 1;
+}
+/* Wenn Datum/Zeit in .cell-tl-stamp liegen, Separator etwas kleiner
+   damit er visuell zwischen Datum und Zeit sitzt ohne zu dominieren. */
+.cell-tl-stamp .cell-sep {
+  font-size: 9px;
+  opacity: 0.55;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1100px) {
+  .serpentine { padding: 0 40px; }
+  .row { gap: 24px; }
+}
+@media (max-width: 760px) {
+  .serpentine { padding: 0 20px; }
+  .row { gap: 16px; }
+  .page-head { padding: 16px 20px 12px; }
+  .page-head h1 { font-size: 22px; }
+  /* Auf Mobile: Keimlinie ausblenden, sonst zu eng */
+  .serpentine-svg { display: none; }
+  .cell-date, .cell-time { font-size: 9px; }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .cell-img, .path-node { transition: none; }
+}
+
+/* Print: nur Schwarz/Weiss, Linie als Strich */
+@media print {
+  .serpentine-svg, .layout-switcher { display: none !important; }
+  .cell-date, .cell-time { color: #000; }
+  .cell-stem, .cell-dot { background: #000; }
+}
+</style>
+</head>
+<body data-theme="dark">
+
+<header class="page-head">
+  <div>
+    <h1>Galerie</h1>
+    <p class="page-head-sub" id="page-head-sub">32 Medien · Serpentine-Timeline mit Viertelkreis-Bögen</p>
+  </div>
+  <div class="layout-switcher" role="group" aria-label="Layout-Switcher">
+    <button type="button" data-layout="0" aria-pressed="false">01</button>
+    <button type="button" data-layout="1" aria-pressed="true">02</button>
+    <button type="button" data-layout="2" aria-pressed="false">03</button>
+    <button type="button" data-layout="3" aria-pressed="false">04</button>
+    <button type="button" data-layout="4" aria-pressed="false">05</button>
+  </div>
+</header>
+
+<main class="serpentine" id="serpentine">
+  <!-- SVG-Overlay: Pfad wird per JS berechnet aus Marker-Positionen -->
+  <svg class="serpentine-svg" id="serpentine-svg" aria-hidden="true">
+    <defs>
+      <marker id="serpentine-arrow" markerWidth="8" markerHeight="8" refX="0" refY="4" orient="auto">
+        <path class="serpentine-arrow-head" d="M 0 0 L 8 4 L 0 8" fill="none" stroke="var(--color-primary)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"></path>
+      </marker>
+    </defs>
+    <path class="serpentine-path" d="" id="serpentine-path" marker-start="url(#serpentine-arrow)" marker-end="url(#serpentine-arrow)"></path>
+  </svg>
+
+  <!-- Zeilen werden per JS gefüllt -->
+  <div class="rows" id="rows"></div>
+</main>
+
+<script>
+/* ============================================================
+   DATEN (32 Beispiel-Bilder aus assets/generated/)
+   ============================================================ */
+const MEDIA = [
+  { src: 'assets/generated/betonwand-stahl-helm.jpg',      ref: '130626.0914' },
+  { src: 'assets/generated/werkhalle-fertig.jpg',           ref: '130626.0914' },
+  { src: 'assets/generated/mauerwerk-kelle.jpg',            ref: '130626.0914' },
+  { src: 'assets/generated/kran-sonnenuntergang.jpg',       ref: '130626.0914' },
+  { src: 'assets/generated/sanitaer-rohre-wasserwaage.jpg', ref: '130626.0914' },
+  { src: 'assets/generated/fassade-geruest-tram.jpg',       ref: '130626.0914' },
+  { src: 'assets/generated/holzdachstuhl-innen.jpg',        ref: '130626.0914' },
+  { src: 'assets/generated/holz-dachstuhl-werkstatt.jpg',   ref: '130626.0914' },
+  { src: 'assets/generated/treppe-schweiss.jpg',            ref: '130626.0914' },
+  { src: 'assets/generated/schulhaus-fassade-herbst.jpg',   ref: '130626.0914' },
+  { src: 'assets/generated/beton-boden-platte.jpg',         ref: '140626.1015' },
+  { src: 'assets/generated/werkhalle-fertig.jpg',           ref: '140626.1015' },
+  { src: 'assets/generated/dach-ziegel.jpg',                ref: '140626.1015' },
+  { src: 'assets/generated/stahl-rahmen-werkhalle.jpg',     ref: '140626.1015' },
+  { src: 'assets/generated/elektro-verteiler.jpg',          ref: '150626.1132' },
+  { src: 'assets/generated/parkett-herringbone.jpg',        ref: '150626.1132' },
+  { src: 'assets/generated/sandstein-reinigung.jpg',        ref: '150626.1132' },
+  { src: 'assets/generated/schulhaus-klassenzimmer.jpg',    ref: '150626.1132' },
+  { src: 'assets/generated/betonwand-stahl-helm.jpg',       ref: '160626.0845' },
+  { src: 'assets/generated/mauerwerk-kelle.jpg',            ref: '160626.0845' },
+  { src: 'assets/generated/kran-sonnenuntergang.jpg',       ref: '160626.0845' },
+  { src: 'assets/generated/treppe-schweiss.jpg',            ref: '160626.0845' },
+  { src: 'assets/generated/sanitaer-rohre-wasserwaage.jpg', ref: '170626.1308' },
+  { src: 'assets/generated/holzdachstuhl-innen.jpg',        ref: '170626.1308' },
+  { src: 'assets/generated/fassade-geruest-tram.jpg',       ref: '170626.1308' },
+  { src: 'assets/generated/beton-boden-platte.jpg',         ref: '170626.1308' },
+  { src: 'assets/generated/dach-ziegel.jpg',                ref: '180626.0924' },
+  { src: 'assets/generated/stahl-rahmen-werkhalle.jpg',     ref: '180626.0924' },
+  { src: 'assets/generated/elektro-verteiler.jpg',          ref: '180626.0924' },
+  { src: 'assets/generated/parkett-herringbone.jpg',        ref: '180626.0924' },
+  { src: 'assets/generated/schulhaus-fassade-herbst.jpg',   ref: '190626.1517' },
+  { src: 'assets/generated/werkhalle-fertig.jpg',           ref: '190626.1517' },
+];
+
+/* ============================================================
+   LAYOUT-KONFIGURATIONEN
+   Pro Layout: Spaltenzahl pro Zeile (Pattern) + Geometrie-Config
+   - rowSpacing:    vertikaler Abstand zwischen den Zeilen
+   - curveRadius:   Radius der Viertelkreis-Ecken
+   - sideOffset:    wie weit der Bogen horizontal nach aussen geht
+   ============================================================ */
+const VARIANT_CONFIGS = [
+  { rowSpacing: '96px',  curveRadius: 90, sideOffset: 120 },  // 0: 3 Reihen × 4
+  { rowSpacing: '72px',  curveRadius: 80, sideOffset: 140 },  // 1: 4 Reihen × 4 (default)
+  { rowSpacing: '60px',  curveRadius: 70, sideOffset: 160 },  // 2: 4 Reihen × 5
+  { rowSpacing: '84px',  curveRadius: 85, sideOffset: 120 },  // 3: 4 Reihen × 3
+  { rowSpacing: '66px',  curveRadius: 75, sideOffset: 140 },  // 4: 3 Reihen × 6
+];
+
+const LAYOUTS = [
+  [4, 4, 4],     // 0
+  [4, 4, 4, 4],  // 1
+  [5, 5, 5, 5],  // 2
+  [3, 3, 3, 3],  // 3
+  [6, 6, 6],     // 4
+];
+
+let currentLayoutIndex = 1;
+
+/* ============================================================
+   LAYOUT-SWITCHER + RENDER
+   ============================================================ */
+function setLayout(index) {
+  currentLayoutIndex = index;
+
+  document.querySelectorAll('.layout-switcher button').forEach((btn, i) => {
+    btn.setAttribute('aria-pressed', i === index ? 'true' : 'false');
+  });
+
+  renderGrid();
+  // requestAnimationFrame ensures layout committed before path calc
+  requestAnimationFrame(updatePath);
+}
+
+function renderGrid() {
+  const container = document.getElementById('rows');
+  container.innerHTML = '';
+  const pattern = LAYOUTS[currentLayoutIndex];
+  const config = VARIANT_CONFIGS[currentLayoutIndex];
+
+  pattern.forEach((colCount, rowIndex) => {
+    const grid = document.createElement('div');
+    grid.className = 'row';
+    grid.style.gridTemplateColumns = `repeat(${colCount}, 1fr)`;
+
+    if (rowIndex < pattern.length - 1) {
+      grid.style.marginBottom = config.rowSpacing;
+    }
+
+    for (let i = 0; i < colCount; i++) {
+      const idx = rowIndex * colCount + i;
+      if (idx >= MEDIA.length) break;
+      const m = MEDIA[idx];
+
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      // Parse ref: "130626.0914" → date "13.06.26", time "09:14" (immer mit Doppelpunkt)
+      let dateStr = '', timeStr = '';
+      if (m.ref.includes('.')) {
+        const [d, t] = m.ref.split('.');
+        if (d && d.length === 6) {
+          dateStr = `${d.slice(0,2)}.${d.slice(2,4)}.${d.slice(4,6)}`;
+        }
+        timeStr = (t && t.length === 4)
+          ? `${t.slice(0,2)}:${t.slice(2,4)}`
+          : (t || '');
+      } else {
+        dateStr = m.ref;
+      }
+      cell.innerHTML = `
+        <div class="cell-img" style="background-image: url('${m.src}')" role="img" aria-label="Baustellen-Foto ${idx + 1}"></div>
+        <div class="cell-stamp" aria-hidden="true"></div>
+        <div class="cell-timeline">
+          <div class="cell-mini-stem" aria-hidden="true"></div>
+          <div class="cell-dot" data-marker aria-label="Marker für ${dateStr} ${timeStr}"></div>
+          <div class="cell-tl-stamp" aria-label="Aufnahme ${dateStr} um ${timeStr}">
+            <span class="cell-date">${dateStr}</span>
+            <span class="cell-sep" aria-hidden="true">↓</span>
+            <span class="cell-time">${timeStr}</span>
+          </div>
+        </div>
+      `;
+      grid.appendChild(cell);
+    }
+    container.appendChild(grid);
+  });
+
+  // Subtitle dynamisch
+  const sub = document.getElementById('page-head-sub');
+  const total = Math.min(MEDIA.length, pattern.reduce((a, b) => a + b, 0));
+  sub.textContent = `${total} Medien · ${pattern.length} Zeilen · Layout ${String(currentLayoutIndex + 1).padStart(2, '0')} · Serpentine mit Viertelkreis-Bögen`;
+}
+
+/* ============================================================
+   PATH-ALGORITHMUS (Boustrophedon mit Viertelkreis-Bögen)
+   - Iteration 0: Start am ersten Marker
+   - Iteration gerade: horizontale Linie zum nächsten Marker
+   - Iteration ungerade: rechtwinkliger Bogen (L→Q→L→Q→L) zur nächsten Zeile
+   ============================================================ */
+function updatePath() {
+  const svg = document.getElementById('serpentine-svg');
+  const path = document.getElementById('serpentine-path');
+  const container = document.getElementById('serpentine');
+  const rows = Array.from(document.querySelectorAll('.row'));
+  if (!rows.length) {
+    path.setAttribute('d', '');
+    return;
+  }
+  const config = VARIANT_CONFIGS[currentLayoutIndex];
+
+  // Alte path-node-Kreise entfernen
+  document.querySelectorAll('.path-node').forEach(n => n.remove());
+
+  function getAnchorPosition(el) {
+    const anchor = el.querySelector('.cell-dot');
+    const containerRect = container.getBoundingClientRect();
+    const mainRect = anchor.getBoundingClientRect();
+    return {
+      x: mainRect.left - containerRect.left + mainRect.width / 2,
+      y: mainRect.top - containerRect.top + mainRect.height / 2,
+    };
+  }
+
+  // pathPoints: für jede Row zwei Punkte (Start, Ende in Lese-Richtung)
+  // Bei geraden Rows (idx % 2 == 0): L→R
+  // Bei ungeraden Rows: R→L
+  const pathPoints = [];
+  rows.forEach((row, rowIndex) => {
+    const children = Array.from(row.children);
+    if (!children.length) return;
+
+    if (rowIndex % 2 === 0) {
+      pathPoints.push(getAnchorPosition(children[0]));
+      pathPoints.push(getAnchorPosition(children[children.length - 1]));
+    } else {
+      pathPoints.push(getAnchorPosition(children[children.length - 1]));
+      pathPoints.push(getAnchorPosition(children[0]));
+    }
+  });
+
+  if (pathPoints.length < 2) return;
+
+  // Geometrie: sideOffset MUSS so gross sein, dass
+  // (a) die vertikale Bogen-Linie AUSSERHALB des Bildrands liegt
+  //     → sideOffset > cellWidth/2
+  // (b) die horizontale Linie vom curr.x zum Viertelkreis-Anfang
+  //     AUSSERHALB des Bildrands liegt
+  //     → sideOffset - radius > cellWidth/2  →  sideOffset > cellWidth/2 + radius
+  // (c) der Bogen nicht über den Container-Padding-Bereich überläuft
+  //     → sideOffset < curr.x - containerPadding  (für Bogen links)
+  //       sideOffset < containerWidth - containerPadding - curr.x  (für Bogen rechts)
+  //
+  // Constraint (b) ist das härteste. Wir messen die breiteste Zelle
+  // und addieren Radius + Sicherheitsmarge.
+  const containerRect = container.getBoundingClientRect();
+  const containerPadding = 80;
+  let maxCellWidth = 0;
+  rows.forEach((row) => {
+    Array.from(row.children).forEach((child) => {
+      const r = child.getBoundingClientRect();
+      if (r.width > maxCellWidth) maxCellWidth = r.width;
+    });
+  });
+  // Radius: kompakt halten UND so, dass der Bogen nicht mehr Höhe
+  // als nötig braucht → radius <= rowSpacing/2, sonst überlappen
+  // die beiden Viertelkreise und der Pfad wird ein "8"-Pfad.
+  const rowSpacingPx = parseFloat(config.rowSpacing);
+  const radius = Math.min(config.curveRadius, 60, (rowSpacingPx / 2) - 6);
+  // sideOffset: muss (a) + (b) erfüllen, darf (c) nicht verletzen
+  const minSideOffset = (maxCellWidth / 2) + radius + 16;  // 16px Sicherheitsmarge
+  const sideOffset = Math.max(config.sideOffset, minSideOffset);
+
+  // SVG-Höhe sicherstellen, dass der Pfad reinpasst
+  // (relevant, weil der Pfad zwischen den Rows nach unten schwingt)
+  const lastRow = rows[rows.length - 1];
+  const lastRect = lastRow.getBoundingClientRect();
+  const neededHeight = (lastRect.bottom - containerRect.top) + sideOffset + 200;
+  if (svg.getAttribute('height') !== String(neededHeight)) {
+    svg.setAttribute('height', String(neededHeight));
+  }
+
+  // Pfad konstruieren
+  let d = `M ${pathPoints[0].x} ${pathPoints[0].y}`;
+
+  for (let i = 0; i < pathPoints.length - 1; i++) {
+    const curr = pathPoints[i];
+    const next = pathPoints[i + 1];
+
+    if (i % 2 === 0) {
+      // Gerade: einfache horizontale Linie zum nächsten Punkt
+      d += ` L ${next.x} ${next.y}`;
+    } else {
+      // Ungerade: rechtwinkliger Bogen (Viertelkreis-Stil)
+      // Bogen rechts wenn i % 4 === 1, sonst links
+      const isRightSide = (i % 4 === 1);
+      if (isRightSide) {
+        d += ` L ${curr.x + (sideOffset - radius)} ${curr.y}`;
+        d += ` Q ${curr.x + sideOffset} ${curr.y} ${curr.x + sideOffset} ${curr.y + radius}`;
+        d += ` L ${curr.x + sideOffset} ${next.y - radius}`;
+        d += ` Q ${curr.x + sideOffset} ${next.y} ${curr.x + (sideOffset - radius)} ${next.y}`;
+      } else {
+        d += ` L ${curr.x - (sideOffset - radius)} ${curr.y}`;
+        d += ` Q ${curr.x - sideOffset} ${curr.y} ${curr.x - sideOffset} ${curr.y + radius}`;
+        d += ` L ${curr.x - sideOffset} ${next.y - radius}`;
+        d += ` Q ${curr.x - sideOffset} ${next.y} ${curr.x - (sideOffset - radius)} ${next.y}`;
+      }
+      d += ` L ${next.x} ${next.y}`;
+    }
+  }
+
+  path.setAttribute('d', d);
+
+  // Path-Node-Kreise an jedem Marker rendern
+  rows.forEach((row) => {
+    Array.from(row.children).forEach((child) => {
+      const pos = getAnchorPosition(child);
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', pos.x);
+      circle.setAttribute('cy', pos.y);
+      circle.setAttribute('r', '5');
+      circle.setAttribute('class', 'path-node');
+      svg.appendChild(circle);
+    });
+  });
+}
+
+/* ============================================================
+   INIT + EVENT HANDLER
+   ============================================================ */
+document.querySelectorAll('.layout-switcher button').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    setLayout(Number(btn.dataset.layout));
+  });
+});
+
+window.addEventListener('resize', () => requestAnimationFrame(updatePath));
+
+// URL-Parameter ?layout=N für Direkt-Verlinkung (QA + Sharing)
+const urlParams = new URLSearchParams(window.location.search);
+const initialLayout = urlParams.get('layout');
+const initialIdx = (initialLayout !== null && LAYOUTS[Number(initialLayout)])
+  ? Number(initialLayout)
+  : currentLayoutIndex;
+setLayout(initialIdx);
+</script>
+
+</body>
+</html>
