@@ -4430,10 +4430,10 @@
       const ctx = {
         rect: (x, y, w, h, fill, stroke, sw) => {
           const a = `M${x} ${y}h${w}v${h}h-${w}z`;
-          ops.push(`<path d="${a}" fill="${fill}"${stroke ? \` stroke="${stroke}" stroke-width="${sw || 0.4}"\` : ''}/>`);
+          ops.push(`<path d="${a}" fill="${fill}"${stroke ? ` stroke="${stroke}" stroke-width="${sw || 0.4}"` : ''}/>`);
         },
         circle: (x, y, r, fill, stroke, sw) => {
-          ops.push(`<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}"${stroke ? \` stroke="${stroke}" stroke-width="${sw || 0.4}"\` : ''}/>`);
+          ops.push(`<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}"${stroke ? ` stroke="${stroke}" stroke-width="${sw || 0.4}"` : ''}/>`);
         },
         line: (x1, y1, x2, y2, stroke, sw) => {
           ops.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${sw || 0.5}" stroke-linecap="round"/>`);
@@ -5951,6 +5951,7 @@
         `;
       }).join('');
     }
+  }
   function galTlMarkerHTML(m, noTail) {
     // Nur der Punkt – Datum+Zeit stehen bereits unter dem Bild
     // (vd-gal-cell-stamp). Der Tooltip beim Hover zeigt sie nochmal.
