@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="de-CH" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BauDoc · Timeline-Filmstreifen (V5) · Galerie-Navigator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- ============================================================
+       PREVIEW-CARD SPEC (LOCKED)
+       Quelle der Geometrie-Werte: frontend/prototypes/preview-card-spec.css
+       Dokumentation:             docs/ux/concepts/preview-card-spec.md
+       Aenderungen an dieser Verlinkung sind Aenderungen an der Spec
+       (siehe COMPONENTS.md Aenderungsjournal).
+       ============================================================ -->
+  <!-- ============================================================
+       DESIGN-TOKENS + APP-SHELL (gem. UI_STANDARDS.md / DESIGN.md)
+       Quelle der Geometrie-Werte: frontend/prototypes/app-shell.css
+       Preview-Card Geometrie:      frontend/prototypes/preview-card-spec.css
+       Aenderungen nur ueber die Spec, niemals hier direkt.
+       ============================================================ -->
+  <link rel="stylesheet" href="../frontend/prototypes/app-shell.css">
+  <link rel="stylesheet" href="../frontend/prototypes/preview-card-spec.css">
+  <style>
+    /* ============================================================
+       LOKALE OVERRIDES (nur Filmstrip-spezifisch)
+       Globale Tokens leben in app-shell.css. Hier nur:
+       - Filmstrip-Hoehe (per Switcher ueberschrieben)
+       - Border-strong (im app-shell nicht definiert, daher hier)
+       - Page-Container-Padding
+       ============================================================ */
+    :root, [data-theme="dark"] {
+      --border-strong:  #3a424a;
+      --strip-h: 104px;
+    }
+    [data-theme="light"] {
+      --border-strong:  #b8c5d1;
+    }
+
+    /* Preview-Card Geometrie-Override: dieses Template verwendet eine
+       breitere Card (max-width: 720px). Werte aus preview-card-spec.css
+       sind LOCKED, daher keine Aenderung. */
+    .preview-card { max-width: 720px; }
+
+    /* ============================================================
+       PAGE-LAYOUT
+       ============================================================ */
+    .app {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 0 var(--space-6) var(--space-8);
+    }
+
+    /* ============================================================
+       SUB-TOPBAR (BauDoc-Kontext unterhalb der vd-topbar)
+       Vorbild: projekt-detail Sub-Topbar im Haupt-App-Showcase.
+       ============================================================ */
+    .vd-subtopbar {
+      position: sticky;
+      top: var(--topbar-height);
+      z-index: 9;
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: 0 var(--space-6);
+      height: var(--subtopbar-height, 48px);
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border-default);
+      margin: 0 calc(-1 * var(--space-6)) var(--space-5);
+    }
+    .vd-subtopbar-crumbs {
+      display: flex; align-items: center; gap: var(--space-2);
+      font-size: 13px;
+      color: var(--text-mid);
+      flex: 1; min-width: 0;
+      white-space: nowrap; overflow: hidden;
+    }
+    .vd-subtopbar-crumbs b { color: var(--text-high); font-weight: 600; }
+    .vd-subtopbar-crumbs .sep { color: var(--text-low); }
+    .vd-subtopbar-crumbs .crumb-tag {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-low);
+      padding: 2px 6px;
+      background: var(--bg-raised);
+      border-radius: 3px;
+    }
+    .vd-subtopbar-actions {
+      display: flex; align-items: center; gap: var(--space-2);
+    }
+
+    /* ============================================================
+       FILTER-BAR (typisch VisiDoc)
+       ============================================================ */
+    .filterbar {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background: var(--bg-panel);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-container);
+      margin-bottom: var(--space-5);
+      flex-wrap: wrap;
+    }
+    .filterbar-search {
+      flex: 1; min-width: 220px;
+      height: 30px; padding: 0 10px 0 32px;
+      background: var(--bg-base);
+      border: 1px solid var(--border-default);
+      color: var(--text-high);
+      border-radius: var(--radius-small);
+      font-size: 12.5px;
+      font-family: var(--font-sans);
+      position: relative;
+    }
+    .filterbar-search-wrap { position: relative; flex: 1; min-width: 220px; }
+    .filterbar-search-wrap svg {
+      position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+      width: 14px; height: 14px; color: var(--text-low);
+    }
+    .filter-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 30px; padding: 0 12px;
+      background: transparent; border: 1px solid var(--border-default);
+      color: var(--text-mid); border-radius: var(--radius-pill);
+      font-size: 12px; font-weight: 500;
+      cursor: pointer;
+    }
+    .filter-chip:hover { color: var(--text-high); border-color: var(--border-strong); }
+    .filter-chip--active {
+      background: var(--color-primary-soft); color: var(--color-primary);
+      border-color: rgba(102, 128, 72, 0.4);
+    }
+    .filter-chip .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: currentColor; opacity: 0.7;
+    }
+    .filter-count {
+      margin-left: auto;
+      font-family: var(--font-mono); font-size: 11.5px;
+      color: var(--text-low);
+    }
+    .filter-count b { color: var(--text-high); font-weight: 600; }
+
+    /* ============================================================
+       SECTION-HEAD (Kontext zur Filmstreifen-Logik)
+       ============================================================ */
+    .section-head {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      gap: var(--space-4);
+      margin-bottom: var(--space-3);
+      flex-wrap: wrap;
+    }
+    .section-head-title {
+      font-size: 14px; font-weight: 600; margin: 0;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-head-title .num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px;
+      border-radius: var(--radius-small);
+      background: var(--color-primary-soft); color: var(--color-primary);
+      font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+    }
+    .section-head-sub {
+      font-size: 12px; color: var(--text-mid); margin: 2px 0 0;
+    }
+    .section-head-actions {
+      display: flex; gap: var(--space-2); align-items: center;
+    }
+    .variant-switch {
+      display: inline-flex;
+      background: var(--bg-raised);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-container);
+      padding: 2px;
+    }
+    .variant-switch button {
+      height: 24px; padding: 0 10px;
+      background: transparent; border: none;
+      color: var(--text-mid);
+      font-family: var(--font-sans); font-size: 11.5px; font-weight: 500;
+      border-radius: 5px; cursor: pointer;
+    }
+    .variant-switch button:hover { color: var(--text-high); }
+    .variant-switch button.is-active {
+      background: var(--color-primary); color: #0a1216; font-weight: 600;
+    }
+
+    /* ============================================================
+       MEDIA-GRID (40 Mock-Medien)
+       ============================================================ */
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: var(--space-3);
+      padding-bottom: 6px; /* war 12px -> nochmal -50% fuer dichteren Anschluss an die Preview/Timeline */
+    }
+    .m-card {
+      position: relative;
+      border-radius: var(--radius-container);
+      overflow: hidden;
+      background: var(--bg-raised);
+      border: 1px solid var(--border-default);
+      aspect-ratio: 4 / 3;
+      cursor: pointer;
+      transition: 180ms ease;
+    }
+    .m-card:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-1px);
+    }
+    .m-card.is-active {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px var(--color-primary-soft), 0 8px 18px rgba(0,0,0,0.35);
+    }
+    .m-card.is-target-flash {
+      animation: target-flash 1.4s ease;
+    }
+    @keyframes target-flash {
+      0%   { box-shadow: 0 0 0 0 var(--color-primary); }
+      40%  { box-shadow: 0 0 0 6px var(--color-primary-soft); }
+      100% { box-shadow: 0 0 0 0 transparent; }
+    }
+
+    .m-thumb {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-size: 9.5px;
+      color: var(--text-low);
+      letter-spacing: 0.04em;
+      z-index: 0;
+    }
+    .m-thumb--photo {
+      background:
+        linear-gradient(135deg, #243442 0%, #1a2632 60%, #243442 100%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 4px);
+    }
+    .m-thumb--plan {
+      background: #0e1a23;
+      position: relative;
+      overflow: hidden;
+    }
+    .m-thumb--plan::before {
+      content: ""; position: absolute; inset: 0;
+      background:
+        linear-gradient(transparent 49.5%, rgba(102, 128, 72, 0.18) 50%, transparent 50.5%),
+        linear-gradient(90deg, transparent 49.5%, rgba(102, 128, 72, 0.18) 50%, transparent 50.5%);
+      z-index: 1;
+    }
+    .m-thumb--plan::after {
+      content: ""; position: absolute; inset: 12%;
+      border: 1px solid var(--color-primary);
+      border-radius: 2px;
+      opacity: 0.5;
+      z-index: 1;
+    }
+    .m-thumb--video {
+      background: radial-gradient(circle at 50% 45%, #2a3d4d 0%, #0f1720 70%);
+      position: relative;
+    }
+    .m-thumb--video::before {
+      content: ""; position: absolute;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 0; height: 0;
+      border-left: 12px solid var(--color-primary);
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+      opacity: 0.85;
+      z-index: 1;
+    }
+    .m-thumb--audio {
+      background: linear-gradient(160deg, #1c2a35 0%, #0f1720 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .m-thumb--audio::before {
+      content: ""; position: absolute; inset: 36% 14% 36% 14%;
+      background:
+        repeating-linear-gradient(90deg,
+          var(--color-primary) 0 2px,
+          transparent 2px 4px);
+      opacity: 0.5;
+      border-radius: 2px;
+      z-index: 1;
+    }
+    .m-thumb > span { position: relative; z-index: 2; opacity: 0.55; }
+
+    /* Typ-Pille (oben links) */
+    .m-type {
+      position: absolute; top: 8px; left: 8px;
+      padding: 2px 7px;
+      background: rgba(10, 18, 22, 0.72);
+      backdrop-filter: blur(4px);
+      border-radius: var(--radius-pill);
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-high);
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .m-type .dot { width: 5px; height: 5px; border-radius: 50%; }
+    .m-type--photo .dot { background: var(--color-primary); }
+    .m-type--plan  .dot { background: var(--status-info); }
+    .m-type--video .dot { background: var(--status-warn); }
+    .m-type--audio .dot { background: var(--status-success); }
+
+    /* Datum-Stempel (oben rechts) */
+    .m-date {
+      position: absolute; top: 8px; right: 8px;
+      padding: 2px 7px;
+      background: rgba(10, 18, 22, 0.72);
+      backdrop-filter: blur(4px);
+      border-radius: var(--radius-small);
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-high);
+    }
+    .m-card--today .m-date {
+      background: var(--status-warn);
+      color: #1f1500;
+      font-weight: 600;
+    }
+
+    /* Unterer Info-Streifen */
+    .m-foot {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      padding: 18px 10px 8px;
+      background: linear-gradient(180deg, transparent 0%, rgba(10, 18, 22, 0.85) 60%);
+      display: flex; flex-direction: column; gap: 2px;
+      pointer-events: none;
+    }
+    .m-title {
+      font-size: 12px; color: var(--text-high); font-weight: 500;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .m-sub {
+      font-size: 10.5px; color: var(--text-mid);
+      display: flex; align-items: center; gap: 6px;
+      font-family: var(--font-mono);
+    }
+    .m-sub-sep { color: var(--border-strong); }
+
+    /* ============================================================
+       ACTIVE-PREVIEW (zwischen Grid und Timeline-Filmstreifen)
+       Zeigt das aktive Medium im Grossformat. Geometrie (Stempel-
+       Reihe + Trendlinie + Dot) ist in `preview-card-spec.css`
+       als locked Custom Properties definiert -- siehe
+       docs/ux/concepts/preview-card-spec.md. Hier nur Card-Chrome
+       (Padding, Border, Background) und Bild-Hintergruende.
+       ============================================================ */
+    .preview-card {
+      position: relative;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: var(--space-3);
+      background: var(--bg-panel);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-container);
+    }
+
+    .preview-photo {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: var(--radius-small);
+      overflow: hidden;
+      isolation: isolate;
+      z-index: 1;
+    }
+    .preview-photo--photo {
+      background:
+        linear-gradient(135deg, #243442 0%, #1a2632 60%, #243442 100%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 4px);
+    }
+    .preview-photo--plan {
+      background: #0e1a23;
+    }
+    .preview-photo--plan::before {
+      content: ""; position: absolute; inset: 0;
+      background:
+        linear-gradient(transparent 49.5%, rgba(102, 128, 72, 0.18) 50%, transparent 50.5%),
+        linear-gradient(90deg, transparent 49.5%, rgba(102, 128, 72, 0.18) 50%, transparent 50.5%);
+      z-index: 1;
+    }
+    .preview-photo--video {
+      background: radial-gradient(circle at 50% 45%, #2a3d4d 0%, #0f1720 70%);
+    }
+    .preview-photo--audio {
+      background: linear-gradient(160deg, #1c2a35 0%, #0f1720 100%);
+    }
+    /* Typ-Pille oben links auf dem Foto */
+    .preview-photo-type {
+      position: absolute;
+      top: 10px; left: 10px;
+      padding: 3px 9px;
+      background: rgba(10, 18, 22, 0.78);
+      backdrop-filter: blur(6px);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-pill);
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-high);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      z-index: 2;
+    }
+    .preview-photo-type .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+    }
+    .preview-photo-type--photo .dot { background: var(--color-primary); }
+    .preview-photo-type--plan  .dot { background: var(--status-info); }
+    .preview-photo-type--video .dot { background: var(--status-warn); }
+    .preview-photo-type--audio .dot { background: var(--status-success); }
+
+    /* ============================================================
+       STEMPEL-REIHE (Datum | Trendlinie | Zeit)
+       Geometrie-Werte: preview-card-spec.css (LOCKED)
+       Aenderungen NUR ueber die Spec, niemals hier direkt.
+       ============================================================ */
+    .preview-stamp {
+      position: relative;
+      height: var(--preview-stamp-line-height);
+      margin-top: var(--preview-stamp-margin-top);
+      margin-bottom: var(--preview-stamp-margin-bottom);
+      font-family: var(--preview-stamp-font-family);
+      font-size: var(--preview-stamp-font-size);
+      font-weight: var(--preview-stamp-font-weight);
+      z-index: 1;
+    }
+    .preview-stamp-date {
+      position: absolute;
+      right: calc(50% + var(--preview-stamp-gap));
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--preview-stamp-date-color);
+      white-space: nowrap;
+      /* Anker zur Timeline-Achse: Datum ist visuell betont */
+      font-weight: 600;
+    }
+    .preview-stamp-time {
+      position: absolute;
+      left: calc(50% + var(--preview-stamp-gap));
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--preview-stamp-time-color);
+      white-space: nowrap;
+    }
+
+    /* Vertikale Trendlinie (1 px Salwei, 49 px hoch, Anker = Stempel-Top) */
+    .preview-stamp-trendline {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      transform: translateX(-50%);
+      width: var(--preview-trendline-width);
+      height: var(--preview-trendline-height);
+      background: var(--preview-trendline-color);
+      opacity: var(--preview-trendline-opacity);
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       ANKER-DOT (am Ende der Trendlinie)
+       Position: innerhalb des Stempels, am unteren Ende der Linie.
+       Effektive Y-Invariante (Dot-Mitte ab Bildunterkante):
+         20 (margin-top) + 49 (trendline-height) + 2.5 (dot-offset) = 71.5 px
+       Diese Invariante haengt am Bild -- die Timeline-SVG referenziert sie.
+       Konsumenten-CSS darf Position/Grösse NICHT ueberschreiben.
+       ============================================================ */
+    .preview-dot {
+      position: absolute;
+      left: 50%;
+      top: var(--preview-dot-top);
+      transform: translate(-50%, 0);
+      width: var(--preview-dot-size);
+      height: var(--preview-dot-size);
+      border-radius: 50%;
+      background: var(--preview-dot-color);
+      box-shadow:
+        0 0 0 var(--preview-dot-ring-width) var(--preview-dot-ring-color),
+        0 0 0 calc(var(--preview-dot-ring-width) * 2) var(--preview-dot-color);
+    }
+
+    /* ============================================================
+       V5: FILMSTRIP (sticky unter dem Grid)
+       ============================================================ */
+    .strip-zone {
+      position: sticky;
+      bottom: 0;
+      margin: 0 calc(-1 * var(--space-6));
+      padding: 0 var(--space-6);
+      background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--bg-base) 80%, transparent) 30%, var(--bg-base));
+      z-index: 20;
+      pointer-events: none; /* nur das innere Panel hoert Mausevents */
+    }
+    .strip-zone::before {
+      content: "";
+      display: block;
+      height: 2px; /* war 4px, jetzt 2px -> -50% Anschluss Pin <-> Timeline */
+    }
+
+    /* ============================================================
+       COLLAPSE / EXPAND (vd-picker-Pattern)
+       - data-collapsed="false" (Default): volle Streifen-Hoehe mit Head + Track + Achse
+       - data-collapsed="true":            nur Re-Open-Bar sichtbar, Strip ganz versteckt
+       - Uebergang animiert via max-height + opacity
+       ============================================================ */
+    .strip-zone[data-collapsed="true"] .strip {
+      pointer-events: none;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transform: translateY(8px);
+      transition: max-height 240ms ease, opacity 200ms ease, transform 220ms ease;
+      border-color: transparent;
+    }
+    .strip-zone[data-collapsed="false"] .strip {
+      max-height: 600px;
+      opacity: 1;
+      transform: translateY(0);
+      transition: max-height 280ms ease 60ms, opacity 220ms ease 100ms, transform 240ms ease 60ms;
+    }
+
+    /* Chevron im Toggle rotiert, wenn eingeklappt (zeigt nach oben = "oeffnen") */
+    .strip-collapse-btn svg { transition: transform 220ms ease; }
+    .strip-zone[data-collapsed="true"] .strip-collapse-btn svg {
+      transform: rotate(180deg);
+    }
+
+    /* Re-Open-Bar (sichtbar nur wenn eingeklappt). 1:1 wie vd-picker-reopen
+       in frontend/prototypes/index.html. Sticky-Bottom am Container,
+       NICHT fixed (kein Sidebar-Offset noetig). */
+    .strip-reopen {
+      position: sticky;
+      bottom: 0;
+      z-index: 19;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      width: 100%;
+      height: 40px;
+      padding: 0 var(--space-6);
+      margin: 0;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border-default);
+      color: var(--text-mid);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12.5px;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.22);
+      animation: strip-reopen-in 220ms ease;
+    }
+    .strip-reopen[hidden] { display: none; }
+    .strip-reopen:hover { color: var(--text-high); background: var(--bg-raised); }
+    .strip-reopen:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: -2px;
+    }
+    .strip-reopen-left {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-3);
+      min-width: 0;
+    }
+    .strip-reopen-thumb {
+      width: 24px; height: 24px;
+      border-radius: var(--radius-small);
+      background: var(--color-primary-soft);
+      color: var(--color-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .strip-reopen-thumb svg { width: 13px; height: 13px; }
+    .strip-reopen-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-low);
+      white-space: nowrap;
+    }
+    .strip-reopen-chev {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+    .strip-reopen-chev svg { width: 12px; height: 12px; }
+    @keyframes strip-reopen-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .strip {
+      pointer-events: auto;
+      position: relative;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-preview) var(--radius-preview) 0 0;
+      box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+
+    .strip-head {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: 10px var(--space-4);
+      border-bottom: 1px solid var(--border-default);
+      background: var(--bg-raised);
+    }
+    .strip-head-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11.5px; font-weight: 600;
+      color: var(--text-mid);
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .strip-head-label svg { width: 14px; height: 14px; color: var(--color-primary); }
+    .strip-now-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 3px 9px;
+      background: rgba(245, 199, 104, 0.12);
+      border: 1px solid rgba(245, 199, 104, 0.4);
+      color: var(--status-warn);
+      border-radius: var(--radius-pill);
+      font-size: 11px; font-weight: 500;
+      font-family: var(--font-mono);
+    }
+    .strip-now-pill::before {
+      content: ""; width: 6px; height: 6px;
+      border-radius: 50%; background: var(--status-warn);
+    }
+    .strip-meta {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-low);
+      display: inline-flex; gap: 10px;
+    }
+    .strip-meta b { color: var(--text-high); font-weight: 600; }
+    .strip-meta-sep { color: var(--border-strong); }
+
+    .strip-head-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+    .strip-btn {
+      height: 26px; padding: 0 10px;
+      background: transparent;
+      border: 1px solid var(--border-default);
+      color: var(--text-mid);
+      border-radius: var(--radius-small);
+      font-size: 11.5px; font-weight: 500;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .strip-btn:hover { color: var(--text-high); border-color: var(--border-strong); }
+    .strip-btn svg { width: 12px; height: 12px; }
+
+    /* Track-Bereich (scrollbar horizontal) */
+    .strip-track-wrap {
+      position: relative;
+      height: var(--strip-h);
+      overflow: hidden;
+    }
+    /* Fade an Raendern -> deutet mehr Inhalt an */
+    .strip-track-wrap::before,
+    .strip-track-wrap::after {
+      content: "";
+      position: absolute; top: 0; bottom: 0;
+      width: 36px; pointer-events: none; z-index: 4;
+    }
+    .strip-track-wrap::before {
+      left: 0;
+      background: linear-gradient(90deg, var(--bg-panel), transparent);
+    }
+    .strip-track-wrap::after {
+      right: 0;
+      background: linear-gradient(-90deg, var(--bg-panel), transparent);
+    }
+
+    /* Hover-Scroll: aktive Randzone bekommt kräftigeren Fade + Chevron-Indikator.
+       Beide Edges haben je einen Indikator, der nur sichtbar wird, wenn der
+       Cursor in der jeweiligen Zone ist. */
+    .strip-track-wrap.hover-zone-left::before,
+    .strip-track-wrap.hover-zone-right::after {
+      width: 88px; /* breiterer Hover-Bereich -> optisches Feedback */
+      transition: width 140ms ease;
+    }
+    .strip-track-wrap.hover-zone-left::before {
+      background: linear-gradient(90deg,
+        color-mix(in srgb, var(--color-primary) 28%, var(--bg-panel)) 0%,
+        color-mix(in srgb, var(--color-primary) 14%, var(--bg-panel)) 60%,
+        transparent 100%);
+    }
+    .strip-track-wrap.hover-zone-right::after {
+      background: linear-gradient(-90deg,
+        color-mix(in srgb, var(--color-primary) 28%, var(--bg-panel)) 0%,
+        color-mix(in srgb, var(--color-primary) 14%, var(--bg-panel)) 60%,
+        transparent 100%);
+    }
+
+    .hover-indicator {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      z-index: 6;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: #0a1216;
+      display: none;
+      align-items: center; justify-content: center;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(102, 128, 72, 0.35);
+      animation: hover-pulse 1.4s ease-in-out infinite;
+    }
+    .hover-indicator svg { width: 14px; height: 14px; }
+    .hover-indicator--left  { left: 6px; }
+    .hover-indicator--right { right: 6px; }
+    .strip-track-wrap.hover-zone-left  .hover-indicator--left  { display: inline-flex; }
+    .strip-track-wrap.hover-zone-right .hover-indicator--right { display: inline-flex; }
+    @keyframes hover-pulse {
+      0%, 100% { transform: translateY(-50%) scale(1);    opacity: 1; }
+      50%      { transform: translateY(-50%) scale(1.08); opacity: 0.85; }
+    }
+
+    /* Cursor-Hinweis in den Edge-Zonen */
+    .strip-track-wrap.hover-zone-left,
+    .strip-track-wrap.hover-zone-right { cursor: ew-resize; }
+    .strip-track-wrap.hover-zone-center { cursor: grab; }
+
+    .strip-track {
+      position: relative; /* Anker fuer strip-pin (Heute-Marker) */
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 48px;
+      height: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-behavior: smooth;
+      /* scroll-snap-type wird im Mobile-Media-Query aktiviert (snapt nur bei Swipe).
+         Auf Desktop wuerde Snap den Hover-Scroll-Flow unterbrechen, weil jeder
+         per-Frame-Scroll auf den naechsten Snap-Punkt korrigiert wird. */
+      -webkit-overflow-scrolling: touch;
+      cursor: grab; /* Signalisiert: "du kannst mich ziehen" */
+      user-select: none; /* keine Text-Markierung beim Drag */
+      -webkit-user-select: none;
+      touch-action: pan-y; /* Touch: horizontales Wischen erlaubt, vertikaler Scroll weiterhin */
+    }
+    .strip-track.is-dragging {
+      cursor: grabbing;
+      scroll-snap-type: none !important; /* Snap waehrend Drag ausschalten */
+    }
+    .strip-track::-webkit-scrollbar { height: 6px; }
+    .strip-track::-webkit-scrollbar-thumb {
+      background: var(--border-strong); border-radius: 3px;
+    }
+
+    /* Achse (Monats-Ticks) */
+    .strip-axis {
+      position: relative;
+      height: 18px;
+      padding: 0 48px;
+      border-top: 1px solid var(--border-default);
+      background: var(--bg-raised);
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-low);
+      display: flex; align-items: center;
+      overflow: hidden;
+    }
+    .strip-axis-tick {
+      display: inline-flex; align-items: center; gap: 4px;
+      position: absolute;
+      top: 0; bottom: 0;
+      padding: 0 4px;
+      border-left: 1px solid var(--border-strong);
+    }
+    .strip-axis-tick span {
+      background: var(--bg-raised);
+      padding: 0 4px;
+      transform: translateY(-1px);
+    }
+
+    /* Filmstreifen-Item */
+    .strip-item {
+      flex-shrink: 0;
+      width: 56px; height: 56px;
+      border-radius: 5px;
+      position: relative;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: 140ms ease;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-mid);
+      overflow: hidden;
+    }
+    .strip-item:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+    .strip-item.is-active {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px var(--color-primary-soft);
+    }
+    .strip-item.is-today {
+      box-shadow: inset 0 0 0 2px var(--status-warn);
+    }
+    .strip-item.is-cluster {
+      /* mehrere Medien am gleichen Tag -> kleiner Counter */
+    }
+    .strip-item-num {
+      position: absolute; top: -6px; right: -6px;
+      min-width: 18px; height: 18px;
+      padding: 0 5px;
+      background: var(--bg-raised);
+      color: var(--text-high);
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-strong);
+      font-size: 9.5px; font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono);
+    }
+    .strip-item.is-active .strip-item-num {
+      background: var(--color-primary); color: #0a1216; border-color: var(--color-primary);
+    }
+    .strip-item.is-today .strip-item-num {
+      background: var(--status-warn); color: #1f1500; border-color: var(--status-warn);
+    }
+    /* Mini-Label unter dem Thumbnail (Tag-Monat) */
+    .strip-item-label {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      bottom: -16px;
+      font-family: var(--font-mono); font-size: 9.5px;
+      color: var(--text-low);
+      white-space: nowrap;
+      opacity: 0; transition: opacity 120ms ease;
+    }
+    .strip-item:hover .strip-item-label,
+    .strip-item.is-active .strip-item-label { opacity: 1; }
+    .strip-item.is-today .strip-item-label { color: var(--status-warn); }
+
+    /* Monats-Trenner */
+    .strip-divider {
+      flex-shrink: 0;
+      width: 1px; height: 64px;
+      background: var(--border-strong);
+      position: relative;
+      margin: 0 4px;
+    }
+    .strip-divider-label {
+      position: absolute; top: -4px; left: 50%;
+      transform: translateX(-50%);
+      padding: 2px 6px;
+      background: var(--bg-panel);
+      border-radius: 3px;
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-low);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    /* Tag-Cluster (gestapelte Thumbs) */
+    .strip-cluster {
+      flex-shrink: 0;
+      display: flex; align-items: center;
+      padding: 0 4px;
+    }
+    .strip-cluster .strip-item { margin-left: -22px; }
+    .strip-cluster .strip-item:first-child { margin-left: 0; }
+
+    /* Heute-Pin (vertikale Linie + Pill) */
+    .strip-pin {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 2px;
+      background: var(--status-warn);
+      pointer-events: none;
+      z-index: 3;
+      box-shadow: 0 0 0 2px rgba(245, 199, 104, 0.2);
+    }
+
+    /* Tag-Popover (klick auf Cluster oeffnet Detail) */
+    .strip-popover {
+      position: absolute;
+      bottom: calc(var(--strip-h) + 18px);
+      background: var(--bg-panel);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-container);
+      padding: var(--space-3);
+      min-width: 220px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+      z-index: 30;
+      pointer-events: auto;
+    }
+    .strip-popover-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .strip-popover-date {
+      font-size: 12px; font-weight: 600;
+    }
+    .strip-popover-count {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-low);
+    }
+    .strip-popover-list {
+      display: flex; flex-direction: column; gap: 4px;
+      max-height: 200px; overflow-y: auto;
+    }
+    .strip-popover-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 4px 6px;
+      border-radius: var(--radius-small);
+      font-size: 11.5px;
+    }
+    .strip-popover-row:hover { background: var(--bg-raised); }
+    .strip-popover-row .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .strip-popover-row .name {
+      flex: 1; min-width: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .strip-popover-row .time {
+      font-family: var(--font-mono); font-size: 10.5px;
+      color: var(--text-low);
+    }
+
+    /* ============================================================
+       VARIANT-SWITCHER (Hoehe des Streifens)
+       ============================================================ */
+    html[data-variant="compact"]  { --strip-h: 80px; }
+    html[data-variant="default"]  { --strip-h: 104px; }
+    html[data-variant="expanded"] { --strip-h: 132px; }
+    html[data-variant="expanded"] .strip-item { width: 72px; height: 72px; font-size: 11px; }
+    html[data-variant="expanded"] .strip-divider { height: 88px; }
+    html[data-variant="compact"]  .strip-item { width: 44px; height: 44px; font-size: 9.5px; }
+
+    /* ============================================================
+       RESPONSIVE — Mobile
+       ============================================================ */
+    @media (max-width: 900px) {
+      .app { padding: 0 var(--space-3) calc(var(--strip-h) + 80px); }
+      .vd-subtopbar {
+        margin: 0 calc(-1 * var(--space-3)) var(--space-4);
+        padding: 0 var(--space-3);
+      }
+      .vd-subtopbar-crumbs { font-size: 12px; }
+      .vd-subtopbar-crumbs .crumb-tag { display: none; }
+      .filterbar { gap: 8px; padding: var(--space-2) var(--space-3); }
+      .filter-chip .long { display: none; }
+      .filter-count { width: 100%; text-align: right; }
+      .section-head { flex-direction: column; align-items: flex-start; gap: var(--space-2); }
+      .media-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: var(--space-2);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .strip-zone { padding: 0 var(--space-3); margin: 0 calc(-1 * var(--space-3)); }
+      .strip-head { padding: 8px var(--space-3); gap: var(--space-2); flex-wrap: wrap; }
+      .strip-head-label { font-size: 10.5px; }
+      .strip-meta { display: none; }
+      .strip-head-actions .strip-btn .label { display: none; }
+      .strip-track {
+        padding: 8px 32px;
+        scroll-snap-type: x mandatory; /* Mobile: swipe-snapt auf Item-Zentren */
+      }
+      .strip-item {
+        scroll-snap-align: center;
+        width: 60px; height: 60px;
+      }
+      html[data-variant="expanded"] .strip-item { width: 64px; height: 64px; }
+      html[data-variant="compact"]  .strip-item { width: 48px; height: 48px; }
+      .strip-axis { padding: 0 32px; }
+      .strip-divider-label { font-size: 9px; padding: 1px 4px; }
+    }
+
+    @media (max-width: 380px) {
+      /* Sehr schmale Screens: Filmstreifen wird zur Icon-Leiste mit Sheet */
+      .strip-track-wrap { display: none; }
+      .strip-axis { display: none; }
+      .strip-zone {
+        bottom: 0;
+        padding: 0 var(--space-2);
+      }
+      .strip {
+        border-radius: var(--radius-container);
+        margin-bottom: var(--space-2);
+      }
+      .strip-mobile-toggle {
+        display: inline-flex !important;
+      }
+      .hover-indicator { display: none !important; }
+      }
+    }
+    .strip-mobile-toggle { display: none; }
+
+    /* Bottom-Sheet (Mobile Sheet-Variante bei sehr schmalen Screens) */
+    .strip-sheet-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 60;
+      display: none;
+    }
+    .strip-sheet-backdrop.is-open { display: block; }
+    .strip-sheet {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      max-height: 70vh;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border-strong);
+      border-radius: var(--radius-preview) var(--radius-preview) 0 0;
+      z-index: 70;
+      transform: translateY(100%);
+      transition: transform 220ms ease;
+      display: none;
+    }
+    .strip-sheet.is-open { transform: translateY(0); }
+    .strip-sheet-handle {
+      width: 36px; height: 4px;
+      background: var(--border-strong);
+      border-radius: 2px;
+      margin: 8px auto;
+    }
+    .strip-sheet-head {
+      display: flex; align-items: center; gap: var(--space-2);
+      padding: 0 var(--space-4) var(--space-3);
+      border-bottom: 1px solid var(--border-default);
+    }
+    .strip-sheet-list {
+      padding: var(--space-3) var(--space-4) var(--space-6);
+      overflow-y: auto;
+      max-height: 60vh;
+    }
+
+    /* ============================================================
+       KONTEXT-TEXT (oben am Grid)
+       ============================================================ */
+    .meta-row {
+      display: flex; gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background: var(--bg-raised);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-container);
+      margin-bottom: var(--space-4);
+      font-size: 12px;
+      color: var(--text-mid);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .meta-row b { color: var(--text-high); font-weight: 600; }
+    .meta-row code {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--color-primary); background: var(--color-primary-soft);
+      padding: 1px 5px; border-radius: 3px;
+    }
+
+    /* ============================================================
+       TEST-PANEL (rechts oben: Szenario wechseln)
+       ============================================================ */
+    .test-bar {
+      display: flex; gap: var(--space-2); align-items: center;
+      flex-wrap: wrap;
+    }
+    .test-bar .test-label {
+      font-size: 11px; color: var(--text-low);
+      font-family: var(--font-mono);
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .test-pill {
+      height: 24px; padding: 0 10px;
+      background: var(--bg-raised); border: 1px solid var(--border-default);
+      color: var(--text-mid); border-radius: var(--radius-pill);
+      font-size: 11px; font-weight: 500;
+      cursor: pointer;
+      font-family: var(--font-sans);
+    }
+    .test-pill:hover { color: var(--text-high); border-color: var(--border-strong); }
+    .test-pill.is-active {
+      background: var(--color-primary-soft); color: var(--color-primary);
+      border-color: rgba(102, 128, 72, 0.4);
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============================================================
+       TOPBAR (1:1 wie VisiDoc-App-Shell, siehe app-shell.css §"Topbar")
+       ============================================================ -->
+  <header class="vd-topbar" role="banner">
+    <a class="vd-topbar-brand" href="#" aria-label="VisiDoc – Startseite">
+      <span class="vd-topbar-brand-text">Visi<span class="vd-brand-accent">Doc</span></span>
+    </a>
+    <span class="vd-topbar-tab-display">Galerie · Filmstreifen</span>
+    <div class="vd-topbar-spacer"></div>
+    <div class="vd-search-wrap" role="search">
+      <svg class="vd-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/>
+      </svg>
+      <input class="vd-search-input" type="search" placeholder="Suchen" aria-label="Schnellsuche">
+    </div>
+    <div class="vd-topbar-actions">
+      <button class="vd-button vd-button--primary" type="button">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        <span>Neues Medium</span>
+      </button>
+      <button class="vd-icon-button" type="button" aria-label="Benachrichtigungen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+        </svg>
+      </button>
+      <button class="vd-theme-pill" type="button" id="themeToggle" data-state="dark" aria-label="Light/Dark-Mode wechseln" title="Light/Dark-Mode">
+        <span class="vd-theme-pill-sun" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/></svg>
+        </span>
+        <span class="vd-theme-pill-thumb" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       SUB-TOPBAR (Breadcrumb im BauDoc-Kontext, wie projekt-detail)
+       ============================================================ -->
+  <div class="vd-subtopbar" role="navigation" aria-label="BauDoc-Breadcrumb">
+    <div class="vd-subtopbar-crumbs">
+      <b>BauDoc</b>
+      <span class="sep">/</span>
+      <span>Bahnhofstrasse 12, Zuerich</span>
+      <span class="sep">/</span>
+      <span>Gewerk Rohbau</span>
+      <span class="sep">/</span>
+      <span>Galerie</span>
+      <span class="sep">/</span>
+      <span class="crumb-tag">v3.4</span>
+    </div>
+    <div class="vd-subtopbar-actions">
+      <button class="vd-button vd-button--ghost" type="button">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <span>Upload</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FILTER-BAR
+       ============================================================ -->
+  <div class="filterbar" role="toolbar" aria-label="Galerie-Filter">
+    <div class="filterbar-search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="filterbar-search" type="search" placeholder="Medien durchsuchen (Titel, Autor, Position…)">
+    </div>
+    <button class="filter-chip filter-chip--active" type="button"><span class="dot"></span>Foto</button>
+    <button class="filter-chip" type="button"><span class="dot"></span>Plan</button>
+    <button class="filter-chip" type="button"><span class="dot"></span>Video</button>
+    <button class="filter-chip" type="button"><span class="dot"></span>Audio</button>
+    <button class="filter-chip" type="button">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span class="long">Filter</span>
+    </button>
+    <span class="filter-count"><b id="visibleCount">40</b> / 184 Medien sichtbar · Sortierung: <b>Aufnahme</b></span>
+  </div>
+
+  <!-- ============================================================
+       KONTEXT-ZEILE
+       ============================================================ -->
+  <div class="meta-row">
+    <span>Galerie-Bereich: <b>Rohbau</b></span>
+    <span>·</span>
+    <span>Sichtbarer Zeitraum: <code id="rangeLabel">01.04.2026 – 13.06.2026</code></span>
+    <span>·</span>
+    <span>Klicke auf einen <b>Filmstreifen-Anker</b>, springt das Grid dorthin.</span>
+    <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+      <span class="test-label">Dichte-Test:</span>
+      <div class="test-bar" id="testBar">
+        <button class="test-pill" data-density="30" type="button">30</button>
+        <button class="test-pill is-active" data-density="40" type="button">40</button>
+        <button class="test-pill" data-density="50" type="button">50</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION-HEAD + GRID
+       ============================================================ -->
+  <div class="section-head">
+    <div>
+      <h2 class="section-head-title">
+        <span class="num">05</span>
+        Galerie · V5 Filmstreifen-Navigator
+      </h2>
+      <p class="section-head-sub">
+        Horizontaler Streifen unter dem Grid. Jeder Anker ist ein echtes Mini-Thumbnail der zugehoerigen Medien.
+        Klick springt zum Medium. Drag scrollt horizontal, Mausrad ebenfalls.
+      </p>
+    </div>
+    <div class="section-head-actions">
+      <span class="test-label" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-low); text-transform: uppercase; letter-spacing: 0.06em;">Streifen-Groesse</span>
+      <div class="variant-switch" id="variantSwitch">
+        <button type="button" data-variant="compact">Compact</button>
+        <button type="button" data-variant="default" class="is-active">Default</button>
+        <button type="button" data-variant="expanded">Expanded</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="media-grid" id="mediaGrid" role="list" aria-label="Galerie Medien">
+    <!-- wird per JS befuellt -->
+  </div>
+
+  <!-- ============================================================
+       ACTIVE-PREVIEW
+       Zeigt das aktive Medium im Grossformat. Geometrie (Stempel-
+       Reihe + Trendlinie + Dot) lebt in preview-card-spec.css.
+       Markup folgt der Spec: Bild, dann Stempel (Datum links |
+       Trendlinie mittig | Zeit rechts), dann Anker-Dot.
+       Wird per JS an den aktiven Filmstreifen-Anker gebunden.
+       ============================================================ -->
+  <aside class="preview-card" id="previewCard" aria-label="Aktives Medium - Detail">
+    <div class="preview-photo preview-photo--photo" id="previewPhoto">
+      <span class="preview-photo-type preview-photo-type--photo" id="previewType">
+        <span class="dot"></span><span id="previewTypeLabel">Foto</span>
+      </span>
+    </div>
+    <div class="preview-stamp" role="group" aria-label="Aufnahmezeitpunkt">
+      <span class="preview-stamp-date" id="previewDate">13.06.26</span>
+      <span class="preview-stamp-time" id="previewTime">09:14</span>
+      <span class="preview-stamp-trendline" aria-hidden="true"></span>
+      <span class="preview-dot" aria-hidden="true"></span>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       V5 FILMSTRIP
+       ============================================================ -->
+  <div class="strip-zone" data-collapsed="false" aria-label="Timeline-Navigator">
+    <div class="strip" role="region" aria-label="Filmstreifen">
+
+      <div class="strip-head">
+        <span class="strip-head-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><circle cx="6" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="18" cy="12" r="2"/></svg>
+          Timeline · Navigator
+        </span>
+        <span class="strip-now-pill">Heute: <span id="todayLabel">13.06.2026</span></span>
+        <span class="strip-meta">
+          <span>Sprung: <b id="activeDateLabel">13.06.2026</b></span>
+          <span class="strip-meta-sep">|</span>
+          <span><b id="activeClusterCount">3</b> Medien am Ziel</span>
+        </span>
+        <div class="strip-head-actions">
+          <button class="strip-btn" type="button" id="todayBtn" title="Springt zum aktuellen Datum">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+            <span class="label">Heute</span>
+          </button>
+          <button class="strip-btn strip-mobile-toggle" type="button" id="sheetOpen" title="Timeline als Sheet">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            <span class="label">Timeline</span>
+          </button>
+          <button class="strip-btn strip-collapse-btn" type="button" id="stripCollapseBtn" data-action="strip-toggle" aria-expanded="true" aria-label="Timeline einklappen" title="Timeline einklappen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+            <span class="label" data-bind="strip-collapse-label">Einklappen</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="strip-track-wrap" id="stripTrackWrap">
+        <div class="hover-indicator hover-indicator--left" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </div>
+        <div class="hover-indicator hover-indicator--right" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="strip-track" id="stripTrack" tabindex="0" aria-label="Filmstreifen-Anker">
+          <!-- wird per JS befuellt: Items + Monats-Trenner -->
+          <div class="strip-pin" id="stripPin" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="strip-axis" id="stripAxis" aria-hidden="true">
+        <!-- wird per JS befuellt: Monats-Ticks -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Re-Open-Bar (sichtbar nur wenn Strip zugeklappt) -->
+  <button class="strip-reopen" type="button" data-action="strip-reopen" aria-label="Timeline öffnen" hidden>
+    <span class="strip-reopen-left">
+      <span class="strip-reopen-thumb" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><circle cx="6" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="18" cy="12" r="2"/></svg>
+      </span>
+      <span>Timeline öffnen</span>
+      <span class="strip-reopen-meta" data-bind="strip-reopen-meta">13.06.2026 · 3 Medien</span>
+    </span>
+    <span class="strip-reopen-chev">
+      Öffnen
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="18 15 12 9 6 15"/>
+      </svg>
+    </span>
+  </button>
+
+</div>
+
+<!-- ============================================================
+     BOTTOM-SHEET (Mobile Fallback)
+     ============================================================ -->
+<div class="strip-sheet-backdrop" id="sheetBackdrop"></div>
+<aside class="strip-sheet" id="sheet" aria-label="Timeline Sheet">
+  <div class="strip-sheet-handle"></div>
+  <div class="strip-sheet-head">
+    <span class="strip-head-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><circle cx="6" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="18" cy="12" r="2"/></svg>
+      Timeline
+    </span>
+    <button class="strip-btn" type="button" id="sheetClose" style="margin-left:auto;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="strip-sheet-list" id="sheetList">
+    <!-- wird per JS befuellt -->
+  </div>
+</aside>
+
+<script>
+'use strict';
+
+/* ============================================================
+   DATEN-MODELL
+   40 Mock-Medien ueber ~75 Tage, deterministisch
+   ============================================================ */
+const MONTHS = [
+  { id: 'apr', label: 'APR', longLabel: 'April', start: new Date(2026, 3, 1), end: new Date(2026, 3, 30) },
+  { id: 'mai', label: 'MAI', longLabel: 'Mai',   start: new Date(2026, 4, 1), end: new Date(2026, 4, 31) },
+  { id: 'jun', label: 'JUN', longLabel: 'Juni',  start: new Date(2026, 5, 1), end: new Date(2026, 5, 30) },
+];
+const TODAY = new Date(2026, 5, 13); // 13.06.2026
+
+const GERMAN_DOW = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+const TYPES = [
+  { id: 'photo', weight: 0.55, label: 'Foto' },
+  { id: 'plan',  weight: 0.20, label: 'Plan' },
+  { id: 'video', weight: 0.18, label: 'Video' },
+  { id: 'audio', weight: 0.07, label: 'Audio' },
+];
+
+const TITLES = {
+  photo: [
+    'Betonage Decke UG – Suedfluegel',
+    'Bewehrungsabnahme – Treppenhaus Kern 2',
+    'Schalungsarbeiten – Aussenwand Nord',
+    'Mauerkronen EG West – Aufmauern',
+    'Durchbrueche Medienkanaele EG',
+    'Aufzugsschacht – Bewehrung',
+    'Sichtbeton – Probeabguss Stuetze 4',
+    'Fundamenterweiterung Nord-West',
+    'Spritzbeton Rueckwand Tiefgarage',
+    'Lehrgeruest Bruecke Nord',
+    'Innenputz EG – Probeinstallation',
+    'Hohlkoerper-Decke OG1 Vorbereitung',
+  ],
+  plan: [
+    'Plan v3 freigegeben – Grundriss EG',
+    'Plan v3 freigegeben – Schnitt B-B',
+    'Schalungsplan Decke UG Rev. 2',
+    'Bewehrungsplan Stuetze S4',
+    'Detailplan Medienkanaele EG',
+    'Plan v4 – Aufzugsschacht Kern 2',
+  ],
+  video: [
+    'Drohnenflug Rohbau Stand 10.06.',
+    'Baustellen-Rundgang 28.05.',
+    'Bewehrungsabnahme – Sequenz',
+    'Betonage Tag – Zeitraffer',
+    'Sicherheitsbegehung 03.06.',
+  ],
+  audio: [
+    'Sprachmemo Bauleiter 12.06.',
+    'Sprachmemo Polier Suedfluegel',
+    'Audionotiz Auftraggeber',
+  ],
+};
+
+const AUTHORS = ['M. Brunner', 'T. Hofer', 'A. Keller', 'L. Steiner', 'P. Wirth', 'C. Frey'];
+
+/* ============================================================
+   SEEDED RNG (Mulberry32)
+   ============================================================ */
+function mulberry32(seed) {
+  return function() {
+    let t = seed += 0x6D2B79F5;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const rand = mulberry32(0x5a17be);
+
+/* ============================================================
+   MEDIEN-GENERIERUNG (40 Stueck, ueber 75 Tage)
+   Cluster: APR 12, MAI 18, JUN 10
+   ============================================================ */
+let CURRENT_DENSITY = 40;
+
+function pickType() {
+  const r = rand();
+  let acc = 0;
+  for (const t of TYPES) {
+    acc += t.weight;
+    if (r <= acc) return t.id;
+  }
+  return 'photo';
+}
+
+function pickTitle(typeId) {
+  const list = TITLES[typeId];
+  return list[Math.floor(rand() * list.length)];
+}
+
+function pickAuthor() {
+  return AUTHORS[Math.floor(rand() * AUTHORS.length)];
+}
+
+function pickTime() {
+  const h = 7 + Math.floor(rand() * 11); // 7-17 Uhr
+  const m = Math.floor(rand() * 60);
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+
+function fmtDE(d) {
+  return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
+}
+/* Kurzform (tt.mm.yy) fuer die kompakte Preview-Meta-Zeile */
+function fmtDEShort(d) {
+  return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getFullYear()).slice(-2)}`;
+}
+
+function buildMediaItems(count) {
+  const items = [];
+  let id = 1;
+  // Verteilung: 30% APR, 45% MAI, 25% JUN
+  const monthShare = [
+    { m: MONTHS[0], share: 0.30 },
+    { m: MONTHS[1], share: 0.45 },
+    { m: MONTHS[2], share: 0.25 },
+  ];
+
+  for (let i = 0; i < count; i++) {
+    const r = rand();
+    let acc = 0, pickedMonth = monthShare[0].m;
+    for (const ms of monthShare) {
+      acc += ms.share;
+      if (r <= acc) { pickedMonth = ms.m; break; }
+    }
+    const dayOffset = Math.floor(rand() * (pickedMonth.end.getDate()));
+    const date = new Date(pickedMonth.start);
+    date.setDate(pickedMonth.start.getDate() + dayOffset);
+    const type = pickType();
+    items.push({
+      id: id++,
+      date,
+      type,
+      title: pickTitle(type),
+      author: pickAuthor(),
+      time: pickTime(),
+    });
+  }
+  items.sort((a, b) => a.date - b.date);
+  return items;
+}
+
+let media = buildMediaItems(CURRENT_DENSITY);
+
+/* ============================================================
+   GRID RENDER
+   ============================================================ */
+const mediaGrid = document.getElementById('mediaGrid');
+const visibleCountEl = document.getElementById('visibleCount');
+const todayLabelEl = document.getElementById('todayLabel');
+todayLabelEl.textContent = fmtDE(TODAY);
+
+function renderGrid() {
+  mediaGrid.innerHTML = media.map(m => {
+    const dow = GERMAN_DOW[m.date.getDay()];
+    const isToday = sameDay(m.date, TODAY);
+    return `
+      <article class="m-card ${isToday ? 'm-card--today' : ''}" data-id="${m.id}" role="listitem" tabindex="0">
+        <div class="m-thumb m-thumb--${m.type}">
+          <span>${m.type === 'plan' ? 'PLAN' : (m.type === 'video' ? 'VID' : (m.type === 'audio' ? 'AUD' : 'IMG'))} · #${String(m.id).padStart(3,'0')}</span>
+        </div>
+        <span class="m-type m-type--${m.type}"><span class="dot"></span>${capitalize(m.type)}</span>
+        <span class="m-date">${String(m.date.getDate()).padStart(2,'0')}.${String(m.date.getMonth()+1).padStart(2,'0')} ${dow}</span>
+        <div class="m-foot">
+          <span class="m-title">${m.title}</span>
+          <span class="m-sub">
+            <span>${m.author}</span>
+            <span class="m-sub-sep">·</span>
+            <span>${m.time}</span>
+          </span>
+        </div>
+      </article>
+    `;
+  }).join('');
+  visibleCountEl.textContent = String(media.length);
+}
+
+function sameDay(a, b) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+/* ============================================================
+   CLUSTER-BILDUNG (pro Tag)
+   ============================================================ */
+function buildClusters(items) {
+  const map = new Map();
+  items.forEach(it => {
+    const key = `${it.date.getFullYear()}-${it.date.getMonth()}-${it.date.getDate()}`;
+    if (!map.has(key)) map.set(key, { date: it.date, items: [] });
+    map.get(key).items.push(it);
+  });
+  const clusters = Array.from(map.values()).sort((a, b) => a.date - b.date);
+  return clusters;
+}
+
+/* ============================================================
+   FILMSTRIP RENDER
+   ============================================================ */
+const stripTrack = document.getElementById('stripTrack');
+const stripAxis = document.getElementById('stripAxis');
+const stripPin = document.getElementById('stripPin');
+
+function renderStrip() {
+  const clusters = buildClusters(media);
+  let html = '';
+  let prevMonth = -1;
+
+  clusters.forEach((c, idx) => {
+    const month = c.date.getMonth();
+    if (month !== prevMonth) {
+      // Monats-Trenner
+      const mInfo = MONTHS.find(m => m.start.getMonth() === month);
+      if (mInfo) {
+        html += `
+          <div class="strip-divider" data-month="${month}">
+            <span class="strip-divider-label">${mInfo.label}</span>
+          </div>
+        `;
+      }
+      prevMonth = month;
+    }
+
+    const isToday = sameDay(c.date, TODAY);
+    const primary = c.items[0];
+    const firstTwo = c.items.slice(0, 2);
+    const clusterSize = c.items.length;
+
+    // Bei mehr als einem Medium am Tag: gestapelte Anzeige
+    if (clusterSize > 1 && firstTwo.length === 2) {
+      html += `<div class="strip-cluster" data-cluster-idx="${idx}">`;
+      firstTwo.forEach(it => {
+        html += renderStripItem(it, c, isToday, false);
+      });
+      html += `</div>`;
+    } else {
+      html += renderStripItem(primary, c, isToday, clusterSize > 1);
+    }
+  });
+
+  // Pin nach dem Render positionieren
+  stripTrack.innerHTML = html + `<div class="strip-pin" id="stripPin" aria-hidden="true"></div>`;
+
+  // Achse: Monats-Labels an die Position des ersten Eintrags des Monats
+  renderAxis(clusters);
+
+  // Position der Pin berechnen
+  positionPin(clusters);
+}
+
+function renderStripItem(item, cluster, isToday, showCount) {
+  const dow = GERMAN_DOW[cluster.date.getDay()];
+  const label = `${String(cluster.date.getDate()).padStart(2,'0')}.${String(cluster.date.getMonth()+1).padStart(2,'0')}`;
+  const thumbLetter = item.type === 'plan' ? 'P' : (item.type === 'video' ? 'V' : (item.type === 'audio' ? 'A' : 'F'));
+  return `
+    <div class="strip-item ${isToday ? 'is-today' : ''}" data-cluster-idx="${stripTrack.querySelectorAll('[data-cluster-idx]').length}" data-date="${cluster.date.toISOString()}" tabindex="0" title="${cluster.items.length} Medien am ${label}">
+      <div class="m-thumb m-thumb--${item.type}" style="position:absolute; inset:0; border-radius: 4px;">
+        <span style="font-size:11px;">${thumbLetter}</span>
+      </div>
+      ${showCount ? `<span class="strip-item-num">${cluster.items.length}</span>` : ''}
+      <span class="strip-item-label">${label} ${dow}</span>
+    </div>
+  `;
+}
+
+function renderAxis(clusters) {
+  // Vereinfacht: zeige alle Monats-Labels an den Monats-Trennern, fix positioniert
+  const dividers = stripTrack.querySelectorAll('.strip-divider');
+  if (dividers.length === 0) { stripAxis.innerHTML = ''; return; }
+
+  let axisHTML = '';
+  dividers.forEach(div => {
+    const month = parseInt(div.dataset.month, 10);
+    const mInfo = MONTHS.find(m => m.start.getMonth() === month);
+    if (!mInfo) return;
+    axisHTML += `
+      <div class="strip-axis-tick" data-month="${month}">
+        <span>${mInfo.label} 2026</span>
+      </div>
+    `;
+  });
+  stripAxis.innerHTML = axisHTML;
+
+  // Position der Ticks an die der Trenner anpassen
+  positionAxisTicks();
+}
+
+function positionAxisTicks() {
+  const trackRect = stripTrack.getBoundingClientRect();
+  const ticks = stripAxis.querySelectorAll('.strip-axis-tick');
+  ticks.forEach(tick => {
+    const month = parseInt(tick.dataset.month, 10);
+    const divider = stripTrack.querySelector(`.strip-divider[data-month="${month}"]`);
+    if (!divider) return;
+    const divRect = divider.getBoundingClientRect();
+    const offset = divRect.left - trackRect.left + stripTrack.scrollLeft;
+    tick.style.left = `${offset}px`;
+  });
+}
+
+function positionPin(clusters) {
+  const pin = document.getElementById('stripPin');
+  if (!pin) return;
+  const todayCluster = clusters.find(c => sameDay(c.date, TODAY));
+  if (!todayCluster) {
+    pin.style.left = '100%';
+    return;
+  }
+  // Finde das Element mit passendem Datum
+  const target = stripTrack.querySelector(`[data-date="${todayCluster.date.toISOString()}"]`);
+  if (!target) return;
+  const trackRect = stripTrack.getBoundingClientRect();
+  const rect = target.getBoundingClientRect();
+  const center = rect.left - trackRect.left + stripTrack.scrollLeft + rect.width / 2;
+  pin.style.left = `${center}px`;
+
+  // Auto-Scroll: Heute sichtbar machen (nur initial)
+  const wrapWidth = stripTrack.parentElement.clientWidth;
+  const desiredLeft = center - wrapWidth / 2;
+  stripTrack.scrollTo({ left: Math.max(0, desiredLeft), behavior: 'auto' });
+  // Pin-Position nach dem Scroll nochmal setzen
+  requestAnimationFrame(() => {
+    const newRect = target.getBoundingClientRect();
+    const newCenter = newRect.left - trackRect.left + stripTrack.scrollLeft + newRect.width / 2;
+    pin.style.left = `${newCenter}px`;
+    positionAxisTicks();
+  });
+}
+
+/* ============================================================
+   AKTIVE-AUSWAHL + SPRUNG
+   ============================================================ */
+let activeClusterIdx = null;
+const activeDateLabelEl = document.getElementById('activeDateLabel');
+const activeClusterCountEl = document.getElementById('activeClusterCount');
+
+/* Preview-Card (Foto + Datum/Zeit + Pin) */
+const previewCard = document.getElementById('previewCard');
+const previewPhoto = document.getElementById('previewPhoto');
+const previewType = document.getElementById('previewType');
+const previewTypeLabel = document.getElementById('previewTypeLabel');
+const previewDate = document.getElementById('previewDate');
+const previewTime = document.getElementById('previewTime');
+
+const TYPE_LABEL = {
+  photo: 'Foto', plan: 'Plan', video: 'Video', audio: 'Audio',
+};
+
+function updatePreview(idx) {
+  if (!previewCard) return;
+  const clusters = buildClusters(media);
+  const cluster = clusters[idx];
+  if (!cluster || !cluster.items.length) {
+    previewCard.style.display = 'none';
+    return;
+  }
+  const item = cluster.items[0];
+  previewCard.style.display = '';
+  previewDate.textContent = fmtDEShort(item.date);
+  previewTime.textContent = item.time;
+  // Foto-Mock per Typ (1:1 wie m-card-Thumbs)
+  previewPhoto.className = 'preview-photo preview-photo--' + item.type;
+  previewType.className = 'preview-photo-type preview-photo-type--' + item.type;
+  previewTypeLabel.textContent = TYPE_LABEL[item.type] || 'Medium';
+}
+
+function setActiveCluster(idx, opts = {}) {
+  const clusters = buildClusters(media);
+  const items = stripTrack.querySelectorAll('.strip-item');
+  items.forEach(el => el.classList.remove('is-active'));
+  activeClusterIdx = idx;
+
+  const cluster = clusters[idx];
+  if (!cluster) return;
+
+  // Alle Items dieses Tages aktiv markieren (Cluster + Singles)
+  const isoDate = cluster.date.toISOString();
+  stripTrack.querySelectorAll(`[data-date="${isoDate}"]`).forEach(el => el.classList.add('is-active'));
+
+  // Im Grid: erste Karte dieses Tages als aktiv markieren + scrollen + flash.
+  // opts.skipScroll === true: kein Scroll ausloesen (genutzt beim Init,
+  // damit die Topbar sichtbar bleibt und die Page nicht automatisch nach
+  // unten springt — vgl. Chrome-DevTools-Inspektion ergab rectTop=-642).
+  const gridItems = mediaGrid.querySelectorAll('.m-card');
+  const firstOfDay = media.findIndex(m => sameDay(m.date, cluster.date));
+  gridItems.forEach(el => el.classList.remove('is-active'));
+  if (firstOfDay >= 0) {
+    const targetCard = gridItems[firstOfDay];
+    targetCard.classList.add('is-active');
+    if (!opts.skipScroll) {
+      targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    targetCard.classList.add('is-target-flash');
+    setTimeout(() => targetCard.classList.remove('is-target-flash'), 1400);
+  }
+
+  activeDateLabelEl.textContent = fmtDE(cluster.date);
+  activeClusterCountEl.textContent = cluster.items.length;
+
+  // Strip auf aktives Item zentrieren (falls noetig)
+  const target = stripTrack.querySelector(`[data-date="${isoDate}"]`);
+  if (target) {
+    const wrapWidth = stripTrack.parentElement.clientWidth;
+    const trackRect = stripTrack.getBoundingClientRect();
+    const rect = target.getBoundingClientRect();
+    const center = rect.left - trackRect.left + stripTrack.scrollLeft + rect.width / 2;
+    const desired = center - wrapWidth / 2;
+    stripTrack.scrollTo({ left: desired, behavior: 'smooth' });
+  }
+
+  // Preview-Card synchronisieren (Foto, Datum, Zeit, Typ-Pille)
+  updatePreview(idx);
+
+  // Re-Open-Bar Meta (Datum + Medienzahl) frisch synchronisieren
+  syncReopenMeta();
+}
+
+/* ============================================================
+   EVENTS — Filmstrip
+   ============================================================ */
+stripTrack.addEventListener('click', e => {
+  // Klick NUR auswerten, wenn kein Drag stattgefunden hat.
+  // Sonst wuerde nach einem Scrub das Item unter dem Cursor aktiviert.
+  if (stripDragState && stripDragState.moved) return;
+  if (isDraggingStrip) return;
+  const item = e.target.closest('.strip-item');
+  if (!item) return;
+  const idx = parseInt(item.dataset.clusterIdx, 10);
+  setActiveCluster(idx);
+});
+stripTrack.addEventListener('keydown', e => {
+  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+  e.preventDefault();
+  const items = Array.from(stripTrack.querySelectorAll('.strip-item'));
+  if (!items.length) return;
+  const currentIdx = items.findIndex(el => el.classList.contains('is-active'));
+  let nextIdx = currentIdx;
+  if (e.key === 'ArrowRight') nextIdx = Math.min(items.length - 1, currentIdx + 1);
+  else nextIdx = Math.max(0, currentIdx - 1);
+  setActiveCluster(parseInt(items[nextIdx].dataset.clusterIdx, 10));
+  items[nextIdx].focus();
+});
+stripTrack.addEventListener('wheel', e => {
+  // Horizontal scrollen mit vertikalem Mausrad (Trackpads)
+  if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+    stripTrack.scrollLeft += e.deltaY;
+    e.preventDefault();
+  }
+}, { passive: false });
+
+/* ============================================================
+   HOVER-SCROLL (Mauszeiger in linker/rechter Randzone scrollt)
+   ============================================================
+   Verhalten:
+   - Linke 18% der Track-Breite  -> scrollt nach links
+   - Rechte 18% der Track-Breite -> scrollt nach rechts
+   - Mittlere 64%               -> keine Auto-Scroll-Bewegung
+   - Scroll-Geschwindigkeit steigt linear zur Nähe zum Rand (max ~7 px/frame)
+   - Beim Verlassen des Tracks  -> Scroll stoppt sofort
+   - Während manuellem Drag     -> Hover-Scroll pausiert (verhindert "Kampf")
+   - Chevron-Indikator pulsiert nur in der jeweils aktiven Zone
+   ============================================================ */
+const stripTrackWrap = document.getElementById('stripTrackWrap');
+let hoverRAF = null;
+let hoverSpeed = 0;        // px/frame, negativ = links
+let hoverActive = false;
+let isDraggingStrip = false;
+
+function hoverScrollTick() {
+  if (!hoverActive || isDraggingStrip || hoverSpeed === 0) {
+    hoverRAF = null;
+    return;
+  }
+  const maxScroll = stripTrack.scrollWidth - stripTrack.clientWidth;
+  if (maxScroll <= 0) {
+    hoverRAF = null;
+    return;
+  }
+  const prev = stripTrack.scrollLeft;
+  const next = Math.max(0, Math.min(maxScroll, prev + hoverSpeed));
+  // Wichtig: behavior:'instant' umgeht CSS scroll-behavior:smooth,
+  // sonst wuerde jeder Frame eine neue Smooth-Scroll-Animation starten
+  // und die vorherige abbrechen -> effektiv kein Scroll.
+  stripTrack.scrollTo({ left: next, behavior: 'instant' });
+  // Am Rand angekommen? Zone-Cursor bleibt, aber Scroll stoppt.
+  if (next === prev && hoverSpeed !== 0) {
+    // Sanft auslaufen statt ruckartig stoppen
+    hoverSpeed *= 0.6;
+    if (Math.abs(hoverSpeed) < 0.3) hoverSpeed = 0;
+  }
+  hoverRAF = requestAnimationFrame(hoverScrollTick);
+}
+
+stripTrackWrap.addEventListener('mouseenter', () => {
+  hoverActive = true;
+  if (hoverRAF === null) hoverRAF = requestAnimationFrame(hoverScrollTick);
+});
+stripTrackWrap.addEventListener('mouseleave', () => {
+  hoverActive = false;
+  hoverSpeed = 0;
+  stripTrackWrap.classList.remove('hover-zone-left', 'hover-zone-right', 'hover-zone-center');
+  if (hoverRAF !== null) {
+    cancelAnimationFrame(hoverRAF);
+    hoverRAF = null;
+  }
+});
+stripTrackWrap.addEventListener('mousemove', e => {
+  if (isDraggingStrip) return;
+  const rect = stripTrackWrap.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const w = rect.width;
+  const EDGE_PX = Math.min(140, w * 0.18); // 18% der Breite, max 140px
+  const MAX_SPEED = 7;                       // px/frame
+  let speed = 0;
+  let zone = 'center';
+  if (x < EDGE_PX) {
+    const intensity = 1 - (x / EDGE_PX); // 1 am Rand, 0 an der Zonengrenze
+    speed = -intensity * MAX_SPEED;
+    zone = 'left';
+  } else if (x > w - EDGE_PX) {
+    const intensity = 1 - ((w - x) / EDGE_PX);
+    speed = intensity * MAX_SPEED;
+    zone = 'right';
+  }
+  hoverSpeed = speed;
+  stripTrackWrap.classList.toggle('hover-zone-left',  zone === 'left');
+  stripTrackWrap.classList.toggle('hover-zone-right', zone === 'right');
+  stripTrackWrap.classList.toggle('hover-zone-center', zone === 'center');
+  if (hoverActive && hoverRAF === null && speed !== 0) {
+    hoverRAF = requestAnimationFrame(hoverScrollTick);
+  }
+});
+
+/* ============================================================
+   DRAG-TO-SCRUB (linke Maustaste gedrueckt halten + ziehen)
+   ============================================================
+   Verhalten:
+   - pointerdown auf dem Track (linke Taste) -> Drag beginnt,
+     Startposition und scrollLeft werden gemerkt.
+   - pointermove: erst ab DRAG_THRESHOLD px Bewegung gilt es als
+     Drag (sonst ist es ein Klick). Im Drag-Modus scrollt der
+     Track 1:1 zur Mausbewegung (startScrollLeft - deltaX).
+   - pointerup: Drag endet, kurze Verzoegerung damit der
+     click-Handler nicht aus Versehen das Item aktiviert.
+   - Drag pausen Hover-Scroll und Wheel-Override (kein Kampf).
+   - Funktioniert auch per Touch (Pointer-Events vereinen Maus + Touch).
+   ============================================================ */
+const DRAG_THRESHOLD = 5; // px Bewegung bevor Drag greift
+let stripDragState = null; // { startX, startScrollLeft, moved, pointerId }
+
+stripTrack.addEventListener('pointerdown', e => {
+  if (e.button !== 0 && e.pointerType === 'mouse') return; // nur linke Maustaste
+  stripDragState = {
+    startX: e.clientX,
+    startScrollLeft: stripTrack.scrollLeft,
+    moved: false,
+    pointerId: e.pointerId,
+  };
+  // Hover-Scroll sofort pausieren
+  hoverSpeed = 0;
+  isDraggingStrip = true;
+  // Pointer capture: alle weiteren Events gehen an stripTrack,
+  // auch wenn der Cursor das Element verlaesst.
+  try { stripTrack.setPointerCapture(e.pointerId); } catch (_) {}
+});
+
+stripTrack.addEventListener('pointermove', e => {
+  if (!stripDragState || e.pointerId !== stripDragState.pointerId) return;
+  const dx = e.clientX - stripDragState.startX;
+  if (!stripDragState.moved && Math.abs(dx) < DRAG_THRESHOLD) return;
+  stripDragState.moved = true;
+  stripTrack.classList.add('is-dragging');
+  const maxScroll = stripTrack.scrollWidth - stripTrack.clientWidth;
+  const next = Math.max(0, Math.min(maxScroll, stripDragState.startScrollLeft - dx));
+  stripTrack.scrollTo({ left: next, behavior: 'instant' });
+});
+
+function endDrag(e) {
+  if (!stripDragState || (e && e.pointerId !== stripDragState.pointerId)) return;
+  stripTrack.classList.remove('is-dragging');
+  const wasDrag = stripDragState.moved;
+  stripDragState = null;
+  // isDraggingStrip einen Tick laenger gesetzt lassen, damit der
+  // click-Handler, der nach pointerup feuert, den Klick unterdrueckt.
+  // Nach dem Tick zuruecksetzen.
+  setTimeout(() => { isDraggingStrip = false; }, 80);
+  if (e && stripTrack.hasPointerCapture && stripTrack.hasPointerCapture(e.pointerId)) {
+    try { stripTrack.releasePointerCapture(e.pointerId); } catch (_) {}
+  }
+  return wasDrag;
+}
+stripTrack.addEventListener('pointerup',     e => endDrag(e));
+stripTrack.addEventListener('pointercancel', e => endDrag(e));
+// Falls der Cursor das Fenster verlaesst waehrend Drag laeuft
+window.addEventListener('blur', () => {
+  if (stripDragState) endDrag({ pointerId: stripDragState.pointerId });
+});
+window.addEventListener('pointercancel', () => { isDraggingStrip = false; });
+
+document.getElementById('todayBtn').addEventListener('click', () => {
+  const clusters = buildClusters(media);
+  const idx = clusters.findIndex(c => sameDay(c.date, TODAY));
+  if (idx >= 0) setActiveCluster(idx);
+});
+
+/* ============================================================
+   VARIANT-SWITCHER
+   ============================================================ */
+const variantSwitch = document.getElementById('variantSwitch');
+variantSwitch.addEventListener('click', e => {
+  const btn = e.target.closest('button[data-variant]');
+  if (!btn) return;
+  variantSwitch.querySelectorAll('button').forEach(b => b.classList.remove('is-active'));
+  btn.classList.add('is-active');
+  document.documentElement.dataset.variant = btn.dataset.variant;
+  // Pin neu positionieren
+  setTimeout(() => {
+    positionPin(buildClusters(media));
+    positionAxisTicks();
+  }, 200);
+});
+
+/* ============================================================
+   DICHTE-SWITCHER (30 / 40 / 50)
+   ============================================================ */
+document.getElementById('testBar').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-density]');
+  if (!btn) return;
+  document.querySelectorAll('#testBar .test-pill').forEach(b => b.classList.remove('is-active'));
+  btn.classList.add('is-active');
+  const density = parseInt(btn.dataset.density, 10);
+  CURRENT_DENSITY = density;
+  // Seed aendern, damit verschiedene Dichten wirklich andere Verteilungen ergeben
+  const newSeed = 0x5a17be + density * 17;
+  const newRand = mulberry32(newSeed);
+  // Patch pick* to use newRand - simpler: rebuild with fresh state
+  const oldRand = rand;
+  // Stattdessen: direkt neue Medien bauen
+  media = buildMediaItemsDeterministic(density, newSeed);
+  renderAll();
+});
+
+function buildMediaItemsDeterministic(count, seed) {
+  const r = mulberry32(seed);
+  const items = [];
+  const monthShare = [
+    { m: MONTHS[0], share: 0.30 },
+    { m: MONTHS[1], share: 0.45 },
+    { m: MONTHS[2], share: 0.25 },
+  ];
+  function pickTypeL(r) {
+    const x = r();
+    let acc = 0;
+    for (const t of TYPES) { acc += t.weight; if (x <= acc) return t.id; }
+    return 'photo';
+  }
+  function pickTitleL(r, t) { const list = TITLES[t]; return list[Math.floor(r() * list.length)]; }
+  function pickAuthorL(r) { return AUTHORS[Math.floor(r() * AUTHORS.length)]; }
+  function pickTimeL(r) {
+    const h = 7 + Math.floor(r() * 11);
+    const m = Math.floor(r() * 60);
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  }
+  for (let i = 0; i < count; i++) {
+    const x = r();
+    let acc = 0, pickedMonth = monthShare[0].m;
+    for (const ms of monthShare) {
+      acc += ms.share;
+      if (x <= acc) { pickedMonth = ms.m; break; }
+    }
+    const dayOffset = Math.floor(r() * (pickedMonth.end.getDate()));
+    const date = new Date(pickedMonth.start);
+    date.setDate(pickedMonth.start.getDate() + dayOffset);
+    const type = pickTypeL(r);
+    items.push({
+      id: i + 1,
+      date,
+      type,
+      title: pickTitleL(r, type),
+      author: pickAuthorL(r),
+      time: pickTimeL(r),
+    });
+  }
+  items.sort((a, b) => a.date - b.date);
+  // IDs neu nummerieren
+  items.forEach((it, idx) => it.id = idx + 1);
+  return items;
+}
+
+function renderAll() {
+  renderGrid();
+  renderStrip();
+  // Default-Auswahl: heute. Beim ersten Render KEIN Scroll — sonst springt
+  // die Page automatisch zur Karte und die VisiDoc-Topbar rutscht aus dem
+  // Viewport (reproduzierbar via Chrome-DevTools, topbar.rectTop == -642).
+  const clusters = buildClusters(media);
+  const todayIdx = clusters.findIndex(c => sameDay(c.date, TODAY));
+  if (todayIdx >= 0) {
+    setActiveCluster(todayIdx, { skipScroll: true });
+  } else {
+    // Fallback: letzter Cluster
+    setActiveCluster(clusters.length - 1, { skipScroll: true });
+  }
+  // Sicherstellen: Page startet oben
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+/* ============================================================
+   THEME TOGGLE (vd-theme-pill, 1:1 wie im Haupt-App-Showcase)
+   ============================================================ */
+const themeToggle = document.getElementById('themeToggle');
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  themeToggle.dataset.state = t;            // steuert Thumb-Position
+  themeToggle.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
+}
+themeToggle.addEventListener('click', () => {
+  const cur = document.documentElement.dataset.theme;
+  setTheme(cur === 'dark' ? 'light' : 'dark');
+});
+
+/* ============================================================
+   STRIP COLLAPSE / EXPAND
+   1:1 nach vd-picker-Pattern (frontend/prototypes/index.html).
+   - data-collapsed="true"  -> nur Head sichtbar, Re-Open-Bar da
+   - data-collapsed="false" -> volle Hoehe mit Track + Achse
+   - Klick auf Toggle-Button oder Re-Open-Bar wechselt State
+   - aria-expanded + Label werden synchron gehalten
+   ============================================================ */
+const stripZone = document.querySelector('.strip-zone');
+const stripCollapseBtn = document.getElementById('stripCollapseBtn');
+const stripCollapseLabel = stripCollapseBtn.querySelector('[data-bind="strip-collapse-label"]');
+const stripReopenBtn = document.querySelector('.strip-reopen');
+const stripReopenMeta = stripReopenBtn.querySelector('[data-bind="strip-reopen-meta"]');
+
+function syncReopenMeta() {
+  // Zeit + Medienzahl des aktiven Clusters anzeigen
+  const date = activeClusterIdx != null
+    ? buildClusters(media)[activeClusterIdx]?.date
+    : null;
+  if (!date) { stripReopenMeta.textContent = ''; return; }
+  const cluster = buildClusters(media)[activeClusterIdx];
+  stripReopenMeta.textContent =
+    `${fmtDE(date)} · ${cluster.items.length} Medien`;
+}
+
+function setStripCollapsed(collapsed) {
+  stripZone.dataset.collapsed = collapsed ? 'true' : 'false';
+  stripCollapseBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+  stripCollapseBtn.setAttribute(
+    'aria-label',
+    collapsed ? 'Timeline ausklappen' : 'Timeline einklappen'
+  );
+  stripCollapseBtn.setAttribute(
+    'title',
+    collapsed ? 'Timeline ausklappen' : 'Timeline einklappen'
+  );
+  stripCollapseLabel.textContent = collapsed ? 'Ausklappen' : 'Einklappen';
+  // Chevron-Richtung: zeigt nach unten wenn expanded, oben wenn collapsed
+  if (collapsed) {
+    stripReopenBtn.hidden = false;
+  } else {
+    // Re-Open-Bar nach der Slide-Out-Animation verstecken
+    setTimeout(() => { if (stripZone.dataset.collapsed === 'false') stripReopenBtn.hidden = true; }, 260);
+  }
+  syncReopenMeta();
+}
+
+stripCollapseBtn.addEventListener('click', () => {
+  // Toggle: Ziel-Zustand ist das Gegenteil vom aktuellen.
+  setStripCollapsed(stripZone.dataset.collapsed !== 'true');
+});
+stripReopenBtn.addEventListener('click', () => {
+  setStripCollapsed(false);
+  // Nach dem Aufklappen zur Re-Open-Bar scrollen, damit der User den Effekt sieht
+  requestAnimationFrame(() => {
+    stripReopenBtn.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  });
+});
+// Esc-Taste oeffnet die Timeline, wenn sie eingeklappt ist
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (stripZone.dataset.collapsed === 'true') setStripCollapsed(false);
+});
+
+/* ============================================================
+   BOTTOM-SHEET (Mobile Fallback bei <380px)
+   ============================================================ */
+const sheet = document.getElementById('sheet');
+const sheetBackdrop = document.getElementById('sheetBackdrop');
+const sheetList = document.getElementById('sheetList');
+const sheetOpen = document.getElementById('sheetOpen');
+const sheetClose = document.getElementById('sheetClose');
+
+function openSheet() {
+  // Liste aus den Tagen rendern
+  const clusters = buildClusters(media);
+  let html = '';
+  let prevMonth = -1;
+  clusters.forEach((c, idx) => {
+    const month = c.date.getMonth();
+    if (month !== prevMonth) {
+      const mInfo = MONTHS.find(m => m.start.getMonth() === month);
+      if (mInfo) html += `<div class="strip-popover-date" style="padding: 6px 0 4px; color: var(--text-low); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;">${mInfo.longLabel} 2026</div>`;
+      prevMonth = month;
+    }
+    const isToday = sameDay(c.date, TODAY);
+    html += `
+      <div class="strip-popover-row" data-cluster-idx="${idx}" style="cursor:pointer;">
+        <span class="dot" style="background:${c.items[0].type === 'photo' ? 'var(--color-primary)' : c.items[0].type === 'plan' ? 'var(--status-info)' : c.items[0].type === 'video' ? 'var(--status-warn)' : 'var(--status-success)'};"></span>
+        <span class="name">${fmtDE(c.date)} · ${GERMAN_DOW[c.date.getDay()]}${isToday ? ' <span style="color:var(--status-warn); font-weight:600;">(heute)</span>' : ''}</span>
+        <span class="time">${c.items.length} Medien</span>
+      </div>
+    `;
+  });
+  sheetList.innerHTML = html;
+  sheet.classList.add('is-open');
+  sheetBackdrop.classList.add('is-open');
+}
+function closeSheet() {
+  sheet.classList.remove('is-open');
+  sheetBackdrop.classList.remove('is-open');
+}
+sheetOpen.addEventListener('click', openSheet);
+sheetClose.addEventListener('click', closeSheet);
+sheetBackdrop.addEventListener('click', closeSheet);
+sheetList.addEventListener('click', e => {
+  const row = e.target.closest('[data-cluster-idx]');
+  if (!row) return;
+  setActiveCluster(parseInt(row.dataset.clusterIdx, 10));
+  closeSheet();
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+renderAll();
+
+// Beim Resize Pin/Achse neu berechnen
+window.addEventListener('resize', () => {
+  positionPin(buildClusters(media));
+  positionAxisTicks();
+});
+
+</script>
+
+</body>
+</html>
