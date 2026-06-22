@@ -32,7 +32,7 @@
 | Projekte          | 🔵 LIVE | Toolbar mit Status-Segmenten + Projekt-Karten-Grid |
 | Projekt-Detail    | 🔵 LIVE | Sub-Topbar, Tabs-Bar, Filter-Sidebar, Workspace |
 | Galerie           | 🔵 LIVE | Filter-Card (Pills) + Galerie-Zeilen mit Timeline-Streifen |
-| Archiv            | 🔵 LIVE | Tabelle archivierter Projekte + Audit-Log-Bereich |
+| Archiv            | 🔵 LIVE | Hero + KPI-Bar (4 Stats) + Toolbar (Suche + Jahr-Segmente + Sort) + Jahr-gruppierte Projekt-Tabelle (8 Mockups) mit Retention-Bar + Audit-Log-Sektion (5 Einträge) + DSG-Callout-Grid (Aufbewahrung / Audit-Log / Export) |
 | Einstellung/Profil| 🔵 LIVE | 9 Sektionen, sticky Sub-Nav |
 
 ## Modals (in `index.html`, `data-bind="..."`-getriggert)
@@ -74,6 +74,8 @@ von der Live-App instanziiert.
 | `galerie-v2.html` | 🟠 READ-ONLY | Serpentine-Galerie-Layout, Layout-Sandboxing für alternative Visualisierungsidee. Eigener `MEDIA`-Pool (32 Bilder aus `assets/generated/`), **NICHT** `window.VISIDOC_DEMO`. Datei trägt `<!-- LAYOUT-SANDBOX -->` Header-Kommentar. | Eigener statischer Pool |
 | `modals-showcase.html` | 🟠 READ-ONLY | Interaktive Demo aller 4 Modals (Wizard, Foto-Upload, Video-Upload, Export) mit echten Vollbild-Overlays, Live-Validierung, Submit-Mocks. | Übernimmt `window.VISIDOC_DEMO` |
 | `modals.html` | 🟠 READ-ONLY | Modals-Übersicht mit Step-Vorschau, State-Tabelle, Vergleichsmatrix. Stub-Buttons verlinken auf `index.html`. | Übernimmt `window.VISIDOC_DEMO` |
+| `preview-card-spec.css` | 🟠 READ-ONLY | Locked CSS-Custom-Properties-Modul: **einzige Quelle der Wahrheit** für die Preview-Card-Geometrie (Stempel + Trendlinie + Dot). Konsumiert von `index.html` und `design-explorations/timeline-filmstrip.html`. Datei trägt `LOCKED SPEC — DO NOT EDIT`-Header und ist via `attrib +R` OS-seitig schreibgeschützt. | — |
+| `verify-preview-card-spec.py` | 🔵 LIVE | Python-Skript: prüft die Geometrie-Invariante (`20 + 49 + 2.5 = 71.5 px`) und Symmetrie (`14 px = 14 px`). Laufen lassen nach jeder Spec-Änderung, vor PR. | — |
 
 **Regel.** Sandboxes sind READ-ONLY. Änderungsvorschläge werden in
 `index.html` umgesetzt, nicht in der Sandbox. Wenn die Sandbox-Idee
@@ -130,6 +132,8 @@ mehreren Screens verwendet — Änderungen wirken systemweit.
 | 2026-06-19  | galerie-v2.html (live) | Status auf 🟠 READ-ONLY gesetzt | Klare Trennung der Sandbox-Datenquelle von `index.html`; Dokumentation der zwei Datenpools |
 | 2026-06-19  | modals-showcase.html, modals.html | Status auf 🟠 READ-ONLY gesetzt | Standalone-Modals-Showcase mit eigenem App-Chrome, nicht von `index.html` referenziert |
 | 2026-06-19  | galerie-v2.html, modals-showcase.html, modals.html | Neue Sektion „Standalone-Sandboxes" hinzugefügt | Manifest-Eintrag für die Sandboxes, vorher fehlte sie im Register |
+| 2026-06-20  | preview-card-spec.css, docs/ux/concepts/preview-card-spec.md | Neu angelegt als 🟠 READ-ONLY Spec-Modul + Spec-Doku | Iterative Geometrie-Findung (Datum|Trendlinie|Zeit + Dot @ Y=71.5px) in formale Spec überführt; zukünftige Bilder greifen automatisch auf identische Geometrie zu |
+| 2026-06-21  | Archiv (Screen 5) | Vollständig ersetzt: Hero + 4-Stat-Bar + Toolbar + 2× Projekt-Tabelle (8 Mockups, Jahr-gruppiert) mit Retention-Bar + Audit-Log + 3 DSG-Callouts | Bisherige Sektion war 3-Placeholder-Karten ohne CSS. Jetzt produktives Layout mit Retention-Aufbewahrung (10 J DSG-konform), Audit-Highlight für Wohnsiedlung Horgen (88 % verbraucht) und strukturierten Mockup-Daten |
 
 ---
 

@@ -1,0 +1,2325 @@
+<!DOCTYPE html>
+<html lang="de-CH" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VisiDoc – Modals Showcase v2.0 (1:1 aus App-Buttons)</title>
+<style>
+/* ============================================================
+   DESIGN-TOKENS (1:1 aus app-shell.css)
+   ============================================================ */
+:root, [data-theme="dark"] {
+  --bg-base:        #14181B;
+  --bg-panel:       #1F2429;
+  --bg-raised:      #2A2F35;
+  --border-default: #2F353C;
+  --border-subtle:  rgba(255, 255, 255, 0.06);
+  --text-high:      #F2F4F7;
+  --text-mid:       #A3ACB8;
+  --text-low:       #6B7480;
+  --color-primary:  #668048;
+  --color-primary-hover: #7A9359;
+  --color-primary-press: #566B3D;
+  --color-primary-soft:  rgba(102, 128, 72, 0.14);
+  --status-info:    #5B8DEF;
+  --status-warn:    #F5C768;
+  --status-error:   #F26B6B;
+  --font-sans: Inter, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --radius-container: 10px;
+  --radius-small:    8px;
+  --radius-preview:  12px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+}
+[data-theme="light"] {
+  --bg-base:        #F7F8F5;
+  --bg-panel:       #FFFFFF;
+  --bg-raised:      #EDEFE9;
+  --border-default: #D9DCD3;
+  --border-subtle:  rgba(31, 36, 41, 0.08);
+  --text-high:      #1F2429;
+  --text-mid:       #5A636C;
+  --text-low:       #8B929B;
+  --color-primary:  #668048;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--bg-base); color: var(--text-high);
+  font-family: var(--font-sans); font-size: 14px; line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   PAGE — TRIGGER-REPLICA (1:1 aus index.html Topbar + Upload-Row)
+   ============================================================ */
+.vd-showcase { min-height: 100vh; display: flex; flex-direction: column; }
+.vd-showcase-head {
+  padding: 28px 32px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.vd-showcase-head h1 { font-size: 24px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.01em; }
+.vd-showcase-head p { margin: 0; color: var(--text-mid); font-size: 13px; max-width: 880px; line-height: 1.55; }
+
+/* ----- Replica Topbar ----- */
+.vd-replica-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+  padding: 14px 32px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-default);
+}
+.vd-replica-topbar-left { display: flex; align-items: center; gap: 12px; }
+.vd-replica-search {
+  width: 280px; height: 32px;
+  background: var(--bg-raised); border: 1px solid var(--border-default);
+  border-radius: var(--radius-small); color: var(--text-low);
+  display: flex; align-items: center; padding: 0 12px;
+  font-size: 12.5px;
+}
+.vd-replica-topbar-right { display: flex; align-items: center; gap: 10px; }
+
+/* ----- Replica Upload-Row (Foto/Plan/Video/Datei) ----- */
+.vd-replica-uploads {
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.vd-replica-uploads-label {
+  font-size: 11px; font-weight: 500; color: var(--text-low);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+.vd-replica-uploads-actions {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+
+/* ----- Buttons (genau wie in index.html) ----- */
+.vd-button {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 36px; padding: 0 16px;
+  border-radius: var(--radius-small);
+  font-family: inherit; font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+  white-space: nowrap;
+}
+.vd-button svg { width: 14px; height: 14px; }
+.vd-button--primary {
+  background: var(--color-primary); color: #fff;
+  border-color: var(--color-primary);
+}
+.vd-button--primary:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
+.vd-button--secondary {
+  background: var(--bg-panel); color: var(--text-high);
+  border-color: var(--border-default);
+}
+.vd-button--secondary:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.vd-button--ghost {
+  background: transparent; color: var(--text-mid);
+  border-color: transparent;
+}
+.vd-button--ghost:hover { color: var(--text-high); background: var(--bg-raised); }
+.vd-button .vd-spinner {
+  width: 12px; height: 12px;
+  border: 2px solid currentColor; border-top-color: transparent;
+  border-radius: 50%; display: inline-block;
+  animation: vd-spin 0.7s linear infinite;
+}
+@keyframes vd-spin { to { transform: rotate(360deg); } }
+.vd-button:disabled { opacity: .6; cursor: not-allowed; }
+
+/* ============================================================
+   LIVE-STATE-PANELS (unter den Triggern, zeigen was die App speichern würde)
+   ============================================================ */
+.vd-roundtrip {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  padding: 24px 32px;
+}
+@media (max-width: 900px) { .vd-roundtrip { grid-template-columns: 1fr; } }
+.vd-roundtrip-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-container);
+  overflow: hidden;
+}
+.vd-roundtrip-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bg-raised);
+  border-bottom: 1px solid var(--border-default);
+}
+.vd-roundtrip-title { font-size: 12px; font-weight: 600; color: var(--text-high); }
+.vd-roundtrip-title::before {
+  content: ''; display: inline-block;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--color-primary); margin-right: 8px;
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+.vd-roundtrip-meta { font-size: 11px; color: var(--text-low); font-family: var(--font-mono); }
+.vd-roundtrip-body {
+  margin: 0; padding: 14px;
+  font-family: var(--font-mono);
+  font-size: 11.5px; line-height: 1.55;
+  color: var(--text-mid);
+  white-space: pre-wrap; word-break: break-word;
+  min-height: 100px; max-height: 220px; overflow: auto;
+}
+.vd-roundtrip-body .vd-key { color: var(--color-primary); }
+.vd-roundtrip-body .vd-string { color: #B7D4A8; }
+.vd-roundtrip-body .vd-number { color: var(--status-warn); }
+
+/* ============================================================
+   MODALS — shared
+   ============================================================ */
+.vd-modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: grid; place-items: center;
+  padding: 24px;
+  animation: vd-fade-in .15s ease-out;
+}
+/* hidden-Attribut muss display:grid wirklich ausschalten — sonst stapeln sich alle Backdrops übereinander */
+.vd-modal-backdrop[hidden] { display: none !important; }
+@keyframes vd-fade-in { from { opacity: 0; } to { opacity: 1; } }
+body.is-modal-open { overflow: hidden; }
+
+.vd-modal {
+  width: 100%; max-width: 560px;
+  /* Modal wächst mit seinem Inhalt – keine Scrollbar im Default-Zustand.
+     Bei sehr kleinem Viewport (Mobile Hochformat, < 600px Höhe) fällt es auf
+     max-height: 96vh zurück und der Body scrollt. */
+  max-height: 96vh;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-container);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  animation: vd-modal-in .18s ease-out;
+}
+.vd-modal--wide { max-width: 720px; }
+@keyframes vd-modal-in { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.vd-modal-main { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.vd-modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+/* Body wächst mit Inhalt – KEIN interner Scroll per Default.
+   Scroll nur wenn Viewport zu klein (siehe Media Query unten). */
+.vd-modal-body {
+  flex: 0 1 auto;
+  padding: 20px;
+  overflow: visible;
+}
+/* Fallback: bei sehr kleinem Viewport (< 600px hoch) scrollt der Body. */
+@media (max-height: 600px) {
+  .vd-modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-default) transparent;
+  }
+  .vd-modal-body::-webkit-scrollbar { width: 8px; }
+  .vd-modal-body::-webkit-scrollbar-track { background: transparent; }
+  .vd-modal-body::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 4px; }
+  .vd-modal-body::-webkit-scrollbar-thumb:hover { background: var(--text-low); }
+}
+.vd-modal-foot {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-default);
+  background: var(--bg-base);
+}
+.vd-modal-foot-spacer { flex: 1; }
+.vd-modal-foot-info { font-size: 12px; color: var(--text-low); font-family: var(--font-mono); }
+.vd-modal-foot-progress { height: 2px; background: var(--bg-raised); }
+.vd-modal-foot-progress-bar {
+  height: 100%; width: 0%;
+  background: var(--color-primary);
+  transition: width .2s ease;
+}
+.vd-modal-section-label {
+  font-size: 11px; font-weight: 600; color: var(--text-mid);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Read-only Kontext-Banner für automatisch gesetzte Werte (z. B. Projekt) */
+
+/* Read-only Kontext-Banner für automatisch gesetzte Werte (Projekt, Gewerk) */
+.vd-context-banner {
+  display: flex; gap: 0;
+  background: var(--color-primary-soft);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-small);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.vd-context-banner-item {
+  flex: 1;
+  padding: 8px 12px;
+  display: flex; flex-direction: column; gap: 2px;
+  border-right: 1px solid rgba(102, 128, 72, 0.25);
+}
+.vd-context-banner-item:last-child { border-right: none; }
+.vd-context-banner-label {
+  font-size: 9.5px; font-weight: 600;
+  color: var(--color-primary);
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.vd-context-banner-value {
+  font-size: 13px; font-weight: 600;
+  color: var(--text-high);
+  display: flex; align-items: center; gap: 6px;
+}
+.vd-context-banner-value svg { width: 12px; height: 12px; color: var(--color-primary); }
+.vd-modal-meta-grid { display: flex; flex-direction: column; }
+.vd-modal-meta-row {
+  display: grid; grid-template-columns: 160px 1fr; gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 12.5px;
+}
+.vd-modal-meta-row:last-child { border-bottom: none; }
+.vd-modal-meta-label { color: var(--text-low); font-family: var(--font-mono); }
+.vd-modal-meta-value { color: var(--text-high); }
+.vd-modal-meta-value--empty { color: var(--text-low); font-style: italic; }
+
+.vd-modal-close {
+  background: transparent; border: none; cursor: pointer;
+  color: var(--text-low); padding: 4px;
+  display: grid; place-items: center;
+  border-radius: var(--radius-small);
+}
+.vd-modal-close:hover { color: var(--text-high); background: var(--bg-raised); }
+
+.vd-wz-panel { animation: vd-panel-in 160ms ease-out; }
+@keyframes vd-panel-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+.vd-wizard-steps { display: flex; align-items: center; gap: 6px; margin-bottom: 16px; }
+.vd-wizard-step {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px 6px 6px;
+  background: transparent; border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: inherit; font-size: 12.5px; color: var(--text-mid);
+  cursor: pointer;
+}
+.vd-wizard-step:hover { color: var(--text-high); }
+.vd-wizard-step--active { color: var(--color-primary); background: var(--color-primary-soft); border-color: var(--color-primary); }
+.vd-wizard-step--done { color: var(--text-high); }
+.vd-wizard-step-num {
+  width: 22px; height: 22px;
+  display: grid; place-items: center;
+  background: var(--bg-raised); border-radius: 50%;
+  font-size: 11px; font-weight: 600;
+  color: var(--text-mid);
+}
+.vd-wizard-step--active .vd-wizard-step-num { background: var(--color-primary); color: #fff; }
+.vd-wizard-step--done .vd-wizard-step-num { background: var(--color-primary-soft); color: var(--color-primary); }
+.vd-wizard-step--done .vd-wizard-step-num::before { content: '✓'; font-size: 12px; }
+.vd-wizard-step--done .vd-wizard-step-num-text { display: none; }
+.vd-wizard-sep { flex: 0 0 16px; height: 1px; background: var(--border-default); }
+
+/* ============================================================
+   FORM-FIELDS — shared
+   ============================================================ */
+.vd-field-group { display: flex; flex-direction: column; gap: 4px; }
+.vd-field-label { font-size: 12px; color: var(--text-mid); font-weight: 500; letter-spacing: 0.01em; }
+.vd-field-input, .vd-field-select, .vd-field-textarea {
+  font-family: inherit; font-size: 13px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-small);
+  color: var(--text-high);
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.vd-field-input:focus, .vd-field-select:focus, .vd-field-textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+/* Textarea: fixiert auf max-height, scrollt intern statt das Modal zu sprengen.
+   Footer (Zurück / Weiter) bleibt dadurch immer an der gleichen Stelle. */
+.vd-field-textarea {
+  min-height: 56px; max-height: 140px;
+  resize: none;
+  font-family: inherit;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
+}
+.vd-field-textarea::-webkit-scrollbar { width: 6px; }
+.vd-field-textarea::-webkit-scrollbar-track { background: transparent; }
+.vd-field-textarea::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+.vd-field-textarea::-webkit-scrollbar-thumb:hover { background: var(--text-low); }
+.vd-field-input--invalid, .vd-field-select--invalid, .vd-field-textarea--invalid {
+  border-color: var(--status-error);
+  box-shadow: 0 0 0 3px rgba(242,107,107,.12);
+}
+.vd-field-error { font-size: 11px; color: var(--status-error); display: none; }
+.vd-field-group--invalid .vd-field-error { display: block; }
+
+/* ============================================================
+   DROPZONE — kompakt, horizontal, einheitlich für alle 4 Upload-Modals
+   Icon links · Text mittig · Action-Button(s) rechts
+   ============================================================ */
+.vd-dropzone {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px;
+  background: var(--bg-base);
+  border: 1.5px dashed var(--border-default);
+  border-radius: var(--radius-container);
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+}
+.vd-dropzone:hover { border-color: var(--color-primary); background: var(--color-primary-soft); }
+.vd-dropzone--active { border-color: var(--color-primary); background: var(--color-primary-soft); }
+.vd-dropzone-icon {
+  width: 28px; height: 28px;
+  flex-shrink: 0;
+  color: var(--color-primary);
+  opacity: 0.75;
+}
+.vd-dropzone-body { flex: 1; min-width: 0; }
+.vd-dropzone-title { font-size: 13px; color: var(--text-high); font-weight: 500; }
+.vd-dropzone-sub { font-size: 11.5px; color: var(--text-mid); margin-top: 2px; }
+.vd-dropzone-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+/* Hinweis-Zeile unter der Dropzone — nutzt Dropzone-Slot für sinnvolle Zusatz-Info */
+.vd-dropzone-note {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--text-low); margin-top: 8px;
+}
+.vd-dropzone-note svg { width: 12px; height: 12px; color: var(--color-primary); }
+
+.vd-file-preview {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-small);
+}
+.vd-file-thumb {
+  width: 48px; height: 48px;
+  background: var(--bg-raised); border-radius: 8px;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  font-size: 10px; font-weight: 600; color: var(--text-low);
+  overflow: hidden;
+}
+.vd-file-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+.vd-file-info { flex: 1; min-width: 0; }
+.vd-file-name { font-size: 13px; font-weight: 600; color: var(--text-high); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vd-file-meta { font-size: 11.5px; color: var(--text-low); font-family: var(--font-mono); margin-top: 2px; }
+.vd-file-remove {
+  background: transparent; border: none; cursor: pointer;
+  color: var(--text-low); padding: 4px;
+  display: grid; place-items: center;
+}
+.vd-file-remove:hover { color: var(--status-error); }
+.vd-file-list {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-top: 12px;
+  /* Scrollt intern ab dieser Höhe – verhindert dass 50 Bilder das Modal sprengen. */
+  max-height: 240px; overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
+}
+.vd-file-list:empty { display: none; }
+.vd-file-list::-webkit-scrollbar { width: 6px; }
+.vd-file-list::-webkit-scrollbar-track { background: transparent; }
+.vd-file-list::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+.vd-file-list::-webkit-scrollbar-thumb:hover { background: var(--text-low); }
+
+.vd-file-list-empty {
+  text-align: center; padding: 12px;
+  font-size: 12px; color: var(--text-low);
+  font-style: italic;
+}
+
+/* Button "Alle X ansehen" – erscheint wenn Files > Threshold (siehe Engine) */
+.vd-file-list-more {
+  display: flex; justify-content: center;
+  margin-top: 8px;
+}
+.vd-file-list-more[hidden] { display: none; }
+.vd-file-list-more button {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 12px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-small);
+  font-family: inherit; font-size: 12px;
+  color: var(--color-primary); font-weight: 500;
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+}
+.vd-file-list-more button:hover { border-color: var(--color-primary); background: var(--color-primary-soft); }
+.vd-file-list-more button svg { width: 12px; height: 12px; }
+
+/* ============================================================
+   MEDIA-LIGHTBOX — Cards für die Vollbild-Liste
+   ============================================================ */
+.vd-lightbox-card {
+  display: flex; flex-direction: column;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-small);
+  overflow: hidden;
+  transition: border-color .15s ease;
+}
+.vd-lightbox-card:hover { border-color: var(--color-primary); }
+.vd-lightbox-thumb {
+  width: 100%; aspect-ratio: 1 / 1;   /* quadratisch, kompakt – vermeidet dass grosse Screenshots das Layout sprengen */
+  background: var(--bg-raised);
+  display: grid; place-items: center;
+  overflow: hidden;
+}
+.vd-lightbox-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vd-lightbox-grid::-webkit-scrollbar { width: 6px; }
+.vd-lightbox-grid::-webkit-scrollbar-track { background: transparent; }
+.vd-lightbox-grid::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+.vd-lightbox-grid::-webkit-scrollbar-thumb:hover { background: var(--text-low); }
+.vd-lightbox-info { padding: 8px 10px 10px; position: relative; }
+.vd-lightbox-name {
+  font-size: 12px; font-weight: 600;
+  color: var(--text-high);
+  overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 22px;   /* Platz für Remove-Button */
+}
+.vd-lightbox-meta {
+  font-size: 10.5px; color: var(--text-low);
+  font-family: var(--font-mono);
+  margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.vd-lightbox-remove {
+  position: absolute; top: 6px; right: 6px;
+  width: 22px; height: 22px;
+  background: rgba(20,24,27,0.6);
+  border: 1px solid var(--border-default);
+  border-radius: 4px;
+  color: var(--text-low);
+  display: grid; place-items: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .15s ease, color .15s ease, background .15s ease;
+}
+.vd-lightbox-card:hover .vd-lightbox-remove,
+.vd-lightbox-remove:focus { opacity: 1; }
+.vd-lightbox-remove:hover { color: var(--status-error); background: rgba(242,107,107,0.15); border-color: var(--status-error); }
+
+/* ============================================================
+   PROJEKT-WIZARD — .vd-pw-*
+   ============================================================ */
+.vd-pw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+.vd-pw-field { display: flex; flex-direction: column; gap: 4px; }
+.vd-pw-field--full { grid-column: 1 / -1; }
+.vd-pw-label { font-size: 12px; font-weight: 500; color: var(--text-mid); letter-spacing: 0.01em; }
+.vd-pw-input {
+  font-family: inherit; font-size: 13px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-small);
+  color: var(--text-high);
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.vd-pw-input:focus { outline: 2px solid var(--color-primary); outline-offset: 1px; border-color: var(--color-primary); }
+.vd-pw-textarea {
+  font-family: inherit; font-size: 13px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-small);
+  color: var(--text-high);
+  padding: 8px 10px;
+  outline: none;
+  /* Fixiert auf max-height, scrollt intern – verhindert Modal-Sprengung. */
+  min-height: 72px; max-height: 160px;
+  resize: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
+}
+.vd-pw-textarea::-webkit-scrollbar { width: 6px; }
+.vd-pw-textarea::-webkit-scrollbar-track { background: transparent; }
+.vd-pw-textarea::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+.vd-pw-textarea::-webkit-scrollbar-thumb:hover { background: var(--text-low); }
+.vd-pw-textarea:focus { outline: 2px solid var(--color-primary); outline-offset: 1px; border-color: var(--color-primary); }
+.vd-pw-helper, .vd-field-helper { font-size: 11px; color: var(--text-low); }
+
+.vd-pw-status-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: 999px;
+  font-size: 12px; color: var(--text-mid);
+  cursor: pointer;
+}
+.vd-pw-status-pill:hover { border-color: var(--color-primary); }
+.vd-pw-status-pill--active { background: var(--color-primary-soft); border-color: var(--color-primary); color: var(--color-primary); }
+.vd-pw-status-pill-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-low); }
+.vd-pw-status-pill--active .vd-pw-status-pill-dot { background: var(--color-primary); }
+
+.vd-pw-tags {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  padding: 6px 8px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-small);
+  min-height: 36px;
+}
+.vd-pw-tags:focus-within { border-color: var(--color-primary); outline: 2px solid var(--color-primary); outline-offset: 1px; }
+.vd-pw-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px;
+  background: var(--color-primary-soft); color: var(--color-primary);
+  border-radius: 999px;
+  font-size: 11.5px; font-weight: 500;
+}
+.vd-pw-tag-x { cursor: pointer; opacity: .6; padding: 0 2px; }
+.vd-pw-tag-x:hover { opacity: 1; }
+.vd-pw-tags input {
+  flex: 1; min-width: 80px;
+  background: transparent; border: none; outline: none;
+  color: var(--text-high); font-family: inherit; font-size: 12.5px;
+}
+
+.vd-pw-ready {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  background: var(--color-primary-soft);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-small);
+  margin-bottom: 16px;
+}
+.vd-pw-ready-icon {
+  width: 28px; height: 28px;
+  display: grid; place-items: center;
+  background: var(--color-primary); color: #fff; border-radius: 50%;
+}
+.vd-pw-ready-text { font-size: 13px; color: var(--text-high); font-weight: 500; }
+.vd-pw-validation {
+  font-size: 12px; color: var(--status-warn);
+  padding: 8px 12px;
+  background: rgba(245,199,104,0.10);
+  border-left: 2px solid var(--status-warn);
+  border-radius: 0 var(--radius-small) var(--radius-small) 0;
+  margin-top: 12px;
+}
+
+/* ============================================================
+   EXPORT — .vd-ex-*
+   ============================================================ */
+.vd-ex-source-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.vd-ex-format-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+@media (max-width: 600px) { .vd-ex-format-grid { grid-template-columns: 1fr; } }
+.vd-ex-format-card {
+  border: 1px solid var(--border-default);
+  background: var(--bg-base);
+  border-radius: var(--radius-small);
+  padding: 14px;
+  cursor: pointer;
+  display: flex; flex-direction: column; gap: 6px;
+  transition: border-color .15s ease, background .15s ease;
+}
+.vd-ex-format-card:hover { border-color: var(--color-primary); }
+.vd-ex-format-card--active { border-color: var(--color-primary); background: var(--color-primary-soft); }
+.vd-ex-format-icon {
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  background: var(--bg-raised); border-radius: 8px;
+  color: var(--color-primary); margin-bottom: 4px;
+}
+.vd-ex-format-icon svg { width: 16px; height: 16px; }
+.vd-ex-format-title { font-size: 13px; font-weight: 600; color: var(--text-high); }
+.vd-ex-format-sub { font-size: 11.5px; color: var(--text-low); }
+
+.vd-ex-date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.vd-ex-quick { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.vd-ex-quick-pill {
+  padding: 4px 10px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  border-radius: 999px;
+  font-size: 11.5px; color: var(--text-mid);
+  cursor: pointer;
+}
+.vd-ex-quick-pill:hover { border-color: var(--color-primary); color: var(--text-high); }
+.vd-ex-quick-pill--active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+
+.vd-ex-options { display: flex; flex-direction: column; gap: 8px; }
+.vd-ex-opt-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  background: var(--bg-base); border: 1px solid var(--border-default);
+  border-radius: var(--radius-small);
+  cursor: pointer;
+}
+.vd-ex-opt-row:hover { border-color: var(--color-primary); }
+.vd-ex-opt-row input[type="checkbox"] { accent-color: var(--color-primary); width: 14px; height: 14px; }
+.vd-ex-opt-label { font-size: 12.5px; color: var(--text-high); }
+.vd-ex-opt-sub { font-size: 11px; color: var(--text-low); }
+
+.vd-hint {
+  font-size: 11.5px; color: var(--text-low);
+  padding: 8px 12px;
+  background: var(--color-primary-soft);
+  border-left: 2px solid var(--color-primary);
+  border-radius: 0 var(--radius-small) var(--radius-small) 0;
+  margin-top: 12px;
+}
+.vd-hint strong { color: var(--color-primary); }
+.vd-hint code { font-family: var(--font-mono); font-size: 11px; color: var(--text-high); }
+
+/* ============================================================
+   VIDEO-COVER-PICKER
+   ============================================================ */
+.vd-video-cover-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.vd-video-cover {
+  width: 64px; height: 40px;
+  background: linear-gradient(135deg, var(--bg-raised), var(--bg-panel));
+  border: 2px solid var(--border-default);
+  border-radius: 6px;
+  display: grid; place-items: center;
+  font-size: 10px; font-family: var(--font-mono); color: var(--text-mid);
+  cursor: pointer;
+}
+.vd-video-cover:hover { border-color: var(--color-primary); }
+.vd-video-cover--active { border-color: var(--color-primary); background: var(--color-primary-soft); color: var(--color-primary); }
+
+</style>
+</head>
+<body>
+<div class="vd-showcase">
+
+  <!-- ============================================================
+       HEADER + REPLICA TOPBAR (1:1 aus index.html Zeile 2540ff)
+       ============================================================ -->
+  <header class="vd-showcase-head">
+    <h1>VisiDoc – Modals Showcase v2.0</h1>
+    <p>Sechs echte App-Buttons aus Topbar und Projekt-Row triggern sechs dedizierte Modals. Jeder State fliesst live in das State-Panel darunter. Diese Datei ersetzt die alten Showcase-Modals (project-wizard-modal, photo-upload-modal, video-upload-modal, export-modal) – neu hinzu: <code>neues-projekt-modal</code>, <code>foto-aufnahme-modal</code>, <code>plan-upload-modal</code>, <code>video-upload-modal</code>, <code>datei-waehlen-modal</code>, <code>export-modal</code>.</p>
+  </header>
+
+  <div class="vd-replica-topbar" role="region" aria-label="Topbar-Replica">
+    <div class="vd-replica-topbar-left">
+      <div class="vd-replica-search">Suche nach Projekt, Adresse, Bauleiter…</div>
+    </div>
+    <div class="vd-replica-topbar-right">
+      <button class="vd-button vd-button--secondary" type="button" data-open="export-modal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+      <button class="vd-button vd-button--primary" type="button" data-open="neues-projekt-modal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Neues Projekt
+      </button>
+    </div>
+  </div>
+
+  <div class="vd-replica-uploads" role="region" aria-label="Upload-Button-Row-Replica">
+    <div class="vd-replica-uploads-label">Upload-Aktionen · 1:1 aus Projekt-Detail-Row</div>
+    <div class="vd-replica-uploads-actions">
+      <button class="vd-button vd-button--primary" type="button" data-open="foto-aufnahme-modal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        Foto aufnehmen
+      </button>
+      <button class="vd-button vd-button--secondary" type="button" data-open="plan-upload-modal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/>
+        </svg>
+        Plan hochladen
+      </button>
+      <button class="vd-button vd-button--secondary" type="button" data-open="video-upload-modal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+        </svg>
+        Video hochladen
+      </button>
+      <button class="vd-button vd-button--ghost" type="button" data-open="datei-waehlen-modal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Datei wählen
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       LIVE-STATE-PANELS — zeigen was die App speichern würde
+       ============================================================ -->
+  <section class="vd-roundtrip" aria-label="Live-State">
+    <article class="vd-roundtrip-card">
+      <header class="vd-roundtrip-head">
+        <div class="vd-roundtrip-title">Neues Projekt · State</div>
+        <div class="vd-roundtrip-meta">live · <span data-rt-count="pw">0 Felder</span></div>
+      </header>
+      <pre class="vd-roundtrip-body" data-rt-body="pw">// noch keine Eingaben</pre>
+    </article>
+
+    <article class="vd-roundtrip-card">
+      <header class="vd-roundtrip-head">
+        <div class="vd-roundtrip-title">Foto aufnehmen · State</div>
+        <div class="vd-roundtrip-meta">live · <span data-rt-count="foto">0 Bilder</span></div>
+      </header>
+      <pre class="vd-roundtrip-body" data-rt-body="foto">// noch keine Bilder / Eingaben</pre>
+    </article>
+
+    <article class="vd-roundtrip-card">
+      <header class="vd-roundtrip-head">
+        <div class="vd-roundtrip-title">Plan hochladen · State</div>
+        <div class="vd-roundtrip-meta">live · <span data-rt-count="plan">0 Pläne</span></div>
+      </header>
+      <pre class="vd-roundtrip-body" data-rt-body="plan">// noch keine Pläne / Eingaben</pre>
+    </article>
+
+    <article class="vd-roundtrip-card">
+      <header class="vd-roundtrip-head">
+        <div class="vd-roundtrip-title">Video hochladen · State</div>
+        <div class="vd-roundtrip-meta">live · <span data-rt-count="video">0 Videos</span></div>
+      </header>
+      <pre class="vd-roundtrip-body" data-rt-body="video">// noch keine Videos / Eingaben</pre>
+    </article>
+
+    <article class="vd-roundtrip-card">
+      <header class="vd-roundtrip-head">
+        <div class="vd-roundtrip-title">Datei wählen · State</div>
+        <div class="vd-roundtrip-meta">live · <span data-rt-count="datei">0 Dateien</span></div>
+      </header>
+      <pre class="vd-roundtrip-body" data-rt-body="datei">// noch keine Dateien / Eingaben</pre>
+    </article>
+
+    <article class="vd-roundtrip-card">
+      <header class="vd-roundtrip-head">
+        <div class="vd-roundtrip-title">Export · State</div>
+        <div class="vd-roundtrip-meta">live · <span data-rt-count="ex">Konfiguration</span></div>
+      </header>
+      <pre class="vd-roundtrip-body" data-rt-body="ex">// noch keine Export-Konfiguration</pre>
+    </article>
+  </section>
+
+  <!-- ============================================================
+       MODAL 1 — NEUES PROJEKT (Topbar)
+       ============================================================ -->
+  <div class="vd-modal-backdrop" data-bind="neues-projekt-modal" role="dialog" aria-modal="true" aria-label="Neues Projekt anlegen" hidden>
+    <div class="vd-modal">
+      <div class="vd-modal-main">
+        <div class="vd-modal-head">
+          <span style="font-family:inherit;font-size:13.5px;color:var(--text-high);font-weight:500;">Neues Projekt</span>
+          <button class="vd-modal-close" type="button" data-modal-close aria-label="Schliessen">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="vd-modal-body">
+          <div class="vd-wizard-steps" data-wizard="pw">
+            <button class="vd-wizard-step vd-wizard-step--active" type="button" data-wz-step="1"><span class="vd-wizard-step-num"><span class="vd-wizard-step-num-text">1</span></span> Eckdaten</button>
+            <span class="vd-wizard-sep"></span>
+            <button class="vd-wizard-step" type="button" data-wz-step="2"><span class="vd-wizard-step-num"><span class="vd-wizard-step-num-text">2</span></span> Planung</button>
+            <span class="vd-wizard-sep"></span>
+            <button class="vd-wizard-step" type="button" data-wz-step="3"><span class="vd-wizard-step-num"><span class="vd-wizard-step-num-text">3</span></span> Bestätigen</button>
+          </div>
+
+          <div data-wz-panel="1" class="vd-wz-panel">
+            <div class="vd-pw-grid">
+              <div class="vd-pw-field vd-pw-field--full" data-pw-required="true">
+                <label class="vd-pw-label" for="pw-titel">Projekttitel *</label>
+                <input class="vd-pw-input" type="text" id="pw-titel" placeholder="z. B. Neubau Wohnüberbauung Sunnige Hof">
+                <span class="vd-pw-helper vd-field-error">Bitte einen Projekttitel eingeben.</span>
+              </div>
+              <div class="vd-pw-field vd-pw-field--full" data-pw-required="true">
+                <label class="vd-pw-label" for="pw-strasse">Strasse + Nr. *</label>
+                <input class="vd-pw-input" type="text" id="pw-strasse" placeholder="z. B. Sunnigstrasse 12">
+                <span class="vd-pw-helper vd-field-error">Bitte Strasse und Hausnummer eingeben.</span>
+              </div>
+              <div class="vd-pw-field" data-pw-required="true">
+                <label class="vd-pw-label" for="pw-plz">PLZ *</label>
+                <input class="vd-pw-input" type="text" id="pw-plz" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="z. B. 8008">
+                <span class="vd-pw-helper vd-field-error">Bitte 4-stellige Postleitzahl eingeben.</span>
+              </div>
+              <div class="vd-pw-field" data-pw-required="true">
+                <label class="vd-pw-label" for="pw-ort">Ort *</label>
+                <input class="vd-pw-input" type="text" id="pw-ort" placeholder="z. B. Zürich">
+                <span class="vd-pw-helper vd-field-error">Bitte den Ort eingeben.</span>
+              </div>
+              <div class="vd-pw-field" data-pw-required="true">
+                <label class="vd-pw-label" for="pw-bauleiter">Bauleiter *</label>
+                <select class="vd-pw-input" id="pw-bauleiter">
+                  <option value="">– bitte wählen –</option>
+                  <option value="Maria Brunner">Maria Brunner</option>
+                  <option value="Thomas Keller">Thomas Keller</option>
+                  <option value="Andrea Stalder">Andrea Stalder</option>
+                </select>
+                <span class="vd-pw-helper vd-field-error">Bitte einen Bauleiter wählen.</span>
+              </div>
+              <div class="vd-pw-field">
+                <label class="vd-pw-label" for="pw-auftraggeber">Auftraggeber</label>
+                <input class="vd-pw-input" type="text" id="pw-auftraggeber" placeholder="z. B. Genossenschaft Sonnengarten">
+              </div>
+              <div class="vd-pw-field">
+                <label class="vd-pw-label" for="pw-typ">Projekttyp</label>
+                <select class="vd-pw-input" id="pw-typ">
+                  <option>Neubau</option>
+                  <option>Umbau</option>
+                  <option>Sanierung</option>
+                  <option>Erweiterung</option>
+                </select>
+              </div>
+              <div class="vd-pw-field vd-pw-field--full">
+                <label class="vd-pw-label">Status</label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;" data-pw-status-group>
+                  <span class="vd-pw-status-pill vd-pw-status-pill--active" data-status="Planung"><span class="vd-pw-status-pill-dot"></span> Planung</span>
+                  <span class="vd-pw-status-pill" data-status="Aktiv"><span class="vd-pw-status-pill-dot"></span> Aktiv</span>
+                  <span class="vd-pw-status-pill" data-status="Abgeschlossen"><span class="vd-pw-status-pill-dot"></span> Abgeschlossen</span>
+                  <span class="vd-pw-status-pill" data-status="Pausiert"><span class="vd-pw-status-pill-dot"></span> Pausiert</span>
+                </div>
+              </div>
+              <div class="vd-pw-field vd-pw-field--full">
+                <label class="vd-pw-label" for="pw-beschreibung">Kurzbeschrieb</label>
+                <textarea class="vd-pw-textarea" id="pw-beschreibung" placeholder="Optional – kurze Beschreibung des Projekts"></textarea>
+                <span class="vd-pw-helper">Wird auf der Projektkarte angezeigt.</span>
+              </div>
+            </div>
+            <div class="vd-pw-validation" data-pw-validation hidden>
+              <strong>Pflichtfelder fehlen.</strong> Bitte fülle Titel, Strasse, PLZ, Ort und Bauleiter aus, um fortzufahren.
+            </div>
+          </div>
+
+          <div data-wz-panel="2" class="vd-wz-panel" hidden>
+            <div class="vd-pw-grid">
+              <div class="vd-pw-field">
+                <label class="vd-pw-label" for="pw-start">Geplanter Start</label>
+                <input class="vd-pw-input" type="date" id="pw-start">
+              </div>
+              <div class="vd-pw-field">
+                <label class="vd-pw-label" for="pw-ende">Geplantes Ende</label>
+                <input class="vd-pw-input" type="date" id="pw-ende">
+              </div>
+              <div class="vd-pw-field vd-pw-field--full">
+                <label class="vd-pw-label">Tags</label>
+                <div class="vd-pw-tags" data-pw-tags>
+                  <span class="vd-pw-tag">Neubau <span class="vd-pw-tag-x" data-tag-remove>×</span></span>
+                  <span class="vd-pw-tag">Wohnen <span class="vd-pw-tag-x" data-tag-remove>×</span></span>
+                  <span class="vd-pw-tag">Minergie <span class="vd-pw-tag-x" data-tag-remove>×</span></span>
+                  <input type="text" placeholder="Tag hinzufügen…" data-pw-tag-input>
+                </div>
+                <span class="vd-pw-helper">Enter fügt hinzu, Backspace auf leerem Input entfernt den letzten Tag.</span>
+              </div>
+              <div class="vd-pw-field vd-pw-field--full">
+                <label class="vd-pw-label" for="pw-meilensteine">Erste Meilensteine</label>
+                <textarea class="vd-pw-textarea" id="pw-meilensteine" placeholder="z. B. Baugesuch eingereicht, Aushub abgeschlossen, Rohbau fertig…"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div data-wz-panel="3" class="vd-wz-panel" hidden>
+            <div class="vd-pw-ready">
+              <div class="vd-pw-ready-icon">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="vd-pw-ready-text">Zusammenfassung – alles, was du oben eingegeben hast:</div>
+            </div>
+            <div class="vd-modal-section-label">Projekt-Daten (1:1 aus deinen Eingaben)</div>
+            <div class="vd-modal-meta-grid" style="margin-top:8px;" data-pw-summary></div>
+            <div class="vd-hint" style="margin-top:16px;">
+              <strong>Bereit zum Anlegen.</strong> Das Projekt wird an <code>POST /api/projects</code> gesendet.
+            </div>
+          </div>
+        </div>
+        <div class="vd-modal-foot-progress"><div class="vd-modal-foot-progress-bar" data-wz-progress></div></div>
+        <div class="vd-modal-foot">
+          <button class="vd-button vd-button--secondary" type="button" data-wz-prev="pw" disabled>Zurück</button>
+          <span class="vd-modal-foot-spacer"></span>
+          <span class="vd-modal-foot-info"><span data-wz-info="pw">Schritt 1 von 3</span></span>
+          <button class="vd-button vd-button--primary" type="button" data-wz-next="pw">
+            <span data-wz-next-label="pw">Weiter</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL 2 — FOTO AUFNEHMEN (Upload-Button primary)
+       ============================================================ -->
+  <div class="vd-modal-backdrop" data-bind="foto-aufnahme-modal" role="dialog" aria-modal="true" aria-label="Foto aufnehmen" hidden>
+    <div class="vd-modal">
+      <div class="vd-modal-main">
+        <div class="vd-modal-head">
+          <span style="font-family:inherit;font-size:13.5px;color:var(--text-high);font-weight:500;">Foto aufnehmen</span>
+          <button class="vd-modal-close" type="button" data-modal-close aria-label="Schliessen">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="vd-modal-body">
+          <div class="vd-wizard-steps" data-wizard="foto">
+            <button class="vd-wizard-step vd-wizard-step--active" type="button" data-wz-step="1"><span class="vd-wizard-step-num"><span class="vd-wizard-step-num-text">1</span></span> Bilder &amp; Metadaten</button>
+            <span class="vd-wizard-sep"></span>
+            <button class="vd-wizard-step" type="button" data-wz-step="2"><span class="vd-wizard-step-num"><span class="vd-wizard-step-num-text">2</span></span> Bestätigen</button>
+          </div>
+
+          <div data-wz-panel="1" class="vd-wz-panel">
+            <div class="vd-modal-section-label">Bilder hinzufügen</div>
+            <div class="vd-dropzone" data-dropzone id="foto-dropzone" style="margin-top:6px;">
+              <svg class="vd-dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              <div class="vd-dropzone-body">
+                <div class="vd-dropzone-title">Bilder hier ablegen oder direkt aufnehmen</div>
+                <div class="vd-dropzone-sub">JPG, PNG, HEIC · max. 25 MB · Mehrfachauswahl</div>
+              </div>
+              <div class="vd-dropzone-actions">
+                <span class="vd-button vd-button--secondary" data-dz-action="picker">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Datei wählen
+                </span>
+                <span class="vd-button vd-button--secondary" data-dz-action="camera">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  Foto aufnehmen
+                </span>
+              </div>
+              <input type="file" id="foto-input-picker" accept="image/*" multiple hidden>
+              <input type="file" id="foto-input-camera" accept="image/*" capture="environment" hidden>
+            </div>
+
+            <div class="vd-file-list" data-foto-files style="margin-top:10px;"></div>
+            <div class="vd-file-list-empty" data-foto-empty style="margin-top:10px;">Noch keine Bilder ausgewählt – lade Dateien per Drop, Picker oder Kamera hoch.</div>
+            <div class="vd-file-list-more" data-foto-more hidden>
+              <button type="button" data-open-lightbox="foto">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+                Alle <span data-foto-more-count>0</span> Bilder ansehen
+              </button>
+            </div>
+
+            <div style="height:1px;background:var(--border-default);margin:16px 0;"></div>
+
+            <div class="vd-modal-section-label">Zuordnung</div>
+
+            <div class="vd-field-group">
+              <label class="vd-field-label" for="foto-planpos">Planposition</label>
+              <select class="vd-field-select" id="foto-planpos">
+                <option value="">– bitte wählen –</option>
+                <option>Fassade · Nord</option>
+                <option>Fassade · Süd</option>
+                <option>Erdgeschoss · Grundriss</option>
+                <option>Schnitt A-A</option>
+                <option>Detail · Fensteranschluss</option>
+              </select>
+            </div>
+
+            <div class="vd-field-group" style="margin-top:10px;">
+              <label class="vd-field-label" for="foto-tags">Tags (Komma-getrennt)</label>
+              <input class="vd-field-input" type="text" id="foto-tags" placeholder="z. B. Rohbau, Aussenwand, Sichtbeton">
+            </div>
+
+            <div class="vd-field-group" style="margin-top:10px;">
+              <label class="vd-field-label" for="foto-notiz">Notiz</label>
+              <textarea class="vd-field-textarea" id="foto-notiz" placeholder="Optional – Bemerkung zu allen Bildern"></textarea>
+            </div>
+          </div>
+
+          <div data-wz-panel="2" class="vd-wz-panel" hidden>
+            <div class="vd-modal-section-label">Zusammenfassung – was du eingegeben hast</div>
+            <div class="vd-modal-meta-grid" style="margin-top:8px;" data-foto-summary></div>
+            <div class="vd-hint" style="margin-top:16px;">
+              <strong>Bereit zum Hochladen.</strong> Die Bilder werden per Multipart an <code>POST /api/media</code> gesendet.
+            </div>
+          </div>
+        </div>
+        <div class="vd-modal-foot-progress"><div class="vd-modal-foot-progress-bar" data-wz-progress></div></div>
+        <div class="vd-modal-foot">
+          <button class="vd-button vd-button--secondary" type="button" data-wz-prev="foto" disabled>Zurück</button>
+          <span class="vd-modal-foot-spacer"></span>
+          <span class="vd-modal-foot-info"><span data-wz-info="foto">Schritt 1 von 2</span></span>
+          <button class="vd-button vd-button--primary" type="button" data-wz-next="foto">
+            <span data-wz-next-label="foto">Weiter</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL 3 — PLAN HOCHLADEN (Upload-Button secondary, NEU)
+       ============================================================ -->
+  <div class="vd-modal-backdrop" data-bind="plan-upload-modal" role="dialog" aria-modal="true" aria-label="Plan hochladen" hidden>
+    <div class="vd-modal">
+      <div class="vd-modal-main">
+        <div class="vd-modal-head">
+          <span style="font-family:inherit;font-size:13.5px;color:var(--text-high);font-weight:500;">Plan hochladen</span>
+          <button class="vd-modal-close" type="button" data-modal-close aria-label="Schliessen">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="vd-modal-body">
+          <div class="vd-wizard-steps" data-wizard="plan">
+            <button class="vd-wizard-step vd-wizard-step--active" type="button" data-wz-step="1"><span class="vd-wizard-step-num"><span class="vd-wizard-step-num-text">1</span></span> Plan &amp; Metadaten</button>
+            <span class="vd-wizard-sep"></span>
+            <button class="vd-wizard-step" type="button" data-wz-step="2"><span class="vd-wizard-step-num"><span class="vd-wizard-step-num-text">2</span></span> Bestätigen</button>
+          </div>
+
+          <div data-wz-panel="1" class="vd-wz-panel">
+            <div class="vd-modal-section-label">Plan-Datei hinzufügen</div>
+            <div class="vd-dropzone" data-dropzone id="plan-dropzone" style="margin-top:6px;">
+              <svg class="vd-dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg>
+              <div class="vd-dropzone-body">
+                <div class="vd-dropzone-title">Plan hier ablegen oder wählen</div>
+                <div class="vd-dropzone-sub">PDF, PNG, JPG · max. 50 MB · 1 Plan pro Upload</div>
+              </div>
+              <div class="vd-dropzone-actions">
+                <span class="vd-button vd-button--secondary" data-dz-action="picker">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Plan wählen
+                </span>
+              </div>
+              <input type="file" id="plan-input-picker" accept="application/pdf,image/png,image/jpeg" hidden>
+            </div>
+
+            <div class="vd-file-list" data-plan-files style="margin-top:10px;"></div>
+            <div class="vd-file-list-empty" data-plan-empty style="margin-top:10px;">Noch kein Plan ausgewählt – lade eine Datei per Drop oder Picker hoch.</div>
+            <div class="vd-file-list-more" data-plan-more hidden>
+              <button type="button" data-open-lightbox="plan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+                Plan im Vollbild ansehen
+              </button>
+            </div>
+
+            <div style="height:1px;background:var(--border-default);margin:14px 0;"></div>
+
+            <div class="vd-modal-section-label">Zuordnung</div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div class="vd-field-group" data-plan-required="true">
+                <label class="vd-field-label" for="plan-planversion">Planversion *</label>
+                <select class="vd-field-select" id="plan-planversion">
+                  <option value="">– bitte wählen –</option>
+                  <option>v1.0 · Baugesuch</option>
+                  <option>v1.1 · Baugesuch (rev.)</option>
+                  <option>v2.0 · Ausführungsplanung</option>
+                  <option>v2.1 · Ausführungsplanung (rev.)</option>
+                  <option>– Neue Version anlegen –</option>
+                </select>
+                <span class="vd-field-error">Bitte eine Planversion wählen.</span>
+              </div>
+              <div class="vd-field-group" data-plan-required="true">
+                <label class="vd-field-label" for="plan-geschoss">Geschoss *</label>
+                <select class="vd-field-select" id="plan-geschoss">
+                  <option value="">– bitte wählen –</option>
+                  <option>Untergeschoss</option>
+                  <option>Erdgeschoss</option>
+                  <option>1. Obergeschoss</option>
+                  <option>2. Obergeschoss</option>
+                  <option>3. Obergeschoss</option>
+                  <option>Dachgeschoss</option>
+                  <option>Schnitt</option>
+                  <option>Ansicht</option>
+                </select>
+                <span class="vd-field-error">Bitte ein Geschoss wählen.</span>
+              </div>
+            </div>
+
+            <div class="vd-field-group" style="margin-top:10px;">
+              <label class="vd-field-label" for="plan-planpos">Planposition <span style="color:var(--text-low);font-weight:400;">(optional)</span></label>
+              <input class="vd-field-input" type="text" id="plan-planpos" placeholder="z. B. EG-GR-01 oder Schnitt A-A">
+            </div>
+
+            <div class="vd-field-group" style="margin-top:10px;">
+              <label class="vd-field-label" for="plan-notiz">Notiz <span style="color:var(--text-low);font-weight:400;">(optional)</span></label>
+              <textarea class="vd-field-textarea" id="plan-notiz" placeholder="Optional – z. B. Änderungen gegenüber Vorgaengerversion"></textarea>
+            </div>
+          </div>
+
+          <div data-wz-panel="2" class="vd-wz-panel" hidden>
+            <div class="vd-modal-section-label">Zusammenfassung – was du eingegeben hast</div>
+            <div class="vd-modal-meta-grid" style="margin-top:8px;" data-plan-summary></div>
+            <div class="vd-hint" style="margin-top:16px;">
+              <strong>Bereit zum Hochladen.</strong> Der Plan wird per Multipart an <code>POST /api/plans</code> gesendet.
+            </div>
+          </div>
+        </div>
+        <div class="vd-modal-foot-progress"><div class="vd-modal-foot-progress-bar" data-wz-progress></div></div>
+        <div class="vd-modal-foot">
+          <button class="vd-button vd-button--secondary" type="button" data-wz-prev="plan" disabled>Zurück</button>
+          <span class="vd-modal-foot-spacer"></span>
+          <span class="vd-modal-foot-info"><span data-wz-info="plan">Schritt 1 von 2</span></span>
+          <button class="vd-button vd-button--primary" type="button" data-wz-next="plan">
+            <span data-wz-next-label="plan">Weiter</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL 4 — VIDEO HOCHLADEN (Upload-Button secondary)
+       ============================================================ -->
+  <div class="vd-modal-backdrop" data-bind="video-upload-modal" role="dialog" aria-modal="true" aria-label="Video hochladen" hidden>
+    <div class="vd-modal">
+      <div class="vd-modal-main">
+        <div class="vd-modal-head">
+          <span style="font-family:inherit;font-size:13.5px;color:var(--text-high);font-weight:500;">Video hochladen</span>
+          <button class="vd-modal-close" type="button" data-modal-close aria-label="Schliessen">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="vd-modal-body">
+          <div class="vd-wizard-steps" data-wizard="video">
+            <button class="vd-wizard-step vd-wizard-step--active" type="button" data-wz-step="1"><span class="vd-wizard-step-num"><span class="vd-wizard-step-num-text">1</span></span> Video &amp; Metadaten</button>
+            <span class="vd-wizard-sep"></span>
+            <button class="vd-wizard-step" type="button" data-wz-step="2"><span class="vd-wizard-step-num"><span class="vd-wizard-step-num-text">2</span></span> Bestätigen</button>
+          </div>
+
+          <div data-wz-panel="1" class="vd-wz-panel">
+            <div class="vd-modal-section-label">Video hinzufügen</div>
+            <div class="vd-dropzone" data-dropzone id="video-dropzone" style="margin-top:6px;">
+              <svg class="vd-dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+              <div class="vd-dropzone-body">
+                <div class="vd-dropzone-title">Video hier ablegen oder aufnehmen</div>
+                <div class="vd-dropzone-sub">MP4, MOV, WEBM · max. 500 MB · 1 Video pro Upload</div>
+              </div>
+              <div class="vd-dropzone-actions">
+                <span class="vd-button vd-button--secondary" data-dz-action="picker">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Datei wählen
+                </span>
+                <span class="vd-button vd-button--secondary" data-dz-action="camera">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                  Aufnehmen
+                </span>
+              </div>
+              <input type="file" id="video-input-picker" accept="video/*" hidden>
+              <input type="file" id="video-input-camera" accept="video/*" capture="environment" hidden>
+            </div>
+
+            <div class="vd-file-list" data-video-files style="margin-top:10px;"></div>
+            <div class="vd-file-list-empty" data-video-empty style="margin-top:10px;">Noch kein Video ausgewählt – lade eine Datei per Drop, Picker oder Kamera hoch.</div>
+            <div class="vd-file-list-more" data-video-more hidden>
+              <button type="button" data-open-lightbox="video">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+                Video im Vollbild ansehen
+              </button>
+            </div>
+
+            <div class="vd-modal-section-label" style="margin-top:16px;">Cover-Frame wählen</div>
+            <div class="vd-video-cover-row" data-video-cover>
+              <div class="vd-video-cover vd-video-cover--active" data-cover-ts="00:00">00:00</div>
+              <div class="vd-video-cover" data-cover-ts="00:14">00:14</div>
+              <div class="vd-video-cover" data-cover-ts="00:28">00:28</div>
+              <div class="vd-video-cover" data-cover-ts="00:42">00:42</div>
+              <div class="vd-video-cover" data-cover-ts="00:56">00:56</div>
+            </div>
+            <div class="vd-pw-helper" style="margin-top:6px;">Cover-Frame: <span data-cover-selected>00:00</span></div>
+
+            <div style="height:1px;background:var(--border-default);margin:16px 0;"></div>
+
+            <div class="vd-modal-section-label">Zuordnung</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;">
+              <div class="vd-field-group">
+                <label class="vd-field-label" for="video-planpos">Planposition</label>
+                <select class="vd-field-select" id="video-planpos">
+                  <option value="">– bitte wählen –</option>
+                  <option>Fassade · Nord</option>
+                  <option>Fassade · Süd</option>
+                  <option>Erdgeschoss · Grundriss</option>
+                  <option>Schnitt A-A</option>
+                </select>
+              </div>
+              <div class="vd-field-group">
+                <label class="vd-field-label" for="video-gewerk">Gewerk</label>
+                <select class="vd-field-select" id="video-gewerk">
+                  <option>Rohbau</option>
+                  <option>Holzbau</option>
+                  <option>Gebäudehülle</option>
+                  <option>Haustechnik</option>
+                  <option>Innenausbau</option>
+                </select>
+              </div>
+              <div class="vd-field-group">
+                <label class="vd-field-label" for="video-dauer-overlay">Dauer-Stempel</label>
+                <select class="vd-field-select" id="video-dauer-overlay">
+                  <option>Unten rechts</option>
+                  <option>Unten links</option>
+                  <option>Oben rechts</option>
+                  <option>Oben links</option>
+                  <option>Kein Stempel</option>
+                </select>
+              </div>
+              <div class="vd-field-group" style="grid-column:1/-1;">
+                <label class="vd-field-label" for="video-tags">Tags (Komma-getrennt)</label>
+                <input class="vd-field-input" type="text" id="video-tags" placeholder="z. B. Baustelle, Rohbau, Zeitraffer">
+              </div>
+              <div class="vd-field-group" style="grid-column:1/-1;">
+                <label class="vd-field-label" for="video-notiz">Notiz</label>
+                <textarea class="vd-field-textarea" id="video-notiz" placeholder="Optional – Bemerkung zum Video"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div data-wz-panel="2" class="vd-wz-panel" hidden>
+            <div class="vd-modal-section-label">Zusammenfassung – was du eingegeben hast</div>
+            <div class="vd-modal-meta-grid" style="margin-top:8px;" data-video-summary></div>
+            <div class="vd-hint" style="margin-top:16px;">
+              <strong>Bereit zum Hochladen.</strong> Das Video wird per Multipart an <code>POST /api/media</code> gesendet.
+            </div>
+          </div>
+        </div>
+        <div class="vd-modal-foot-progress"><div class="vd-modal-foot-progress-bar" data-wz-progress></div></div>
+        <div class="vd-modal-foot">
+          <button class="vd-button vd-button--secondary" type="button" data-wz-prev="video" disabled>Zurück</button>
+          <span class="vd-modal-foot-spacer"></span>
+          <span class="vd-modal-foot-info"><span data-wz-info="video">Schritt 1 von 2</span></span>
+          <button class="vd-button vd-button--primary" type="button" data-wz-next="video">
+            <span data-wz-next-label="video">Weiter</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL 5 — DATEI WÄHLEN (Upload-Button ghost, NEU)
+       ============================================================ -->
+  <div class="vd-modal-backdrop" data-bind="datei-waehlen-modal" role="dialog" aria-modal="true" aria-label="Datei wählen" hidden>
+    <div class="vd-modal">
+      <div class="vd-modal-main">
+        <div class="vd-modal-head">
+          <span style="font-family:inherit;font-size:13.5px;color:var(--text-high);font-weight:500;">Datei wählen</span>
+          <button class="vd-modal-close" type="button" data-modal-close aria-label="Schliessen">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="vd-modal-body">
+          <div class="vd-wizard-steps" data-wizard="datei">
+            <button class="vd-wizard-step vd-wizard-step--active" type="button" data-wz-step="1"><span class="vd-wizard-step-num"><span class="vd-wizard-step-num-text">1</span></span> Datei &amp; Metadaten</button>
+            <span class="vd-wizard-sep"></span>
+            <button class="vd-wizard-step" type="button" data-wz-step="2"><span class="vd-wizard-step-num"><span class="vd-wizard-step-num-text">2</span></span> Bestätigen</button>
+          </div>
+
+          <div data-wz-panel="1" class="vd-wz-panel">
+            <div class="vd-modal-section-label">Beliebige Datei hinzufügen</div>
+            <div class="vd-dropzone" data-dropzone id="datei-dropzone" style="margin-top:6px;">
+              <svg class="vd-dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div class="vd-dropzone-body">
+                <div class="vd-dropzone-title">Datei hier ablegen oder wählen</div>
+                <div class="vd-dropzone-sub">Alle Formate · max. 100 MB · Mehrfachauswahl</div>
+              </div>
+              <div class="vd-dropzone-actions">
+                <span class="vd-button vd-button--secondary" data-dz-action="picker">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Datei wählen
+                </span>
+              </div>
+              <input type="file" id="datei-input-picker" accept="*/*" multiple hidden>
+            </div>
+
+            <div class="vd-file-list" data-datei-files style="margin-top:10px;"></div>
+            <div class="vd-file-list-empty" data-datei-empty style="margin-top:10px;">Noch keine Datei ausgewählt – lade Dateien per Drop oder Picker hoch.</div>
+            <div class="vd-file-list-more" data-datei-more hidden>
+              <button type="button" data-open-lightbox="datei">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+                Alle <span data-datei-more-count>0</span> Dateien ansehen
+              </button>
+            </div>
+
+            <div style="height:1px;background:var(--border-default);margin:16px 0;"></div>
+
+            <div class="vd-modal-section-label">Zuordnung</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;">
+              <div class="vd-field-group">
+                <label class="vd-field-label" for="datei-typ">Dokumenttyp</label>
+                <select class="vd-field-select" id="datei-typ">
+                  <option>Dokument</option>
+                  <option>Vertrag</option>
+                  <option>Rapport</option>
+                  <option>Bewilligung</option>
+                  <option>Sonstiges</option>
+                </select>
+              </div>
+              <div class="vd-field-group" style="grid-column:1/-1;">
+                <label class="vd-field-label" for="datei-notiz">Notiz</label>
+                <textarea class="vd-field-textarea" id="datei-notiz" placeholder="Optional – Bemerkung zur Datei"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div data-wz-panel="2" class="vd-wz-panel" hidden>
+            <div class="vd-modal-section-label">Zusammenfassung – was du eingegeben hast</div>
+            <div class="vd-modal-meta-grid" style="margin-top:8px;" data-datei-summary></div>
+            <div class="vd-hint" style="margin-top:16px;">
+              <strong>Bereit zum Hochladen.</strong> Die Datei wird per Multipart an <code>POST /api/documents</code> gesendet.
+            </div>
+          </div>
+        </div>
+        <div class="vd-modal-foot-progress"><div class="vd-modal-foot-progress-bar" data-wz-progress></div></div>
+        <div class="vd-modal-foot">
+          <button class="vd-button vd-button--secondary" type="button" data-wz-prev="datei" disabled>Zurück</button>
+          <span class="vd-modal-foot-spacer"></span>
+          <span class="vd-modal-foot-info"><span data-wz-info="datei">Schritt 1 von 2</span></span>
+          <button class="vd-button vd-button--primary" type="button" data-wz-next="datei">
+            <span data-wz-next-label="datei">Weiter</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL 6 — EXPORT (Topbar)
+       ============================================================ -->
+  <div class="vd-modal-backdrop" data-bind="export-modal" role="dialog" aria-modal="true" aria-label="Daten exportieren" hidden>
+    <div class="vd-modal">
+      <div class="vd-modal-main">
+        <div class="vd-modal-head">
+          <span style="font-family:inherit;font-size:13.5px;color:var(--text-high);font-weight:500;">Daten exportieren</span>
+          <button class="vd-modal-close" type="button" data-modal-close aria-label="Schliessen">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="vd-modal-body">
+          <div class="vd-wizard-steps" data-wizard="ex">
+            <button class="vd-wizard-step vd-wizard-step--active" type="button" data-wz-step="1"><span class="vd-wizard-step-num"><span class="vd-wizard-step-num-text">1</span></span> Quelle + Format</button>
+            <span class="vd-wizard-sep"></span>
+            <button class="vd-wizard-step" type="button" data-wz-step="2"><span class="vd-wizard-step-num"><span class="vd-wizard-step-num-text">2</span></span> Zeitraum + Optionen</button>
+          </div>
+
+          <div data-wz-panel="1" class="vd-wz-panel">
+            <div class="vd-modal-section-label">Quelle</div>
+            <div class="vd-ex-source-row" data-ex-source>
+              <span class="vd-pw-status-pill vd-pw-status-pill--active" data-source="Aktuelles Projekt"><span class="vd-pw-status-pill-dot"></span> Aktuelles Projekt</span>
+              <span class="vd-pw-status-pill" data-source="Alle Projekte"><span class="vd-pw-status-pill-dot"></span> Alle Projekte</span>
+              <span class="vd-pw-status-pill" data-source="Galerie"><span class="vd-pw-status-pill-dot"></span> Galerie</span>
+              <span class="vd-pw-status-pill" data-source="Audit-Log"><span class="vd-pw-status-pill-dot"></span> Audit-Log</span>
+            </div>
+
+            <div class="vd-modal-section-label">Format</div>
+            <div class="vd-ex-format-grid" data-ex-format>
+              <div class="vd-ex-format-card vd-ex-format-card--active" data-format="PDF-Bericht">
+                <div class="vd-ex-format-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                <div class="vd-ex-format-title">PDF-Bericht</div>
+                <div class="vd-ex-format-sub">Mit allen Bildern, eingebettet</div>
+              </div>
+              <div class="vd-ex-format-card" data-format="ZIP-Bundle">
+                <div class="vd-ex-format-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+                <div class="vd-ex-format-title">ZIP-Bundle</div>
+                <div class="vd-ex-format-sub">Original-Dateien + manifest.json</div>
+              </div>
+              <div class="vd-ex-format-card" data-format="CSV-Tabelle">
+                <div class="vd-ex-format-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></div>
+                <div class="vd-ex-format-title">CSV-Tabelle</div>
+                <div class="vd-ex-format-sub">Strukturierte Metadaten, Excel-kompatibel</div>
+              </div>
+            </div>
+          </div>
+
+          <div data-wz-panel="2" class="vd-wz-panel" hidden>
+            <div class="vd-modal-section-label">Zeitraum</div>
+            <div class="vd-ex-quick" data-ex-quick>
+              <span class="vd-ex-quick-pill" data-quick-days="7">Letzte 7 Tage</span>
+              <span class="vd-ex-quick-pill vd-ex-quick-pill--active" data-quick-days="30">Letzte 30 Tage</span>
+              <span class="vd-ex-quick-pill" data-quick-days="90">Letzte 90 Tage</span>
+              <span class="vd-ex-quick-pill" data-quick-days="180">Letzte 180 Tage</span>
+              <span class="vd-ex-quick-pill" data-quick-days="365">Aktuelles Jahr</span>
+            </div>
+            <div class="vd-ex-date-row">
+              <div class="vd-field-group">
+                <label class="vd-field-label" for="ex-von">Von</label>
+                <input class="vd-field-input" type="date" id="ex-von" data-ex-von>
+              </div>
+              <div class="vd-field-group">
+                <label class="vd-field-label" for="ex-bis">Bis</label>
+                <input class="vd-field-input" type="date" id="ex-bis" data-ex-bis>
+              </div>
+            </div>
+
+            <div class="vd-modal-section-label" style="margin-top:12px;">Optionen</div>
+            <div class="vd-ex-options" data-ex-options>
+              <label class="vd-ex-opt-row"><input type="checkbox" data-ex-opt="exif" checked><div><div class="vd-ex-opt-label">EXIF einbetten</div><div class="vd-ex-opt-sub">GPS, Kamera, Datum bleiben im Bild</div></div></label>
+              <label class="vd-ex-opt-row"><input type="checkbox" data-ex-opt="comments" checked><div><div class="vd-ex-opt-label">Kommentare einschliessen</div><div class="vd-ex-opt-sub">PDF/ZIP enthalten sichtbare Kommentare</div></div></label>
+              <label class="vd-ex-opt-row"><input type="checkbox" data-ex-opt="original-size"><div><div class="vd-ex-opt-label">Originalgrösse</div><div class="vd-ex-opt-sub">Keine Kompression, grössere Dateien</div></div></label>
+              <label class="vd-ex-opt-row"><input type="checkbox" data-ex-opt="password"><div><div class="vd-ex-opt-label">ZIP-Passwort</div><div class="vd-ex-opt-sub">Du erhältst das Passwort per E-Mail</div></div></label>
+            </div>
+          </div>
+        </div>
+        <div class="vd-modal-foot-progress"><div class="vd-modal-foot-progress-bar" data-wz-progress></div></div>
+        <div class="vd-modal-foot">
+          <button class="vd-button vd-button--secondary" type="button" data-wz-prev="ex" disabled>Zurück</button>
+          <span class="vd-modal-foot-spacer"></span>
+          <span class="vd-modal-foot-info"><span data-wz-info="ex">Schritt 1 von 2</span></span>
+          <button class="vd-button vd-button--primary" type="button" data-wz-next="ex">
+            <span data-wz-next-label="ex">Weiter</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL 7 — MEDIA-LIGHTBOX (geöffnet aus allen 4 Upload-Modals)
+       Zeigt die komplette File-Liste in einem ruhigen Vollbild-Grid mit
+       Suche + Filter, damit das Upload-Modal bei vielen Dateien schlank bleibt.
+       ============================================================ -->
+  <div class="vd-modal-backdrop" data-bind="media-lightbox-modal" role="dialog" aria-modal="true" aria-label="Dateien verwalten" hidden>
+    <div class="vd-modal vd-modal--wide" style="max-width:920px;">
+      <div class="vd-modal-main">
+        <div class="vd-modal-head">
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <span style="font-family:inherit;font-size:13.5px;color:var(--text-high);font-weight:500;" data-lightbox-title>Dateien verwalten</span>
+            <span style="font-size:11px;color:var(--text-low);font-family:var(--font-mono);" data-lightbox-meta>0 Dateien · –</span>
+          </div>
+          <button class="vd-modal-close" type="button" data-modal-close aria-label="Schliessen">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="vd-modal-body" style="padding:16px 20px;">
+          <!-- Toolbar: Suche -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <div style="position:relative;flex:1;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-low);"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/></svg>
+              <input type="search" class="vd-field-input" data-lightbox-search placeholder="Datei suchen…" style="width:100%;padding-left:32px;">
+            </div>
+            <span style="font-size:11px;color:var(--text-low);font-family:var(--font-mono);white-space:nowrap;">
+              <span data-lightbox-visible-count>0</span> sichtbar
+            </span>
+          </div>
+          <!-- Grid: alle Files als Karten mit Thumb, Name, Meta, Remove.
+               Scrollt intern – Header/Toolbar/Footer bleiben fix sichtbar. -->
+          <div data-lightbox-grid style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;max-height:480px;overflow-y:auto;padding-right:4px;scrollbar-width:thin;scrollbar-color:var(--border-default) transparent;">
+            <!-- JS rendert die Cards hier rein -->
+          </div>
+          <div data-lightbox-empty style="display:none;text-align:center;padding:40px 16px;color:var(--text-low);font-size:12.5px;font-style:italic;">
+            Keine Dateien entsprechen der Suche.
+          </div>
+        </div>
+        <div class="vd-modal-foot">
+          <span style="font-size:11.5px;color:var(--text-low);font-family:var(--font-mono);">Änderungen wirken sich sofort auf das Upload-Modal aus</span>
+          <span class="vd-modal-foot-spacer"></span>
+          <button class="vd-button vd-button--primary" type="button" data-modal-close>Zurück zum Upload</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.vd-showcase -->
+
+<script>
+/* ============================================================
+   STATE + ROUNDTRIP-ENGINE
+   ------------------------------------------------------------
+   Sechs Modals, jede mit eigenem State-Objekt, eigene Roundtrip-
+   Live-Anzeige, eigene Submit-Copy (welche API wird aufgerufen).
+   ============================================================ */
+(function () {
+  const body = document.body;
+  const SUBMIT_LABEL = {
+    pw:    'Projekt anlegen',
+    foto:  'Bilder hochladen',
+    plan:  'Plan hochladen',
+    video: 'Video hochladen',
+    datei: 'Datei hochladen',
+    ex:    'Export starten',
+  };
+  const SUBMIT_COPY = {
+    pw:    { processing: 'Projekt wird angelegt…',  success: 'Projekt angelegt',  hint: 'Das Projekt wird an <code>POST /api/projects</code> gesendet.' },
+    foto:  { processing: 'Bilder werden hochgeladen…', success: 'Bilder hochgeladen', hint: 'Die Bilder werden per Multipart an <code>POST /api/media</code> gesendet.' },
+    plan:  { processing: 'Plan wird hochgeladen…',  success: 'Plan hochgeladen',  hint: 'Der Plan wird per Multipart an <code>POST /api/plans</code> gesendet.' },
+    video: { processing: 'Video wird hochgeladen…',  success: 'Video hochgeladen',  hint: 'Das Video wird per Multipart an <code>POST /api/media</code> gesendet.' },
+    datei: { processing: 'Datei wird hochgeladen…',  success: 'Datei hochgeladen',  hint: 'Die Datei wird per Multipart an <code>POST /api/documents</code> gesendet.' },
+    ex:    { processing: 'Export wird vorbereitet…', success: 'Export gestartet',  hint: 'Der Export wird an <code>POST /api/exports</code> gesendet. Download startet automatisch.' },
+  };
+
+  /* ---------- Helpers ---------- */
+  function fmtBytes(b) {
+    if (!b && b !== 0) return '–';
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(1) + ' MB';
+  }
+  function fmtDateDE(s) {
+    if (!s) return '–';
+    return s.split('-').reverse().join('.');
+  }
+  function readTags(container) {
+    if (!container) return [];
+    return Array.from(container.querySelectorAll('.vd-pw-tag'))
+      .map(t => t.firstChild ? t.firstChild.textContent.trim() : '')
+      .filter(Boolean);
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'})[c]);
+  }
+  function jsonHighlight(obj) {
+    let s = JSON.stringify(obj, null, 2);
+    if (!s || s === '{}') return '// noch keine Eingaben';
+    s = s.replace(/(".*?")(\s*:)/g, '<span class="vd-key">$1</span>$2');
+    s = s.replace(/:\s*("[^"]*")/g, ': <span class="vd-string">$1</span>');
+    s = s.replace(/:\s*(\d+\.?\d*)/g, ': <span class="vd-number">$1</span>');
+    return s;
+  }
+
+  /* ---------- STATE ---------- */
+  const STATES = {
+    pw: {
+      titel: '', strasse: '', plz: '', ort: '', bauleiter: '', auftraggeber: '',
+      typ: 'Neubau', status: 'Planung', beschreibung: '',
+      start: '', ende: '', tags: ['Neubau', 'Wohnen', 'Minergie'], meilensteine: '',
+    },
+    foto: { files: [], projekt: 'Neubau Wohnüberbauung Sunnige Hof', gewerk: 'Rohbau', planpos: '', tags: '', notiz: '' },
+    plan: { files: [], projekt: 'Neubau Wohnüberbauung Sunnige Hof', planversion: '', geschoss: '', planpos: '', notiz: '' },
+    video: { files: [], coverTs: '00:00', projekt: 'Neubau Wohnüberbauung Sunnige Hof', planpos: '', gewerk: 'Rohbau', dauerOverlay: 'Unten rechts', tags: '', notiz: '' },
+    datei: { files: [], projekt: 'Neubau Wohnüberbauung Sunnige Hof', typ: 'Dokument', notiz: '' },
+    ex:   { source: 'Aktuelles Projekt', format: 'PDF-Bericht', von: '', bis: '', options: { exif: true, comments: true, 'original-size': false, password: false } },
+  };
+
+  /* ---------- ROUNDTRIP-RENDER ---------- */
+  function renderRt(wizardId) {
+    const state = STATES[wizardId];
+    const body = document.querySelector(`[data-rt-body="${wizardId}"]`);
+    const countEl = document.querySelector(`[data-rt-count="${wizardId}"]`);
+    if (body) body.innerHTML = jsonHighlight(state);
+    if (countEl) countEl.textContent = rtCountLabel(wizardId, state);
+  }
+  function rtCountLabel(id, state) {
+    if (id === 'pw') {
+      const filled = ['titel','adresse','bauleiter','auftraggeber','typ','budget','beschreibung','start','ende','meilensteine']
+        .filter(k => state[k]).length;
+      const tags = (state.tags || []).length;
+      return `${filled + tags} Eingaben`;
+    }
+    if (id === 'foto' || id === 'plan' || id === 'datei') {
+      return `${(state.files || []).length} Dateien · ${fmtBytes(totalSize(state.files))}`;
+    }
+    if (id === 'video') {
+      return `${(state.files || []).length} Videos · Cover: ${state.coverTs || '–'}`;
+    }
+    if (id === 'ex') {
+      const optCount = Object.values(state.options || {}).filter(Boolean).length;
+      return `${state.source ? 'Quelle ✓' : 'Quelle ✗'} · ${state.format ? 'Format ✓' : 'Format ✗'} · ${optCount} Optionen`;
+    }
+    return '';
+  }
+  function totalSize(files) {
+    return (files || []).reduce((s, f) => s + (f.file?.size || 0), 0);
+  }
+
+  /* ---------- SUMMARY-RENDER ---------- */
+  function metaRow(label, value) {
+    const isEmpty = value === '' || value === null || value === undefined;
+    return `<div class="vd-modal-meta-row"><span class="vd-modal-meta-label">${label}</span><span class="vd-modal-meta-value${isEmpty ? ' vd-modal-meta-value--empty' : ''}">${isEmpty ? '–' : escapeHtml(String(value))}</span></div>`;
+  }
+  function renderPwSummary() {
+    const s = STATES.pw; const g = document.querySelector('[data-pw-summary]'); if (!g) return;
+    // Adresse wird im Summary wieder zusammengesetzt (User hat 3 Felder ausgefüllt)
+    const adresse = [s.strasse, [s.plz, s.ort].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+    g.innerHTML = [
+      metaRow('titel', s.titel), metaRow('adresse', adresse), metaRow('bauleiter', s.bauleiter),
+      metaRow('auftraggeber', s.auftraggeber), metaRow('typ', s.typ),
+      metaRow('status', s.status),
+      metaRow('beschreibung', s.beschreibung), metaRow('start', fmtDateDE(s.start)),
+      metaRow('ende', fmtDateDE(s.ende)), metaRow('tags', (s.tags || []).join(', ')),
+      metaRow('meilensteine', s.meilensteine),
+    ].join('');
+  }
+  function renderFotoSummary() {
+    const s = STATES.foto; const g = document.querySelector('[data-foto-summary]'); if (!g) return;
+    const files = s.files || [];
+    g.innerHTML = [
+      metaRow('anzahl', `${files.length} Bilder`),
+      metaRow('groesse_total', fmtBytes(totalSize(files))),
+      metaRow('files', files.length === 0 ? '' : files.map(f => `${f.name} (${fmtBytes(f.file?.size)})`).join('\n')),
+      metaRow('projekt', s.projekt),
+      metaRow('gewerk', s.gewerk),
+      metaRow('planposition', s.planpos),
+      metaRow('tags', s.tags),
+      metaRow('notiz', s.notiz),
+    ].join('');
+  }
+  function renderPlanSummary() {
+    const s = STATES.plan; const g = document.querySelector('[data-plan-summary]'); if (!g) return;
+    const files = s.files || [];
+    g.innerHTML = [
+      metaRow('datei', files[0]?.name || ''),
+      metaRow('groesse', fmtBytes(files[0]?.file?.size)),
+      metaRow('projekt', s.projekt),
+      metaRow('planversion', s.planversion),
+      metaRow('geschoss', s.geschoss),
+      metaRow('planposition', s.planpos),
+      metaRow('notiz', s.notiz),
+    ].join('');
+  }
+  function renderVideoSummary() {
+    const s = STATES.video; const g = document.querySelector('[data-video-summary]'); if (!g) return;
+    const files = s.files || [];
+    g.innerHTML = [
+      metaRow('datei', files[0]?.name || ''),
+      metaRow('groesse', fmtBytes(files[0]?.file?.size)),
+      metaRow('cover_frame', s.coverTs),
+      metaRow('projekt', s.projekt), metaRow('planposition', s.planpos),
+      metaRow('gewerk', s.gewerk), metaRow('dauer_stempel', s.dauerOverlay),
+      metaRow('tags', s.tags), metaRow('notiz', s.notiz),
+    ].join('');
+  }
+  function renderDateiSummary() {
+    const s = STATES.datei; const g = document.querySelector('[data-datei-summary]'); if (!g) return;
+    const files = s.files || [];
+    g.innerHTML = [
+      metaRow('anzahl', `${files.length} Dateien`),
+      metaRow('groesse_total', fmtBytes(totalSize(files))),
+      metaRow('files', files.length === 0 ? '' : files.map(f => `${f.name} (${fmtBytes(f.file?.size)})`).join('\n')),
+      metaRow('projekt', s.projekt), metaRow('typ', s.typ),
+      metaRow('notiz', s.notiz),
+    ].join('');
+  }
+
+  /* ---------- OPEN / CLOSE ---------- */
+  function openModal(selector) {
+    const backdrop = document.querySelector(selector);
+    if (!backdrop) return;
+    body.classList.add('is-modal-open');
+    backdrop.hidden = false;
+    const wiz = backdrop.querySelector('[data-wizard]');
+    if (wiz) { goStep(wiz.dataset.wizard, 1); resetWizardState(backdrop); }
+    document.addEventListener('keydown', escClose);
+    const firstInput = backdrop.querySelector('input, select, textarea, button:not([data-modal-close])');
+    if (firstInput) setTimeout(() => firstInput.focus(), 200);
+  }
+  function closeAll() {
+    body.classList.remove('is-modal-open');
+    document.removeEventListener('keydown', escClose);
+    document.querySelectorAll('.vd-modal-backdrop').forEach(bd => bd.hidden = true);
+  }
+  function escClose(e) { if (e.key === 'Escape') closeAll(); }
+
+  document.querySelectorAll('[data-open]').forEach(btn => {
+    btn.addEventListener('click', () => openModal(`[data-bind="${btn.dataset.open}"]`));
+  });
+  document.querySelectorAll('[data-modal-close]').forEach(btn => {
+    btn.addEventListener('click', closeAll);
+  });
+  document.querySelectorAll('.vd-modal-backdrop').forEach(bd => {
+    bd.addEventListener('click', e => { if (e.target === bd) closeAll(); });
+  });
+
+  /* ---------- WIZARD-STEP ---------- */
+  function goStep(wizardId, step) {
+    const wiz = document.querySelector(`[data-wizard="${wizardId}"]`);
+    if (!wiz) return;
+    const total = wiz.querySelectorAll('[data-wz-step]').length;
+    step = Math.max(1, Math.min(total, step));
+
+    wiz.querySelectorAll('[data-wz-step]').forEach(s => {
+      const n = parseInt(s.dataset.wzStep, 10);
+      s.classList.toggle('vd-wizard-step--active', n === step);
+      s.classList.toggle('vd-wizard-step--done', n < step);
+    });
+
+    const root = wiz.closest('.vd-modal-backdrop');
+    root.querySelectorAll('[data-wz-panel]').forEach(p => {
+      const n = parseInt(p.dataset.wzPanel, 10);
+      p.hidden = n !== step;
+    });
+
+    const info = root.querySelector(`[data-wz-info="${wizardId}"]`);
+    if (info) info.textContent = `Schritt ${step} von ${total}`;
+    const prev = root.querySelector(`[data-wz-prev="${wizardId}"]`);
+    if (prev) prev.disabled = step === 1;
+    const nextWrap = root.querySelector(`[data-wz-next="${wizardId}"]`);
+    if (nextWrap) {
+      const labelSpan = nextWrap.querySelector('[data-wz-next-label]') || nextWrap;
+      labelSpan.textContent = step === total ? SUBMIT_LABEL[wizardId] : 'Weiter';
+    }
+    const progress = root.querySelector('[data-wz-progress]');
+    if (progress) progress.style.width = `${(step / total) * 100}%`;
+
+    if (wizardId === 'pw'    && step === 2) renderPwSummary();
+    if (wizardId === 'foto'  && step === 2) renderFotoSummary();
+    if (wizardId === 'plan'  && step === 2) renderPlanSummary();
+    if (wizardId === 'video' && step === 2) renderVideoSummary();
+    if (wizardId === 'datei' && step === 2) renderDateiSummary();
+  }
+
+  document.querySelectorAll('[data-wz-step]').forEach(s => {
+    s.addEventListener('click', () => {
+      const id = s.closest('[data-wizard]').dataset.wizard;
+      const target = parseInt(s.dataset.wzStep, 10);
+      if (id === 'pw'    && target >= 2 && !validatePwStep1())    { showPwValidation(); return; }
+      if (id === 'foto'  && target >= 2 && !validateUploadStep1('foto'))  return;
+      if (id === 'plan'  && target >= 2 && !validatePlanStep1())  return;
+      if (id === 'video' && target >= 2 && !validateUploadStep1('video')) return;
+      if (id === 'datei' && target >= 2 && !validateUploadStep1('datei')) return;
+      if (id === 'ex'    && target >= 2 && !validateExStep1())    return;
+      goStep(id, target);
+    });
+  });
+
+  document.querySelectorAll('[data-wz-next]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.wzNext;
+      const wiz = document.querySelector(`[data-wizard="${id}"]`);
+      const active = wiz.querySelector('.vd-wizard-step--active');
+      const cur = parseInt(active.dataset.wzStep, 10);
+      const total = wiz.querySelectorAll('[data-wz-step]').length;
+      if (cur < total) {
+        if (id === 'pw'    && cur === 1 && !validatePwStep1())    { showPwValidation(); return; }
+        if (id === 'foto'  && cur === 1 && !validateUploadStep1('foto'))  return;
+        if (id === 'plan'  && cur === 1 && !validatePlanStep1())  return;
+        if (id === 'video' && cur === 1 && !validateUploadStep1('video')) return;
+        if (id === 'datei' && cur === 1 && !validateUploadStep1('datei')) return;
+        if (id === 'ex'    && cur === 1 && !validateExStep1())    return;
+        goStep(id, cur + 1);
+      } else {
+        submitMock(id, btn);
+      }
+    });
+  });
+
+  document.querySelectorAll('[data-wz-prev]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.wzPrev;
+      const wiz = document.querySelector(`[data-wizard="${id}"]`);
+      const active = wiz.querySelector('.vd-wizard-step--active');
+      goStep(id, parseInt(active.dataset.wzStep, 10) - 1);
+    });
+  });
+
+  /* ---------- SUBMIT-MOCK ---------- */
+  function submitMock(id, btn) {
+    const root = btn.closest('.vd-modal-backdrop');
+    const info = root.querySelector(`[data-wz-info="${id}"]`);
+    const labelSpan = btn.querySelector('[data-wz-next-label]') || btn;
+    const copy = SUBMIT_COPY[id] || { processing: 'Wird verarbeitet…', success: 'Abgeschlossen' };
+    labelSpan.textContent = copy.processing;
+    btn.disabled = true;
+    btn.insertAdjacentHTML('afterbegin', '<span class="vd-spinner"></span>');
+    if (info) info.textContent = copy.processing;
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.querySelector('.vd-spinner')?.remove();
+      labelSpan.textContent = '✓ ' + copy.success;
+      if (info) info.textContent = copy.success;
+      setTimeout(() => closeAll(), 600);
+    }, 1400);
+  }
+
+  /* ---------- PROJEKT-WIZARD — STATE-BINDING ---------- */
+  function bindPwFields() {
+    const fields = [
+      ['pw-titel', 'titel'], ['pw-strasse', 'strasse'], ['pw-plz', 'plz'], ['pw-ort', 'ort'],
+      ['pw-bauleiter', 'bauleiter'],
+      ['pw-auftraggeber', 'auftraggeber'], ['pw-typ', 'typ'],
+      ['pw-beschreibung', 'beschreibung'], ['pw-start', 'start'], ['pw-ende', 'ende'],
+      ['pw-meilensteine', 'meilensteine'],
+    ];
+    fields.forEach(([id, key]) => {
+      const el = document.getElementById(id); if (!el) return;
+      STATES.pw[key] = el.value;
+      el.addEventListener('input',  () => { STATES.pw[key] = el.value; renderRt('pw'); hidePwValidation(); clearPwInvalid(el); });
+      el.addEventListener('change', () => { STATES.pw[key] = el.value; renderRt('pw'); });
+    });
+    document.querySelectorAll('[data-pw-status-group] [data-status]').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('[data-pw-status-group] [data-status]').forEach(p => p.classList.remove('vd-pw-status-pill--active'));
+        pill.classList.add('vd-pw-status-pill--active');
+        STATES.pw.status = pill.dataset.status;
+        renderRt('pw');
+      });
+    });
+    const tagWrap = document.querySelector('[data-pw-tags]');
+    if (tagWrap) {
+      const input = tagWrap.querySelector('[data-pw-tag-input]');
+      STATES.pw.tags = readTags(tagWrap);
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ',') {
+          e.preventDefault();
+          const v = input.value.trim(); if (!v) return;
+          const tag = document.createElement('span');
+          tag.className = 'vd-pw-tag';
+          tag.innerHTML = escapeHtml(v) + ' <span class="vd-pw-tag-x" data-tag-remove>×</span>';
+          input.parentNode.insertBefore(tag, input);
+          input.value = '';
+          STATES.pw.tags = readTags(tagWrap);
+          renderRt('pw');
+        } else if (e.key === 'Backspace' && !input.value && tagWrap.querySelectorAll('.vd-pw-tag').length) {
+          const tags = tagWrap.querySelectorAll('.vd-pw-tag');
+          tags[tags.length - 1].remove();
+          STATES.pw.tags = readTags(tagWrap);
+          renderRt('pw');
+        }
+      });
+      tagWrap.addEventListener('click', e => {
+        if (e.target.dataset.tagRemove !== undefined) {
+          e.target.closest('.vd-pw-tag').remove();
+          STATES.pw.tags = readTags(tagWrap);
+          renderRt('pw');
+          input.focus();
+        } else if (e.target === tagWrap) {
+          input.focus();
+        }
+      });
+    }
+    renderRt('pw');
+  }
+  function validatePwStep1() {
+    const modal = document.querySelector('[data-bind="neues-projekt-modal"]');
+    const fields = modal.querySelectorAll('[data-pw-required="true"]');
+    let ok = true;
+    fields.forEach(f => {
+      const input = f.querySelector('input, select');
+      const errEl = f.querySelector('.vd-field-error');
+      const val = (input.value || '').trim();
+      if (!val) {
+        ok = false;
+        input.classList.add('vd-field-input--invalid', 'vd-field-select--invalid');
+        f.classList.add('vd-field-group--invalid');
+        if (errEl) errEl.style.display = 'block';
+      } else { clearPwInvalid(input); }
+    });
+    if (ok) hidePwValidation();
+    return ok;
+  }
+  function clearPwInvalid(input) {
+    const f = input.closest('[data-pw-required]');
+    if (!f) return;
+    const errEl = f.querySelector('.vd-field-error');
+    input.classList.remove('vd-field-input--invalid', 'vd-field-select--invalid');
+    f.classList.remove('vd-field-group--invalid');
+    if (errEl) errEl.style.display = 'none';
+  }
+  function showPwValidation() { const b = document.querySelector('[data-pw-validation]'); if (b) b.hidden = false; }
+  function hidePwValidation() { const b = document.querySelector('[data-pw-validation]'); if (b) b.hidden = true; }
+
+  /* ---------- UPLOAD-ENGINE (foto / video / datei — shared) ---------- */
+  function bindUploadWizard(prefix, opts) {
+    // opts: {
+    //   acceptTypes: ['image/'] | ['video/'] | ['*'],
+    //   multiple: bool, hasCover: bool,
+    //   contextFields: [[dataAttrSuffix, stateKey], ...]   // read-only, kommt aus data-* Span
+    //   metadataFields: [[idSuffix, stateKey], ...]        // echte Eingabefelder
+    // }
+    const contextFields = opts.contextFields || [];
+    contextFields.forEach(([dataAttr, key]) => {
+      const el = document.querySelector(`[data-${dataAttr}]`);
+      if (!el) return;
+      STATES[prefix][key] = el.textContent.trim();
+    });
+    const metadataFields = opts.metadataFields || [];
+    metadataFields.forEach(([suffix, key]) => {
+      const el = document.getElementById(prefix + '-' + suffix); if (!el) return;
+      STATES[prefix][key] = el.value;
+      const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+      el.addEventListener(evt, () => { STATES[prefix][key] = el.value; renderRt(prefix); });
+    });
+
+    const dz = document.getElementById(prefix + '-dropzone');
+    if (!dz) { renderRt(prefix); return; }
+    const pickerInput = document.getElementById(prefix + '-input-picker');
+    const cameraInput = document.getElementById(prefix + '-input-camera');
+
+    dz.addEventListener('click', e => {
+      if (e.target.closest('[data-dz-action]')) return;
+      if (pickerInput) pickerInput.click();
+    });
+    dz.querySelectorAll('[data-dz-action]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const action = btn.dataset.dzAction;
+        if (action === 'picker' && pickerInput) pickerInput.click();
+        if (action === 'camera' && cameraInput) cameraInput.click();
+      });
+    });
+    [pickerInput, cameraInput].filter(Boolean).forEach(inp => {
+      inp.addEventListener('change', () => handleUploadFiles(prefix, inp.files, opts));
+    });
+    dz.addEventListener('dragenter', e => { e.preventDefault(); dz.classList.add('vd-dropzone--active'); });
+    dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('vd-dropzone--active'); });
+    dz.addEventListener('dragleave', e => { if (e.target === dz) dz.classList.remove('vd-dropzone--active'); });
+    dz.addEventListener('drop', e => {
+      e.preventDefault();
+      dz.classList.remove('vd-dropzone--active');
+      handleUploadFiles(prefix, e.dataTransfer.files, opts);
+    });
+
+    if (opts.hasCover) {
+      document.querySelectorAll('[data-video-cover] [data-cover-ts]').forEach(cover => {
+        cover.addEventListener('click', () => {
+          document.querySelectorAll('[data-video-cover] [data-cover-ts]').forEach(c => c.classList.remove('vd-video-cover--active'));
+          cover.classList.add('vd-video-cover--active');
+          STATES.video.coverTs = cover.dataset.coverTs;
+          const sel = document.querySelector('[data-cover-selected]');
+          if (sel) sel.textContent = cover.dataset.coverTs;
+          renderRt('video');
+        });
+      });
+    }
+    renderRt(prefix);
+  }
+  function handleUploadFiles(prefix, fileList, opts) {
+    if (!fileList) return;
+    const arr = Array.from(fileList);
+    arr.forEach(file => {
+      // Type-Filter
+      if (!(opts.acceptTypes || []).some(t => t === '*' || file.type.startsWith(t))) return;
+      const id = prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+      const entry = { id, name: file.name, size: file.size, type: file.type, file, thumb: null };
+      if (opts.multiple) {
+        STATES[prefix].files.push(entry);
+      } else {
+        STATES[prefix].files = [entry];
+      }
+      // Thumbnail nur für Bilder
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = ev => { entry.thumb = ev.target.result; renderUploadFiles(prefix); };
+        reader.readAsDataURL(file);
+      }
+    });
+    renderUploadFiles(prefix);
+    renderRt(prefix);
+  }
+  function renderUploadFiles(prefix) {
+    const list = document.querySelector('[data-' + prefix + '-files]');
+    const empty = document.querySelector('[data-' + prefix + '-empty]');
+    const more  = document.querySelector('[data-' + prefix + '-more]');
+    const moreCount = document.querySelector('[data-' + prefix + '-more-count]');
+    if (!list) return;
+    list.innerHTML = '';
+    STATES[prefix].files.forEach(f => {
+      const div = document.createElement('div');
+      div.className = 'vd-file-preview';
+      div.dataset.fileId = f.id;
+      let thumbHtml;
+      if (f.thumb) {
+        thumbHtml = `<img src="${f.thumb}" alt="">`;
+      } else if (f.type.startsWith('video/')) {
+        thumbHtml = `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color:#fff" aria-hidden="true"><polygon points="8 5 19 12 8 19 8 5"/></svg>`;
+      } else {
+        const ext = (f.name.split('.').pop() || 'FILE').toUpperCase().slice(0, 4);
+        thumbHtml = `<span>${escapeHtml(ext)}</span>`;
+      }
+      const thumbBg = f.type.startsWith('video/') ? 'style="background:#000;color:#fff;"' : '';
+      div.innerHTML = `
+        <div class="vd-file-thumb" ${thumbBg}>${thumbHtml}</div>
+        <div class="vd-file-info">
+          <div class="vd-file-name"></div>
+          <div class="vd-file-meta"></div>
+        </div>
+        <button class="vd-file-remove" type="button" data-remove-id="${f.id}" aria-label="Entfernen">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>`;
+      div.querySelector('.vd-file-name').textContent = f.name;
+      div.querySelector('.vd-file-meta').textContent = `${fmtBytes(f.size)} · ${f.type || 'unbekannt'}`;
+      list.appendChild(div);
+    });
+    if (empty) empty.style.display = STATES[prefix].files.length === 0 ? 'block' : 'none';
+
+    // Lightbox-Trigger: zeigen wenn mehr als Threshold Files da sind
+    const LIGHTBOX_THRESHOLD = 6;
+    if (more) {
+      const showLightbox = STATES[prefix].files.length > LIGHTBOX_THRESHOLD;
+      more.hidden = !showLightbox;
+      if (showLightbox && moreCount) {
+        moreCount.textContent = STATES[prefix].files.length;
+      }
+    }
+
+    list.querySelectorAll('[data-remove-id]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.removeId;
+        STATES[prefix].files = STATES[prefix].files.filter(f => f.id !== id);
+        renderUploadFiles(prefix);
+        renderRt(prefix);
+      });
+    });
+  }
+  function validateUploadStep1(prefix) { return STATES[prefix].files.length > 0; }
+
+  /* ---------- MEDIA-LIGHTBOX ---------- */
+  // Quelle (prefix) merken, damit Lightbox-Aktionen auf den richtigen State schreiben
+  let LIGHTBOX_SOURCE = null;
+
+  const LIGHTBOX_TITLE = {
+    foto:  'Bilder verwalten',
+    plan:  'Plan verwalten',
+    video: 'Video verwalten',
+    datei: 'Dateien verwalten',
+  };
+
+  function openLightbox(prefix) {
+    LIGHTBOX_SOURCE = prefix;
+    const backdrop = document.querySelector('[data-bind="media-lightbox-modal"]');
+    if (!backdrop) return;
+    // Header-Texte setzen
+    const title = backdrop.querySelector('[data-lightbox-title]');
+    if (title) title.textContent = LIGHTBOX_TITLE[prefix] || 'Dateien verwalten';
+    renderLightbox();
+    body.classList.add('is-modal-open');
+    backdrop.hidden = false;
+    document.addEventListener('keydown', escClose);
+    // Fokus auf Suche (sofort)
+    setTimeout(() => {
+      const search = backdrop.querySelector('[data-lightbox-search]');
+      if (search) search.focus();
+    }, 200);
+  }
+
+  function renderLightbox(filter) {
+    if (!LIGHTBOX_SOURCE) return;
+    const files = STATES[LIGHTBOX_SOURCE].files || [];
+    const q = (filter || '').trim().toLowerCase();
+    const visible = q ? files.filter(f => f.name.toLowerCase().includes(q)) : files;
+
+    const backdrop = document.querySelector('[data-bind="media-lightbox-modal"]');
+    const grid = backdrop.querySelector('[data-lightbox-grid]');
+    const emptyEl = backdrop.querySelector('[data-lightbox-empty]');
+    const metaEl = backdrop.querySelector('[data-lightbox-meta]');
+    const visCountEl = backdrop.querySelector('[data-lightbox-visible-count]');
+
+    if (metaEl) {
+      metaEl.textContent = `${files.length} ${files.length === 1 ? 'Datei' : 'Dateien'} · ${fmtBytes(totalSize(files))}`;
+    }
+    if (visCountEl) visCountEl.textContent = visible.length;
+
+    grid.innerHTML = '';
+    visible.forEach(f => {
+      const card = document.createElement('div');
+      card.className = 'vd-lightbox-card';
+      card.dataset.fileId = f.id;
+      let thumbHtml;
+      if (f.thumb) {
+        thumbHtml = `<img src="${f.thumb}" alt="">`;
+      } else if (f.type && f.type.startsWith('video/')) {
+        thumbHtml = `<svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor" style="color:#fff" aria-hidden="true"><polygon points="8 5 19 12 8 19 8 5"/></svg>`;
+      } else if (f.type && f.type.startsWith('image/')) {
+        thumbHtml = `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--text-low)"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>`;
+      } else {
+        const ext = (f.name.split('.').pop() || 'FILE').toUpperCase().slice(0, 5);
+        thumbHtml = `<span style="font-size:11px;font-weight:600;color:var(--text-mid);">${escapeHtml(ext)}</span>`;
+      }
+      const thumbBg = (f.type && f.type.startsWith('video/')) ? 'background:#000;color:#fff;' : '';
+      card.innerHTML = `
+        <div class="vd-lightbox-thumb" style="${thumbBg}">${thumbHtml}</div>
+        <div class="vd-lightbox-info">
+          <div class="vd-lightbox-name"></div>
+          <div class="vd-lightbox-meta"></div>
+        </div>
+        <button class="vd-lightbox-remove" type="button" data-remove-id="${f.id}" aria-label="Entfernen">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>`;
+      card.querySelector('.vd-lightbox-name').textContent = f.name;
+      card.querySelector('.vd-lightbox-meta').textContent = `${fmtBytes(f.size)} · ${f.type || 'unbekannt'}`;
+      grid.appendChild(card);
+    });
+
+    // Empty-State
+    if (visible.length === 0) {
+      grid.style.display = 'none';
+      emptyEl.style.display = 'block';
+    } else {
+      grid.style.display = '';
+      emptyEl.style.display = 'none';
+    }
+
+    // Remove-Handler
+    grid.querySelectorAll('[data-remove-id]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.removeId;
+        STATES[LIGHTBOX_SOURCE].files = STATES[LIGHTBOX_SOURCE].files.filter(f => f.id !== id);
+        renderLightbox(document.querySelector('[data-lightbox-search]')?.value || '');
+        renderUploadFiles(LIGHTBOX_SOURCE);
+        renderRt(LIGHTBOX_SOURCE);
+      });
+    });
+  }
+
+  // Such-Handler: live filtern während der User tippt
+  document.addEventListener('input', e => {
+    if (e.target.matches('[data-lightbox-search]')) {
+      renderLightbox(e.target.value);
+    }
+  });
+
+  // "Alle X ansehen"-Buttons aus allen 4 Upload-Modals
+  document.querySelectorAll('[data-open-lightbox]').forEach(btn => {
+    btn.addEventListener('click', () => openLightbox(btn.dataset.openLightbox));
+  });
+
+  /* ---------- PLAN — VALIDATION (File + 3 Pflichtfelder) ---------- */
+  function bindPlanFields() {
+    // Projekt wird in init() aus CURRENT_PROJECT gesetzt – nicht aus Eingabefeld.
+    ['planversion','geschoss','planpos','notiz'].forEach(key => {
+      const el = document.getElementById('plan-' + key); if (!el) return;
+      STATES.plan[key] = el.value;
+      const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+      el.addEventListener(evt, () => {
+        STATES.plan[key] = el.value;
+        renderRt('plan');
+        // Inline-Validation verschwindet beim Tippen
+        if (el.value) {
+          el.classList.remove('vd-field-input--invalid', 'vd-field-select--invalid');
+          const grp = el.closest('[data-plan-required]');
+          if (grp) {
+            grp.classList.remove('vd-field-group--invalid');
+            const errEl = grp.querySelector('.vd-field-error');
+            if (errEl) errEl.style.display = 'none';
+          }
+        }
+      });
+    });
+
+    bindUploadWizard('plan', {
+      acceptTypes: ['application/pdf', 'image/png', 'image/jpeg'],
+      multiple: false,
+      hasCover: false,
+      metadataFields: [],
+    });
+    renderRt('plan');
+  }
+  function validatePlanStep1() {
+    if (STATES.plan.files.length === 0) return false;
+    const modal = document.querySelector('[data-bind="plan-upload-modal"]');
+    let ok = true;
+    modal.querySelectorAll('[data-plan-required="true"]').forEach(f => {
+      const input = f.querySelector('input, select');
+      const errEl = f.querySelector('.vd-field-error');
+      const val = (input.value || '').trim();
+      if (!val) {
+        ok = false;
+        input.classList.add('vd-field-input--invalid', 'vd-field-select--invalid');
+        f.classList.add('vd-field-group--invalid');
+        if (errEl) errEl.style.display = 'block';
+      } else {
+        input.classList.remove('vd-field-input--invalid', 'vd-field-select--invalid');
+        f.classList.remove('vd-field-group--invalid');
+        if (errEl) errEl.style.display = 'none';
+      }
+    });
+    return ok;
+  }
+
+  /* ---------- EXPORT ---------- */
+  function bindExFields() {
+    document.querySelectorAll('[data-ex-source] [data-source]').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('[data-ex-source] [data-source]').forEach(p => p.classList.remove('vd-pw-status-pill--active'));
+        pill.classList.add('vd-pw-status-pill--active');
+        STATES.ex.source = pill.dataset.source;
+        renderRt('ex');
+      });
+    });
+    document.querySelectorAll('[data-ex-format] [data-format]').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('[data-ex-format] [data-format]').forEach(c => c.classList.remove('vd-ex-format-card--active'));
+        card.classList.add('vd-ex-format-card--active');
+        STATES.ex.format = card.dataset.format;
+        renderRt('ex');
+      });
+    });
+    const von = document.querySelector('[data-ex-von]');
+    const bis = document.querySelector('[data-ex-bis]');
+    if (von) { von.addEventListener('change', () => { STATES.ex.von = von.value; renderRt('ex'); }); }
+    if (bis) { bis.addEventListener('change', () => { STATES.ex.bis = bis.value; renderRt('ex'); }); }
+    document.querySelectorAll('[data-ex-options] [data-ex-opt]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        STATES.ex.options[cb.dataset.exOpt] = cb.checked;
+        renderRt('ex');
+      });
+    });
+    document.querySelectorAll('[data-ex-quick] [data-quick-days]').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('[data-ex-quick] [data-quick-days]').forEach(p => p.classList.remove('vd-ex-quick-pill--active'));
+        pill.classList.add('vd-ex-quick-pill--active');
+        const days = parseInt(pill.dataset.quickDays, 10);
+        const bisD = new Date();
+        const vonD = new Date();
+        if (days === 365) {
+          STATES.ex.von = `${bisD.getFullYear()}-01-01`;
+        } else {
+          vonD.setDate(vonD.getDate() - days);
+          STATES.ex.von = vonD.toISOString().slice(0, 10);
+        }
+        STATES.ex.bis = bisD.toISOString().slice(0, 10);
+        if (von) von.value = STATES.ex.von;
+        if (bis) bis.value = STATES.ex.bis;
+        renderRt('ex');
+      });
+    });
+    renderRt('ex');
+  }
+  function validateExStep1() { return !!(STATES.ex.source && STATES.ex.format); }
+
+  /* ---------- RESET ---------- */
+  function resetWizardState(backdrop) {
+    backdrop.querySelectorAll('.vd-field-input--invalid, .vd-field-select--invalid').forEach(el => el.classList.remove('vd-field-input--invalid', 'vd-field-select--invalid'));
+    backdrop.querySelectorAll('.vd-field-group--invalid').forEach(el => el.classList.remove('vd-field-group--invalid'));
+    backdrop.querySelectorAll('.vd-field-error').forEach(el => { el.style.display = 'none'; });
+    const pwVal = backdrop.querySelector('[data-pw-validation]');
+    if (pwVal) pwVal.hidden = true;
+    backdrop.querySelectorAll('.vd-spinner').forEach(s => s.remove());
+    backdrop.querySelectorAll('[data-wz-next]').forEach(b => { b.disabled = false; });
+  }
+
+  /* ---------- INIT ---------- */
+  // Aktuelles Projekt + Gewerk des eingeloggten Users – wird beim Öffnen eines Upload-Modals
+  // in den State injiziert. Im echten Produkt: kommt aus dem App-Session-Kontext (Backend liefert es
+  // via /api/session), nicht aus einem Form-Feld. User MUSS es nicht wählen, weil Uploads immer
+  // im aktuellen Projekt-Kontext passieren.
+  const CURRENT_PROJECT = 'Neubau Wohnüberbauung Sunnige Hof';
+  const CURRENT_GEWERK  = 'Rohbau';
+
+  function init() {
+    bindPwFields();
+    // Foto: Projekt + Gewerk automatisch (Context), keine Anzeige im UI
+    bindUploadWizard('foto', {
+      acceptTypes: ['image/'], multiple: true, hasCover: false,
+      metadataFields: [['planpos','planpos'], ['tags','tags'], ['notiz','notiz']],
+    });
+    STATES.foto.projekt = CURRENT_PROJECT;
+    STATES.foto.gewerk  = CURRENT_GEWERK;
+
+    bindPlanFields();
+    STATES.plan.projekt = CURRENT_PROJECT;
+
+    // Video: Projekt + Gewerk automatisch (Context), keine Anzeige im UI
+    bindUploadWizard('video', {
+      acceptTypes: ['video/'], multiple: false, hasCover: true,
+      metadataFields: [['planpos','planpos'], ['dauer-overlay','dauerOverlay'], ['tags','tags'], ['notiz','notiz']],
+    });
+    STATES.video.projekt = CURRENT_PROJECT;
+    STATES.video.gewerk  = CURRENT_GEWERK;
+
+    // Datei: Projekt automatisch (Context), keine Anzeige im UI
+    bindUploadWizard('datei', {
+      acceptTypes: ['*'], multiple: true, hasCover: false,
+      metadataFields: [['typ','typ'], ['notiz','notiz']],
+    });
+    STATES.datei.projekt = CURRENT_PROJECT;
+
+    bindExFields();
+
+    // Roundtrip-Panels mit den aktuellen Werten rendern (inkl. automatisch gesetztes Projekt + Gewerk)
+    renderRt('foto'); renderRt('plan'); renderRt('video'); renderRt('datei');
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
