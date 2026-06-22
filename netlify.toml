@@ -1,0 +1,6 @@
+# Netlify-Konfiguration fuer BauDoc / VisiDoc Static-Showcase.
+# Setzt frontend/prototypes als Site-Root, damit die index.html dort
+# automatisch auf / ausgeliefert wird (Static, ohne Build-Step).
+
+[build]
+  publish = "frontend/prototypes"

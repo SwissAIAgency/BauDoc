@@ -5,6 +5,14 @@ im Browser geöffnet werden. Geteilte Stile (Tokens, Sidebar, Topbar, Buttons)
 liegen in `app-shell.css`, jede Seite hat nur ihre eigenen Komponenten-Stile
 inline.
 
+> **Pflicht-Doku für diesen Ordner:**
+> - **`ARCHITECTURE.md`** — Folder-Aufbau, Lock-Disziplin, Workflow.
+>   Lies das ZUERST, bevor du etwas anfasst.
+> - **`COMPONENTS.md`** — Komponenten-Manifest mit Status (LIVE /
+>   EXPERIMENT / READ-ONLY / FROZEN). Vor jeder Änderung prüfen.
+> - **`PROTOTYP.md`** (Projekt-Root) — Verbindliche Beschreibung aller
+>   Screens, Komponenten und des Designs.
+
 ## Marken- und Designbasis
 
 - `DESIGN.md` in diesem Ordner — operative Single Source of Truth für die
@@ -12,67 +20,59 @@ inline.
   Token-System, Komponenten-Konventionen.
 - `VisiDoc Logo.png` — freigegebene Wort-Bildmarke.
 
+## Wo finde ich was?
+
+| Ich will … | Datei |
+|---|---|
+| **Die Live-App mit allen 6 Screens sehen** | **`index.html`** (Dashboard, Projekte, Projekt-Detail, Galerie, Archiv, Einstellung/Profil) |
+| **Eine alternative Galerie-Visualisierung (Serpentine-Layout) testen** | **`galerie-v2.html`** (Standalone-Sandbox, eigener Datenpool) |
+| **Modals klickbar testen** | **`modals-showcase.html`** |
+| **Modals-Übersicht mit Doku-Layout** | **`modals.html`** (verlinkt Stub-Buttons auf `index.html`) |
+| **Wissen, wie die Modals aufgebaut sind / Specs** | **`MODALS.md`** |
+| Verstehen, welche Komponenten es gibt und welchen Status sie haben | `COMPONENTS.md` |
+| Verstehen, welche Folder-Disziplin und Lock-Regeln gelten | `ARCHITECTURE.md` |
+| Design-Tokens und Layout-Konventionen nachschlagen | `DESIGN.md` |
+| Den Versions-Verlauf eines Screens nachverfolgen | `PROTOTYP.md` (im Projekt-Root) |
+
 ## Dateien
 
+- `index.html` — **Haupt-Prototyp (App-Shell + alle 6 Screens monolithisch)**.
+  Dashboard, Projekte, Projekt-Detail, Galerie, Archiv, Einstellung/Profil
+  inkl. App-Shell (Sidebar, Topbar, Theme-Toggle) und alle Modals.
+  Konsumiert `window.VISIDOC_DEMO` (deterministische Demo-Daten,
+  Mulberry32-PRNG pro Projekt-Seed). Datei kann direkt im Browser
+  geöffnet werden (`file://`-kompatibel). Spec: `PROTOTYP.md` (Root) §3.
+- `galerie-v2.html` — **Standalone-Sandbox: Serpentine-Galerie-Layout**.
+  Layout-Visualisierung mit eigenem statischen `MEDIA`-Pool (32 Bilder
+  aus `assets/generated/`). **Nicht** referenziert von `index.html`,
+  nicht Teil der Live-App. Status: 🟠 READ-ONLY (siehe `COMPONENTS.md`).
+  Dient nur als Layout-Sandboxing für eine alternative Galerie-Idee.
+- `modals-showcase.html` — **Modals-Showcase (interaktiv)**. Eigene Seite mit
+  4 Trigger-Buttons ("Neues Projekt hinzufügen", "Neue Bilder laden",
+  "Video hinzufügen", "Export") und 4 echten Vollbild-Overlays. Jedes Modal
+  hat klickbare Step-Indikatoren, Live-Validierung, Status-Single-Select,
+  Tag-Picker mit Enter/Backspace, Cover-Frame-Auswahl (Video),
+  Datums-Quick-Pills (Export) und einen Submit-Mock mit Spinner + Auto-Close.
+  → **Spec: `MODALS.md`** im gleichen Ordner (Layout, JS-API, States, A11y,
+  Datenattribute-Kontrakte, Keyboard, Submit-Mock-Details).
+- `modals.html` — **Modals-Übersicht**. Eigene Seite mit Sidebar + Topbar,
+  links eine Trigger-Liste (4 Modals), rechts der Detail-Block pro Modal
+  mit Step-Indikator, Step-Vorschau-Karten, Screenshot-Reel aus
+  `qa-shots/`, nummeriertem Ablauf, State-Tabelle
+  (idle / file-selected / loading / submitting / success / error) und
+  Accessibility-Hinweisen. Stub-Buttons verlinken auf `index.html`, wo
+  die echten Modals leben. Plus Vergleichsmatrix am Seitenende.
+- `MODALS.md` — **Specs & Interaktions-Doku für die Modals**.
+  Verbindliche Referenz für `modals-showcase.html` und `modals.html`.
+  Layout-Diagramm, Modal-für-Modal-Beschreibung aller Felder und
+  Validierungen, JS-API (`openModal` / `closeAll` / `goStep`),
+  DOM-Datenattribute als Kontrakt, UI-States, Keyboard-Bindings,
+  Accessibility-Checkliste, Submit-Mock-Spec.
 - `app-shell.css` — geteilte Stile: Design-Tokens, App-Layout, Sidebar, Topbar,
   Schaltflächen, Fokus-Ring, responsive Regeln, **Farb-Akzent-Utilities**
   (Salwei-Tints, Tag-Chips, Stat-Kacheln, Tipp-Karten, Live-Dot,
   Foto-Stub, Empty-State). Wird von jeder HTML-Datei
   per `<link rel="stylesheet">` eingebunden.
-- `dashboard.html` — Benutzer-Dashboard. Warmes Willkommens-Hero (Salwei-Gradient
-  + Avatar mit Ring + Stat rechts), "Tipp des Tages"-Karte, "Letzte Projekte"
-  (5 Zeilen), "Aktuelle Benachrichtigungen", "Dateistatistik" (Balken),
-  "Nächste Schritte" (Checkliste).
-- `projekte.html` — Projektübersicht. Filter-Toolbar mit Status-Segmenten
-  (Alle / Aktiv / Abgeschlossen), Projekt-Karten-Grid (auto-fill, 320px).
-- `galerie.html` — Medien-Galerie. **3-Spalten-Layout**:
-  1) Page-Header (Titel "Galerie" + Subtitle mit Medien-Count) ausserhalb
-     der Filter-Card.
-  2) **Filter-Card im 3-Zeilen-Layout** (Pattern aus dem Referenz-Screenshot
-     einer Mutual-Funds-Filter-Bar):
-     - **Zeile 1:** Vollbreite-Suchfeld mit Icon und breitem Placeholder.
-     - **Zeile 2:** Salwei-Pill-Segmente (Fotos/Pläne/Videos mit Count-Badge)
-       + Pill-Filter-Dropdowns (Projekt, Status, Zeitraum, Ersteller, Tags)
-       + View-Switcher rechts.
-       - Active: Salwei `#668048` gefüllt, weisser Text.
-       - Inactive: `--bg-raised` Hintergrund, dünner Rand, mittlerer Text.
-     - **Zeile 3:** "AKTIV"-Label + aktive Filter-Chips mit x-Buttons +
-       "Alle Filter zurücksetzen" Link rechts (mit `margin-left: auto`).
-     - Card-Container mit `--bg-panel`, dezenter Rand, abgerundete Ecken.
-  3) Salwei-Tipp-Karte + Medien-Raster (Foto, Plan, Video mit
-     Hover-Quick-Actions, "Neu"-Indikator mit Live-Dot,
-     Dauer-Stempel bei Videos, Projekt-Kontext pro Item)
-  4) Sticky Detail-Panel mit Vorschau, Projekt, Tags, EXIF/GPS,
-     Kommentar-Count, Uploader, Aktionen.
-
-  **Responsive Verhalten:**
-  - < 900px: Typ-Segmente bekommen einen Zeilenumbruch, Filter-Pills
-    dürfen umbrechen, View-Switcher rutscht an den Zeilen-Rand.
-  - < 600px: Padding reduziert, Pill-Höhe verringert,
-    "AKTIV"-Label wird auf 100%-Breite gesetzt.
-- `archiv.html` — Archiv. Tabelle mit archivierten Projekten, Plänen und
-  Audit-Logs. Spalten: Titel, Projekt-ID, Archiviert-Datum, Grösse,
-  Aktionen (Wiederherstellen / Herunterladen).
-- `einstellung-profil.html` — Einstellung und Profil. **9 Sektionen** mit
-  Sticky Sub-Nav (live aktiver Anker beim Scrollen):
-  1. **Profil** — wames Hero (Salwei-Gradient, Eyebrow, Avatar mit Ring,
-     Live-Status, Foto ändern), Persönliche Angaben + Kurzbeschrieb
-  2. **Sicherheit** — Passwort, 2FA (mit Backup-Codes-Callout), 3 Toggle-Rows,
-     aktive Sitzungen (drei Geräte, aktuelles markiert), API-Tokens
-  3. **Benachrichtigungen** — Channel-Matrix (E-Mail / In-App / Push ×
-     5 Ereignisse) + Ruhezeiten-Toggle
-  4. **Anzeige & Sprache** — Theme-Wahl (Dunkel/Hell/System mit visuellen
-     Vorschau-Karten), Sprache, Zeitzone, Datumsformat, Schriftdichte,
-     Animationen-Toggle
-  5. **Aktivität** — letzte 5 Aktionen mit farbcodierten Icons
-  6. **Daten & Datenschutz** — Export-Karten (Art. 8 DSG, Archiv), 2 Toggle-Rows,
-     Aufbewahrungsfristen-Callout, **Danger Zone** (Konto löschen)
-  7. **Organisation & Rolle** — Rolle, Abteilung, Personalnummer,
-     Berechtigungs-Chips (4 granted, 2 nicht)
-  8. **Integrationen** — Microsoft 365 (aktiv), SIA-Normenwerk, OneDrive
-  9. **Audit-Log** (Anker, Inhalte in `archiv.html`)
-
-  Plus globaler Speichern-Button am Formular-Ende.
 
 ## Sidebar-Navigation
 
@@ -125,3 +125,29 @@ Währung CHF, Telefon +41 xx xxx xx xx.
 
 Die HTML-Dateien können direkt im Browser geöffnet werden. Sie benötigen nur
 die `app-shell.css` im gleichen Ordner und JavaScript ist eingebettet.
+
+## Lock-Disziplin
+
+> Kurzfassung — ausführlich in `ARCHITECTURE.md`.
+
+- **`archive/vN/`** ist **frozen**. Niemals ändern, auch nicht für
+  „kleine Fixes". Vor Architektur-Umstellungen wird hier ein
+  Snapshot des aktuellen Live-Stands abgelegt.
+- **Fertige UI-Elemente** sind **READ-ONLY**. Wenn du etwas an einem
+  fertigen Element ändern willst, baue parallel eine neue Komponente
+  in `components/` oder `experiments/`, nicht die alte ändern.
+- **`components/`** enthält Vanilla Custom Elements
+  (`<vd-theme-toggle>`, `<vd-sidebar>`, …). file://-kompatibel,
+  keine ES-Modules.
+- **`experiments/`** ist für kurzlebige Tests und Varianten.
+  Alles hier ist WIP und darf die Live-Komponenten nicht duplizieren.
+- **`COMPONENTS.md`** ist das Register. Bei jeder Änderung wird der
+  Status dort mit Datum und Begründung aktualisiert.
+
+## Workflow
+
+1. Du willst etwas ändern? → `COMPONENTS.md` prüfen, welchen Status
+   die Komponente hat.
+2. READ-ONLY oder FROZEN? → STOP, klären, ggf. neue Komponente bauen.
+3. LIVE? → Änderung machen, danach Status in `COMPONENTS.md` updaten.
+4. Architektur-Umstellung? → Erst Snapshot in `archive/v(N+1)/`.
