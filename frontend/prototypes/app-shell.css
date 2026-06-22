@@ -66,6 +66,14 @@
   --status-warn-soft: rgba(245, 199, 104, 0.18);
   --status-error: #F26B6B;
   --status-error-soft: rgba(242, 107, 107, 0.18);
+
+  /* Scrollbar (VisiDoc-Style) – Dark */
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(124, 132, 143, 0.32);
+  --scrollbar-thumb-hover: rgba(163, 172, 184, 0.55);
+  --scrollbar-thumb-active: var(--color-primary);
+  --scrollbar-size: 10px;
+  --scrollbar-size-thin: 6px;
 }
 
 /* Light Theme (aus Logo abgeleitet) */
@@ -85,6 +93,14 @@
   --status-warn-soft: rgba(138, 102, 24, 0.10);
   --status-error: #A83333;
   --status-error-soft: rgba(168, 51, 51, 0.10);
+
+  /* Scrollbar (VisiDoc-Style) – Light */
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(124, 132, 143, 0.32);
+  --scrollbar-thumb-hover: rgba(90, 99, 108, 0.55);
+  --scrollbar-thumb-active: var(--color-primary);
+  --scrollbar-size: 10px;
+  --scrollbar-size-thin: 6px;
 }
 
 /* ============================================================
@@ -130,41 +146,77 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   width: var(--sidebar-width);
   flex-shrink: 0;
   background: var(--bg-panel);
+  /* Sidebar sitzt jetzt UNTER dem Header (im Grid: Zeile 2, Spalte 1).
+     Damit ist die Trennung Sidebar ↔ Topbar natuerlich oben (durch
+     die Topbar-Border-Bottom), die Trennung Sidebar ↔ Body rechts
+     (durch diese Border-Right). Keine ueberlappenden Linien mehr,
+     keine Pseudo-Elemente noetig. */
   border-right: 1px solid var(--border-default);
   display: flex;
   flex-direction: column;
-  /* Sticky am Viewport-Rand: bleibt sichtbar beim Scrollen, haengt
-     oben am Browser-Viewport (top: 0) und ist exakt 100vh hoch. */
-  position: sticky;
-  top: 0;
-  align-self: flex-start;   /* verhindert Mitwachsen in langen Flex-Layouts */
-  height: 100vh;
-  max-height: 100vh;
-  min-height: 100vh;
-  overflow: hidden;          /* innere Bereiche (Nav) scrollen separat */
+  overflow: hidden;
+  /* height wird vom Grid gesetzt (1fr der App-Body-Zeile);
+     min-height:0 damit der innere Nav-Bereich korrekt scrollt. */
+  height: 100%;
+  min-height: 0;
 }
 
-/* Markenblock oberhalb der Organisation */
+/* Brand-Block (Logo + Wortmarke) — am oberen Rand der Sidebar.
+   Quelle: PNG-Asset visidoc-logo.png (Querformat, Bildschirm +
+   VisiDoc-Wortmarke). Im Collapsed-Modus: nur das quadratische
+   Mark (visidoc-mark.png), zentriert.
+
+   Dark Mode: das Original-PNG ist anthrazit auf transparent und
+   wuerde auf dem dunklen Panel-Hintergrund verschwinden. Wir
+   invertieren die Helligkeit per CSS-filter, behalten aber den
+   Salwei-Akzent ("Doc") durch hue-rotate. */
 .vd-sidebar-brand {
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-4) var(--space-5);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-5) var(--space-3);
   border-bottom: 1px solid var(--border-subtle);
-}
-.vd-sidebar-brand-mark {
-  width: 28px;
-  height: 28px;
   color: var(--text-high);
+  text-decoration: none;
   flex-shrink: 0;
 }
-.vd-sidebar-brand-text {
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  line-height: 1;
+.vd-sidebar-brand:hover { color: var(--text-high); }
+.vd-sidebar-brand-img {
+  display: block;
+  height: auto;
+  flex-shrink: 0;
 }
-.vd-sidebar-brand-text .vd-brand-accent { color: var(--color-primary); }
+/* Voll-Logo (Querformat): skaliert kompakt auf max. 132 px Breite.
+   132 x 160/509 = ~41 px Hoehe → passt in einen ~70-px-Brand-Block
+   (vorher 168 px breit / ~53 px hoch + Padding = ~90 px). Spart
+   ~20 px vertikalen Raum und reduziert die visuelle Dominanz des
+   Logos gegenueber der Nav-Sektion darunter. */
+.vd-sidebar-brand-img--full {
+  width: 100%;
+  max-width: 132px;
+}
+/* Mark-only (quadratisch): Default versteckt, nur Collapsed sichtbar */
+.vd-sidebar-brand-img--mark { display: none; }
+
+/* Dark Mode: Original-PNG ist anthrazit (passt zu Light-Panel),
+   auf Dark-Panel wuerde es verschwinden. Invertiert + hue-rotate
+   dreht "Visi" auf hell, "Doc" zurueck in den Salwei-Bereich. */
+[data-theme="dark"] .vd-sidebar-brand-img {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Collapsed-Mode: nur das quadratische Mark, zentriert. */
+.vd-app-sidebar-collapsed .vd-sidebar-brand {
+  align-items: center;
+  padding: var(--space-4) var(--space-2);
+}
+.vd-app-sidebar-collapsed .vd-sidebar-brand-img--full { display: none; }
+.vd-app-sidebar-collapsed .vd-sidebar-brand-img--mark {
+  display: block;
+  width: 32px;
+  height: auto;
+}
 
 /* Organisationskopf */
 .vd-sidebar-org {
@@ -212,15 +264,6 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-}
-.vd-sidebar-section-label {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-low);
-  padding: var(--space-3) var(--space-3) 2px;
-  line-height: 1;
 }
 .vd-nav-item {
   position: relative;
@@ -427,13 +470,27 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 
 /* ============================================================
    App-Body (Topbar + Main)
-   ============================================================ */
+   ============================================================
+   Body sitzt RECHTS neben der Sidebar (Sidebar ist direktes
+   Geschwister im .vd-app Grid, siehe oben). Body selbst ist
+   Flex-Column: Topbar oben, Scroll-Container darunter. Diese
+   Form passt zum HTML-Markup, in dem Topbar + Scroll direkte
+   Children des Body sind.
+
+   Frueher stand hier ein `display: grid; grid-template-columns:
+   var(--sidebar-width) 1fr` – das hat den Body in zwei Spalten
+   gezwungen, was zur Sidebar-Spalte fuehrte, in der dann Topbar
+   und Scroll gelandet sind (statt im Body-Bereich). Der
+   HTML-<style>-Block setzt das Layout explizit auf Grid mit
+   grid-template-rows (Topbar + Scroll); durch den Wegfall der
+   2-Spalten-Default hält der Body jetzt die korrekte Form. */
 
 .vd-app-body {
-  flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* ============================================================
@@ -441,8 +498,11 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
    ============================================================ */
 
 .vd-topbar {
-  position: sticky;
-  top: 0;
+  /* Layout-Refactoring: Topbar ist jetzt eine EIGENE Zeile direkt
+     unter .vd-app, nicht mehr sticky innerhalb der App-Body.
+     position:sticky entfernt — die Topbar sitzt fest in Zeile 1
+     des App-Grids und scrollt nicht, weil der gesamte .vd-app-
+     Container height:100vh + overflow:hidden hat. */
   z-index: 10;
   height: var(--topbar-height);
   background: var(--bg-panel);
@@ -452,11 +512,44 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   gap: var(--space-4);
   padding: 0 var(--space-5);
 }
-.vd-topbar-title {
-  font-size: 15px;
+/* Markenblock (Logo + Wortmarke) — links in der Topbar */
+.vd-topbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-high);
+  text-decoration: none;
+  flex-shrink: 0;
+  height: 100%;
+}
+.vd-topbar-brand-mark {
+  width: 24px;
+  height: 24px;
+  color: var(--text-high);
+  flex-shrink: 0;
+}
+.vd-topbar-brand-text {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.vd-topbar-brand-text .vd-brand-accent { color: var(--color-primary); }
+
+/* Tab-Anzeige (aktuell ausgewählter Bereich) — sitzt rechts vor der Suche */
+.vd-topbar-tab-display {
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-mid);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-2, rgba(255,255,255,0.04));
+  border: 1px solid var(--border-subtle, transparent);
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-right: var(--space-2);
 }
+
 .vd-topbar-spacer { flex: 1; }
 .vd-search-wrap {
   flex: 1;
@@ -598,12 +691,12 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #C95A2C;                 /* warmer Akzent fuer Dark-Mode-Kreis */
+  background: var(--color-primary);    /* Salwei-Akzent, konsistent mit App-Palette */
   color: #FFFFFF;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(201, 90, 44, 0.35);
+  box-shadow: 0 2px 8px rgba(102, 128, 72, 0.35);   /* Salwei-Schatten */
   transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1), background 200ms ease;
 }
 .vd-theme-pill-thumb svg { width: 16px; height: 16px; }
@@ -611,12 +704,14 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 /* Dark Mode aktiv (Mond rechts): data-state="dark" */
 .vd-theme-pill[data-state="dark"] .vd-theme-pill-thumb {
   transform: translateX(36px);
-  background: #C95A2C;
+  background: var(--color-primary);    /* Salwei-Akzent, konsistent mit App-Palette */
 }
-/* Light Mode aktiv (Sonne links): data-state="light" */
+/* Light Mode aktiv (Sonne links): data-state="light".
+   Gleiche Salwei-Farbe wie im Dark-Mode, damit der Toggle in beiden
+   Modi identisch zur Marken-Palette wirkt (kein warmer Gelbton). */
 .vd-theme-pill[data-state="light"] .vd-theme-pill-thumb {
   transform: translateX(0);
-  background: #E0A03A;                 /* warmer Gelbton fuer Light-Mode-Kreis */
+  background: var(--color-primary);
 }
 .vd-theme-pill[data-state="light"] .vd-theme-pill-sun { color: var(--text-high); }
 
@@ -1222,16 +1317,26 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
    .vd-app-sidebar-collapsed am <body>. Mobile (<= 900px) kollabiert
    automatisch. Desktop via Klick auf vd-sidebar-toggle. */
 .vd-app-sidebar-collapsed .vd-sidebar { width: var(--sidebar-width-collapsed); }
-.vd-app-sidebar-collapsed .vd-sidebar-brand-text,
 .vd-app-sidebar-collapsed .vd-nav-item-label,
 .vd-app-sidebar-collapsed .vd-nav-item-count,
-.vd-app-sidebar-collapsed .vd-sidebar-section-label,
 .vd-app-sidebar-collapsed .vd-sidebar-user-meta,
 .vd-app-sidebar-collapsed .vd-sidebar-org-meta { display: none; }
+/* Dynamische Topbar-Anpassung bei eingeklappter Sidebar: die ~176px
+   zusaetzlicher Body-Breite sollen sinnvoll genutzt werden, nicht als
+   leerer Spacer zwischen Title-Pille und Suchfeld liegen. Drei kleine
+   Anpassungen arbeiten zusammen:
+   1) Spacer kollabiert auf 0 – sonst waere er 475px tote Pixel.
+   2) max-width auf der Suche wird auf 720 erhoeht – sonst waere sie
+      auf 480 gecappt und koennte die gewonnene Breite nicht nutzen.
+   3) margin-left:auto auf den Aktionen schiebt sie an den rechten
+      Rand – sonst wuerde der freie Raum zwischen Suche und Aktionen
+      als Luecke sichtbar bleiben. */
+.vd-app-sidebar-collapsed .vd-topbar-spacer { flex: 0 0 0; }
+.vd-app-sidebar-collapsed .vd-search-wrap { max-width: 720px; }
+.vd-app-sidebar-collapsed .vd-topbar-actions { margin-left: auto; }
 /* Im Collapsed-Modus: Midline schmaler halten, Settings-Border entfernen. */
 .vd-app-sidebar-collapsed .vd-sidebar-midline { margin: var(--space-2) var(--space-1); }
 .vd-app-sidebar-collapsed .vd-sidebar-settings .vd-nav-item { border: none; }
-.vd-app-sidebar-collapsed .vd-sidebar-brand { justify-content: center; padding: var(--space-4) 0; }
 .vd-app-sidebar-collapsed .vd-nav-item { justify-content: center; padding: 0; }
 .vd-app-sidebar-collapsed .vd-sidebar-user { justify-content: center; }
 .vd-app-sidebar-collapsed .vd-sidebar-org { justify-content: center; padding: var(--space-1); }
@@ -1239,26 +1344,13 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 
 /* Im eingeklappten Modus KEIN Scroll-Indikator: Nav-Inhalt ist klein
    genug, dass nichts scrollen muss. Auch Footer/Toggle sind klein.
-   Nav-Items behalten ihre normale Höhe (40px), kein space-between!
-   WICHTIG: Padding-Top entspricht dem Platz, den die Section-Labels
-   "Arbeit" und "Konto" im expanded Zustand einnehmen, damit die
-   Nav-Items in beiden Zuständen auf derselben Y-Position sitzen. */
+   Nav-Items behalten ihre normale Höhe (40px), kein space-between! */
 .vd-app-sidebar-collapsed .vd-sidebar-nav {
   overflow-y: visible;
   padding: var(--space-3) var(--space-1);
   gap: 2px;
   flex: 1 1 auto;
   justify-content: flex-start;
-}
-/* Kompensations-Spacer für die im collapsed weggeblendeten Section-Labels.
-   Werden als unsichtbare Höhenhalter in den Nav eingefügt, damit die
-   Items auf gleicher Höhe wie im expanded sitzen. */
-.vd-app-sidebar-collapsed .vd-sidebar-section-label {
-  display: block;
-  visibility: hidden;
-  height: 26px;
-  padding: var(--space-3) var(--space-3) 2px;
-  margin: 0;
 }
 .vd-app-sidebar-collapsed .vd-sidebar-nav > .vd-sidebar-divider {
   margin: var(--space-2) var(--space-3);
@@ -1384,16 +1476,19 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .vd-app-sidebar-collapsed .vd-nav-item:hover::after { opacity: 1; }
 
 /* Reopen-Button (sichtbar wenn Sidebar eingeklappt) */
-/* Hinweis: position: sticky bleibt auch im eingeklappten Zustand
-   aktiv (nicht 'relative' setzen!), sonst scrollt die Sidebar weg. */
-.vd-app-sidebar-collapsed .vd-sidebar { /* sticky bleibt erhalten */ }
+/* Hinweis: Sidebar ist jetzt in der App-Body-Zeile (Grid-Item),
+   nicht mehr sticky. Das ::after-Pseudo-Element wurde entfernt
+   (Border-Right wird wieder direkt auf .vd-sidebar gesetzt). */
+.vd-app-sidebar-collapsed .vd-sidebar { /* position: static, OK */ }
 
 /* Responsive: Sidebar collapse + Topbar
-   ============================================================ */
+   ============================================================
+   Hinweis: Die Spaltenbreite des Outer-App-Grids (Sidebar vs.
+   Body) wird im HTML-<style>-Block per !important gesetzt –
+   der Body selbst ist Flex-Column, daher brauchen wir hier
+   keine .vd-app-body-Spaltenregel mehr. */
 
 @media (max-width: 900px) {
-  .vd-app { grid-template-columns: var(--sidebar-width-collapsed) 1fr; }
-  .vd-app-sidebar-collapsed .vd-app { grid-template-columns: var(--sidebar-width-collapsed) 1fr; }
   .vd-sidebar-toggle { display: none; }
 }
 
@@ -1401,4 +1496,101 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   .vd-topbar { padding: 0 var(--space-3); gap: var(--space-2); }
   .vd-search-wrap { display: none; }
   .vd-main { padding: var(--space-4) var(--space-3); }
+}
+
+/* ============================================================
+   SCROLLBAR – VisiDoc-Style
+   ------------------------------------------------------------
+   Gescoped auf die App-Container, damit Inputs, Textareas und
+   andere Formularfelder unberuehrt bleiben (vermeidet
+   unerwartete Layout-Shifts in Formularen).
+   - Firefox: scrollbar-width + scrollbar-color
+   - Webkit (Chrome/Safari/Edge): ::-webkit-scrollbar-*
+   - Touch (coarse pointer): native Overlay-Scrollbar
+   ============================================================ */
+
+.vd-app-scroll,
+.vd-sidebar,
+.vd-modal-picker,
+.vd-picker-strip {
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* Webkit */
+.vd-app-scroll::-webkit-scrollbar,
+.vd-sidebar::-webkit-scrollbar,
+.vd-modal-picker::-webkit-scrollbar,
+.vd-picker-strip::-webkit-scrollbar {
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+  background: var(--scrollbar-track);
+}
+.vd-app-scroll::-webkit-scrollbar-track,
+.vd-sidebar::-webkit-scrollbar-track,
+.vd-modal-picker::-webkit-scrollbar-track,
+.vd-picker-strip::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+.vd-app-scroll::-webkit-scrollbar-thumb,
+.vd-sidebar::-webkit-scrollbar-thumb,
+.vd-modal-picker::-webkit-scrollbar-thumb,
+.vd-picker-strip::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+  /* 2px transparenter Rahmen, damit das Pill nicht am Track-Rand
+     klebt, sondern in der Mitte der 10px-Rinne sitzt. */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background 120ms ease;
+}
+.vd-app-scroll::-webkit-scrollbar-thumb:hover,
+.vd-sidebar::-webkit-scrollbar-thumb:hover,
+.vd-modal-picker::-webkit-scrollbar-thumb:hover,
+.vd-picker-strip::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+.vd-app-scroll::-webkit-scrollbar-thumb:active,
+.vd-sidebar::-webkit-scrollbar-thumb:active,
+.vd-modal-picker::-webkit-scrollbar-thumb:active,
+.vd-picker-strip::-webkit-scrollbar-thumb:active {
+  background: var(--scrollbar-thumb-active);
+}
+.vd-app-scroll::-webkit-scrollbar-corner,
+.vd-sidebar::-webkit-scrollbar-corner,
+.vd-modal-picker::-webkit-scrollbar-corner,
+.vd-picker-strip::-webkit-scrollbar-corner {
+  background: var(--scrollbar-track);
+}
+
+/* Thin-Variante fuer die horizontalen Picker-Streifen.
+   Diese Container behalten einen dezenten, schmaleren Stil –
+   passend zur kompakten Pill-Aesthetik der Tile-Strips. */
+.vd-picker-strip::-webkit-scrollbar,
+.vd-modal-picker::-webkit-scrollbar {
+  height: var(--scrollbar-size-thin);
+}
+.vd-picker-strip::-webkit-scrollbar-thumb,
+.vd-modal-picker::-webkit-scrollbar-thumb {
+  border-width: 1px;
+}
+
+/* Touch / Mobile: native Overlay-Scrollbar (kein reservierter
+   Platz). Custom-Styles wuerden auf Geraeten ohne Maus nur
+   Layout-Shift erzeugen und sind nicht noetig. */
+@media (pointer: coarse) {
+  .vd-app-scroll,
+  .vd-sidebar,
+  .vd-modal-picker,
+  .vd-picker-strip {
+    scrollbar-width: auto;
+  }
+  .vd-app-scroll::-webkit-scrollbar,
+  .vd-sidebar::-webkit-scrollbar,
+  .vd-modal-picker::-webkit-scrollbar,
+  .vd-picker-strip::-webkit-scrollbar {
+    width: auto;
+    height: auto;
+  }
 }

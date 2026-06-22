@@ -1,0 +1,137 @@
+/* =============================================================================
+   preview-card-spec.css
+   -----------------------------------------------------------------------------
+   LOCKED SPEC — DO NOT EDIT.
+   -----------------------------------------------------------------------------
+   Verbindliche Geometrie-Spec für die VisiDoc-Preview-Card (Bild + Datum/Zeit-
+   Stempel + vertikale Trendlinie + Anker-Dot).
+
+   Diese Datei ist die EINZIGE Quelle der Wahrheit für die Layout-Werte.
+   Sämtliche Konsumenten (HTML, andere CSS-Module) MÜSSEN die Werte hier
+   per `var(--preview-*)` referenzieren. Direkt eingetragene Pixel-Werte für
+   die hier definierten Grössen sind verboten.
+
+   Konsumenten:
+     - frontend/prototypes/index.html            (Haupt-App)
+     - design-explorations/timeline-filmstrip.html (V5-Prototyp)
+
+   Dokumentation:
+     - docs/ux/concepts/preview-card-spec.md     (menschliche Spec, lesen!)
+     - frontend/prototypes/COMPONENTS.md         (Lock-Status-Tracking)
+
+   Lock-Mechanismus (mehrstufig):
+     1. Dieser Header: "DO NOT EDIT" — Coding-Conventions
+     2. Datei-Readonly-Flag (Windows `attrib +R`, siehe COMPONENTS.md)
+     3. PR-Review-Pflicht: jede Änderung an dieser Datei erfordert Review
+        durch Joshua + Update des Spec-Markdown + Eintrag in COMPONENTS.md
+        "Änderungsjournal".
+
+   Geometrie-Invariante (darf nicht gebrochen werden):
+     dot-center-y == 71.5 px ab Bildunterkante
+     berechnet sich aus:
+       margin-top (20) + trendline-height (49) + dot-offset (2.5) == 71.5
+     Wenn ein einzelner Wert geändert wird, MUSS die Summe 71.5 bleiben.
+     ============================================================================= */
+
+:root {
+  /* ---------------------------------------------------------------------------
+     KOMPONENTEN-WERTE (atomar)
+     Jeder Wert ist eine unabhängige, semantisch benannte Grösse.
+     --------------------------------------------------------------------------- */
+
+  /* Luft zwischen Bildunterkante und Stempel-Reihe */
+  --preview-stamp-margin-top: 20px;
+
+  /* Höhe der Text-Zeile innerhalb des Stempels (Datum/Zeit-Schriftgrösse) */
+  --preview-stamp-line-height: 10px;
+
+  /* Luft zwischen Stempel-Reihe und Dot-Oberkante (= Rest-Trendline) */
+  --preview-stamp-margin-bottom: 39px;
+
+  /* Vertikale Trendlinie (zwischen Bild und Dot, läuft DURCH die Stempel-Reihe) */
+  --preview-trendline-width: 1px;
+  --preview-trendline-color: var(--color-primary);
+  --preview-trendline-opacity: 0.5;
+
+  /* Dot (Anker am Ende der Trendlinie) */
+  --preview-dot-size: 5px;
+  --preview-dot-color: var(--color-primary);
+  --preview-dot-ring-width: 2px;
+  --preview-dot-ring-color: var(--bg-base);
+
+  /* Horizontale Gaps zwischen Datum/Zeit und Trendlinie (symmetrisch) */
+  --preview-stamp-gap: 14px;
+
+  /* Schrift-Eigenschaften für Datum und Zeit (konsistent lesbar) */
+  --preview-stamp-font-family: var(--font-mono);
+  --preview-stamp-font-size: 10px;
+  --preview-stamp-font-weight: 500;
+  --preview-stamp-font-color: var(--color-primary);
+  --preview-stamp-font-opacity: 0.7;
+  --preview-stamp-font-letter-spacing: 0.08em;
+  --preview-stamp-font-text-transform: uppercase;
+  --preview-stamp-font-line-height: 1;
+  --preview-stamp-time-color: var(--preview-stamp-font-color);
+  --preview-stamp-date-color: var(--preview-stamp-font-color);
+
+  /* Bild-Eigenschaften (galerie-konsistent) */
+  --preview-cell-max-width: 240px;
+  --preview-image-aspect-ratio: 16 / 9;
+  --preview-image-border-color: var(--border-subtle);
+  --preview-image-border-width: 1px;
+  --preview-image-border-radius: var(--radius-small);
+
+  /* Serpentine-Connector (Bogen zwischen den Zeilen, galerie-v2 Pattern) */
+  --preview-serpentine-stroke-width: 2.5px;
+  --preview-serpentine-stroke-color: var(--color-primary);
+  --preview-serpentine-stroke-opacity: 0.7;
+  --preview-serpentine-stroke-linecap: round;
+  --preview-serpentine-stroke-linejoin: round;
+  --preview-serpentine-curve-radius: 75px;
+  --preview-serpentine-side-offset: 140px;
+  --preview-serpentine-row-spacing: 66px;
+  --preview-serpentine-drop-shadow: 0 0 6px rgba(102, 128, 72, 0.35);
+
+  /* ---------------------------------------------------------------------------
+     BERECHNETE WERTE (NICHT direkt überschreiben — gehören zu den Komponenten)
+     --------------------------------------------------------------------------- */
+
+  /* Höhe der Trendlinie = Text-Zeile + Stempel-Margin-Bottom.
+     Ergibt: 10 + 39 = 49 px (vertikale Linie vom Stempel-Top bis Dot-Top). */
+  --preview-trendline-height: calc(
+    var(--preview-stamp-line-height) +
+    var(--preview-stamp-margin-bottom)
+  );
+
+  /* Y-Position der Dot-Oberkante RELATIV ZUM STEMPEL-TOP.
+     Da die Trendlinie innerhalb des Stempels sitzt (top: 0, height: 49 px),
+     sitzt der Dot am Ende der Linie: top = trendline-height = 49 px.
+     -> Der Dot MUSS innerhalb des Stempels positioniert sein,
+        nicht als Geschwister. */
+  --preview-dot-top: var(--preview-trendline-height);
+
+  /* Y-Position des Dot-Mittelpunkts RELATIV ZUM BILD (Invariante).
+     Ergibt: 20 + 49 + 2.5 = 71.5 px.
+     Dieser Wert ist FIX — die Geometrie der Timeline-SVG hängt davon ab.
+     Hier nur dokumentiert; nicht im CSS-Consumer-Code verwendet, weil der
+     Dot innerhalb des Stempels positioniert wird. */
+  --preview-dot-center-y-from-image: calc(
+    var(--preview-stamp-margin-top) +
+    var(--preview-trendline-height) +
+    (var(--preview-dot-size) / 2)
+  );
+
+  /* Visueller Dot-Durchmesser inkl. Ring.
+     Ergibt: 5 + 2 * 2 = 9 px. */
+  --preview-dot-visual-size: calc(
+    var(--preview-dot-size) +
+    2 * var(--preview-dot-ring-width)
+  );
+}
+
+/* =============================================================================
+   Ende LOCKED SPEC.
+   Ab hier keine Style-Regeln mehr — diese Datei enthält ausschliesslich
+   Custom Properties. Konsumenten-CSS lebt im jeweiligen HTML-<style>-Block
+   oder in app-shell.css, zieht seine Werte aber IMMER von hier.
+   ============================================================================= */
