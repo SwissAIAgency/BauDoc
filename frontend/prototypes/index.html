@@ -1217,14 +1217,12 @@
       color: var(--text-high);
     }
 
-    /* Demo-Picker Popover */
-    .vd-gal-demo-wrap { position: relative; }
+    /* Demo-Picker Popover — position:fixed damit overflow-x:hidden der Eltern-
+       Container nicht clippt. Koordinaten werden per JS beim Öffnen gesetzt. */
     .vd-gal-demo-picker {
-      position: absolute;
-      top: calc(100% + 6px);
-      right: 0;
-      z-index: 200;
-      min-width: 160px;
+      position: fixed;
+      z-index: 9000;
+      width: 192px;
       background: var(--bg-panel);
       border: 1px solid var(--border-default);
       border-radius: var(--radius-default);
@@ -4140,6 +4138,11 @@
         0 0 0 var(--preview-dot-ring-width) var(--preview-dot-ring-color),
         0 0 0 calc(var(--preview-dot-ring-width) * 3) var(--preview-dot-color);
     }
+    /* CSS-Dot unsichtbar — SVG-Kreis (.vd-gal-path-node) ist das sichtbare Element.
+       Element bleibt im Layout für getBoundingClientRect(); Klicks passieren durch
+       den SVG-Overlay (pointer-events: none) hindurch auf diesen Dot. */
+    .vd-gal-stamp-dot,
+    .vd-gal-stamp-dot--active { opacity: 0; }
     .vd-gal-cell-empty {
       aspect-ratio: var(--preview-image-aspect-ratio);
       border: 2px solid #ffffff;
@@ -9554,7 +9557,15 @@
   if (_demoToggle && _demoPicker) {
     _demoToggle.addEventListener('click', (e) => {
       e.stopPropagation();
-      _demoPicker.hidden = !_demoPicker.hidden;
+      if (_demoPicker.hidden) {
+        const r = _demoToggle.getBoundingClientRect();
+        _demoPicker.style.top   = (r.bottom + 6) + 'px';
+        _demoPicker.style.right = (window.innerWidth - r.right) + 'px';
+        _demoPicker.style.left  = 'auto';
+        _demoPicker.hidden = false;
+      } else {
+        _demoPicker.hidden = true;
+      }
     });
     document.addEventListener('click', (e) => {
       if (!_demoToggle.closest('.vd-gal-demo-wrap').contains(e.target)) {
