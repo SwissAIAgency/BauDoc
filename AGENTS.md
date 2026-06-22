@@ -31,6 +31,18 @@ Die fachliche Hauptquelle ist `docs/references/leistungskatalog_baufortschritt_d
 - Lasse keine Platzhalter im finalen Produktivcode zurück.
 - Wenn Tests nicht ausführbar sind, dokumentiere den Grund.
 
+## Repository-Layout und Worktree-Discipline
+
+- **Genau EIN lokales Repo-Verzeichnis** für dieses Projekt. Keine Schwester-Ordner wie `*`-wt`, `*-worktree`, `*-v2`, `*-alt`. Mehrere parallele Verzeichnisse erzeugen Verwirrung, veraltete Branches und verschwendeten Speicherplatz.
+- **Worktrees nur, wenn aktiv parallel gearbeitet wird.** Vor `git worktree add` immer erst `git worktree list` prüfen. Existieren bereits Worktrees, sind sie vorher wegzuräumen (siehe nächster Punkt) — niemals stillschweigend einen weiteren hinzufügen.
+- **Nach Abschluss jeder Session: Worktree SOFORT entfernen.** Reihenfolge:
+  1. `git diff > <backup>/<name>.patch` (WIP extern sichern, bevor `--force` Daten löscht)
+  2. `git worktree remove --force <pfad>`
+  3. `git worktree prune --verbose`
+  4. `git branch -D <feature-branch>` für nicht mehr benötigte lokale Branches
+- **Niemals `git worktree remove --force` ohne Backup.** `--force` löscht ungestagte Edits ohne Nachfrage. Fremde Edits (Joshua oder andere Sessions) niemals still entsorgen — bei Unsicherheit vorher mit dem Nutzer klären.
+- **Konsequenz:** Drei verwaiste Worktrees (`*-filter-row-wt`, `*-topbar-wt`, `*-main-wt`) wurden 2026-06-19 aufgeräumt. Vor jeder neuen Arbeit kurz `git worktree list` ausführen — falls wieder welche entstanden sind, zuerst entfernen.
+
 ## Arbeitsablauf bei jeder Aufgabe
 
 1. Relevante Dokumente und Bereichsregeln lesen.
@@ -109,6 +121,25 @@ Die fachliche Hauptquelle ist `docs/references/leistungskatalog_baufortschritt_d
 - Businesslogik in UI-Komponenten verstecken.
 - Sicherheits- oder Datenschutzthemen auf später verschieben, wenn sie den aktuellen Task betreffen.
 - Unrelated Refactors oder großflächige Formatierungen durchführen.
+
+
+## Git- und Deploy-Workflow (verbindlich ab 2026-06-22)
+
+- **Working-Tree-Edits an `frontend/prototypes/index.html` (und allen Frontend-Files) gehen IMMER auf `dev`.** Nie direkt auf `main` pushen.
+- **Production-Branch in Netlify ist `dev`** (Site-Konfiguration: `Configuration -> Deploys -> Repository -> Production branch = dev`). Jeder Push auf `dev` triggert dann auto-deploy auf `https://visidoc.netlify.app/`.
+- **Standard-Workflow** fuer Aenderungen an `index.html` und `frontend/prototypes/`:
+  1. Dateien im Working-Tree editieren
+  2. `git add frontend/prototypes/` (oder gezielt einzelne Files, um Muell nicht zu stagen)
+  3. `git commit -m "feat|fix|...: <was>"`
+  4. `git push origin dev`
+  5. Netlify auto-deployt in ~30 Sek, Live-URL ist aktualisiert
+- **Muell im Working-Tree** (`index - Kopie.html`, `.tmp-shot.png`, `MODALS.md`, `modals-showcase.html`, `verify-preview-card-spec.py`, `preview-card-spec.css`, `components/`, `qa-shots/`, viele Screenshots, `visidoc-logo.png`, `visidoc-mark.png`, etc.) vor `git add` aufraeumen oder gezielt nur das Benoetigte stagen.
+- **Wenn Live-URL nach `dev`-Push nicht aktualisiert wird:** Netlify-Production-Branch pruefen. Falls auf `main` zurueckgefallen: in Netlify-UI auf `dev` umstellen. Workaround bis dahin: Merge-Commit auf `main` (`git checkout main && git merge dev && git push origin main`), weil FF nicht immer moeglich ist (main kann durch PR-Merges divergieren).
+- **`main` bleibt Production-Snapshot** und wird nur per Merge-Commit von `dev` aktualisiert - kein direkter Push, kein `--force` auf `main`, kein Rebase.
+- **Netlify-Auth:** GitHub-**Owner**-Account verbinden, nicht Collaborator. Sonst greift Strict Contributor Verification und blockiert Builds (auch API-Deploys). Bei Free-Plan keine Team-Members moeglich.
+- **Repo-Sichtbarkeit:** Public (Stand 2026-06-22), damit Strict Contributor Verification auf private Repos nicht greift. Security-Bewertung in `SECURITY_PRIVACY.md` mitfuehren, falls wieder auf Private gestellt wird.
+- **Site-URL:** `https://visidoc.netlify.app/` (war frueher `magical-medovik-36d81e.netlify.app`, am 2026-06-22 umbenannt).
+- **Strict Contributor Verification:** blockiert sowohl Git-Pushes als auch manuelle API-Deploys (`netlify deploy --dir=...`). Workaround nur via Drag-and-Drop in Netlify-UI oder Owner-Auth + Repo-Public.
 
 ## Rollenpflicht
 
