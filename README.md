@@ -26,6 +26,10 @@ BauDoc dokumentiert Baufortschritt mit Fotos, Plänen, Planversionen, Planpositi
 - `SECURITY_PRIVACY.md`: Sicherheits- und Datenschutzgrundlage.
 - `UI_STANDARDS.md`: UI-, Brand- und Accessibility-Regeln.
 - `TESTING.md`: Teststrategie.
+- `PROTOTYP.md`: Single Source of Truth für den HTML-Prototyp
+  in `frontend/prototypes/`. Definiert alle Screens und führt
+  einen Änderungs-Log (Abschnitt 10). Jede HTML-Änderung wird
+  dort nachgetragen.
 - `docs/technical/project-analysis.md`: Projektanalyse vor Implementierung.
 - `docs/technical/development-plan.md`: priorisierter Entwicklungsplan.
 - `security/threat-model.md`: Threat Model.

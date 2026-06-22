@@ -53,8 +53,8 @@
 | Markenfarben | Salbei `#668048`, Anthrazit `#1F2429` |
 | Schriften | Inter (UI), JetBrains Mono (Daten) |
 | Icon-Set | Lucide, Strichstärke 1.75 |
-| Aktuelle Prototyp-Version | `1.5.0` |
-| Letzte Verifikation HTML ↔ Doku | 2026-06-19 |
+| Aktuelle Prototyp-Version | `1.5.1` |
+| Letzte Verifikation HTML ↔ Doku | 2026-06-22 |
 | Anzahl Screens | 6 |
 | HTML-Datei(en) | `frontend/prototypes/index.html` |
 | Geteilte Stile | `frontend/prototypes/app-shell.css` |
@@ -347,6 +347,30 @@ Höhe 22 px, Padding 4 / 10 px, Hintergrund Status-Farbe mit
 > an dieser Datei wird hier eingetragen. Reihenfolge:
 > neueste oben. Pflichtfelder: Datum (tt.mm.jjjj), Version,
 > betroffener Screen, Kurzbeschreibung, Begründung.
+
+### Eintrag – 22.06.2026 – v1.5.1 (Galerie: Inner-Padding für konsistenten Sidebar-Gap)
+
+- **Datum:** 22.06.2026
+- **Version:** 1.5.1 (Patch)
+- **Betroffen:** `index.html` Screen `galerie` (`.vd-gal-rows-inner`),
+  diese Datei (Section 10 + Section 1)
+- **Änderung:** `.vd-gal-rows-inner` bekommt
+  `padding-left: 107px`. Damit sitzt die Galerie-Box (Cells +
+  Serpentine-Reserve) in beiden Sidebar-Zuständen (expanded 240 px
+  / collapsed 64 px) konsistent 131 px von der Sidebar entfernt
+  — vorher driftete sie um ~176 px nach links im collapsed-State.
+- **Begründung:** Galerie wirkte im collapsed-State linkslastig,
+  weil `.vd-gal-rows-inner` nur ein `padding-right` für die
+  Serpentine-Reserve hatte, aber kein explizites `padding-left`,
+  um die Cell-Box gegen die Sidebar zu verankern. Im expanded-
+  State glich das Section-Padding (24 px) + optischer Sidebar-Gap
+  den Drift zufällig aus; im collapsed-State (schmalere Sidebar)
+  wurde die Asymmetrie sichtbar.
+- **Verifikation:** Expanded-Screenshot: Sidebar-Gap ≈ Bogen-Gap ≈
+  131 px, Cells-Mitte-Offset ≈ −21 px (innerhalb des 240 px
+  Sidebar-Bereichs). Collapsed-Screenshot: Sidebar-Gap ≈ 131 px
+  fix, Cells-Mittig zwischen Sidebar und Bildschirmrand;
+  Bogen-Geometrie bedingt rechts mehr Luft, das ist gewollt.
 
 ### Eintrag – 19.06.2026 – v1.5.0 (UI/UX-Reset: Doku-Sync, Sandbox-Klärung, Sidebar-Counts)
 
