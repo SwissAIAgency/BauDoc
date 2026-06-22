@@ -3847,22 +3847,15 @@
     body[data-active-screen="galerie"][data-tab-picker] .vd-filmstrip-reopen { display: none !important; }
     .vd-gal-rows-inner {
       position: relative;
-      /* Galerie-Section dehnt sich 24px nach rechts aus (damit die
-         Galerie-Scrollbar mit der Body-Scrollbar fluchtet). Die
-         Galerie-Inhalte (Zellen + Serpentine) sollen aber innerhalb
-         des normalen Content-Bereichs bleiben, symmetrisch zwischen
-         Sidebar und rechtem Rand – analog zur Filter-Bar oben.
-         Der Serpentine-Bogen (sideOffset 140px) muss vollstaendig
-         sichtbar bleiben, daher KEIN overflow-x: clip — die Zellen
-         sind so positioniert, dass Zelle + 140px Bogen + 24px
-         Padding innerhalb des Bildschirmrands sitzen (siehe
-         margin-right unten). */
+      /* Galerie-Box (Cells + Bogen-Reserve) sitzt symmetrisch zwischen
+         Sidebar und Bildschirmrand. Sidebar-Gap = Bogen-Gap = 131px.
+         - Links: 24px Section-Padding + 107px Inner-Padding = 131px
+         - Rechts: 188px Inner-Padding - 57px (Section-Overflow -24 + Bogen-Reserve 33) = 131px
+         Bogen läuft visuell 33px über die Cells hinaus (siehe
+         updateSerpentinePath: Pfad endet am letzten Zellen-Dot + minimaler
+         Anschluss, sideOffset 140px gilt nur zwischen den Zeilen). */
       width: 100%;
-      /* Cells sitzen links innerhalb von .vd-gal-rows-inner und
-         lassen rechts Platz fuer den Serpentine-Bogen (140px
-         sideOffset) plus 2x Sicherheits-Padding (24px Scrollbar-
-         Bereich + 24px optischer Abstand zum Bildschirmrand).
-         Der Bogen wird visuell nicht abgeschnitten. */
+      padding-left: 107px;
       padding-right: calc(var(--preview-serpentine-side-offset, 140px) + var(--space-6, 24px) * 2);
       box-sizing: border-box;
       z-index: 10;
