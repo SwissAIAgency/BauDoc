@@ -20,6 +20,7 @@
 | Dokument | Pfad | Status | Inhalt |
 |---|---|---|---|
 | Systemarchitektur | `docs/architecture/overview.md` | APPROVED | Laravel + Vue + PostgreSQL, Systemübersicht, Datenflüsse |
+| OpenAPI-Spec | `docs/architecture/openapi.yaml` | APPROVED | API-Endpunkte, Schemas, Fehlerformate (Skeleton, ab BD-004 finalisieren) |
 | API-Verträge | `docs/technical/api-contracts.md` | DRAFT | Request/Response-Formate |
 | Datenbankmodell | `docs/technical/database-model.md` | DRAFT | Entity-Beziehungen |
 
@@ -29,6 +30,7 @@
 |---|---|---|---|
 | Entwicklungsplan | `docs/technical/development-plan.md` | APPROVED | BD-001..BD-015, Akzeptanzkriterien, Agents |
 | Code-Konventionen | `docs/development/code-conventions.md` | APPROVED | Naming, Struktur, Kommentar-Standards, Git |
+| CI/CD-Pipeline | `docs/technical/ci-cd.md` | APPROVED | GitHub Actions, Staging/Prod-Deploy, Workflow (ab BD-014) |
 | Deployment | `docs/technical/deployment.md` | DRAFT | Lokale Umgebung, Produktions-Deployment |
 
 ## Design & UI/UX
@@ -38,10 +40,11 @@
 | Prototype-Spec (SSoT) | `PROTOTYP.md` (Root) | APPROVED | HTML-Prototyp Single Source of Truth (847 Zeilen) |
 | Prototype-Übersicht | `docs/design/prototype-spec.md` | APPROVED | Redirect → PROTOTYP.md + Kurzreferenz |
 | UI-Standards (produktiv) | `docs/design/system.md` | APPROVED | UI-Regeln, Farben, Typografie, Formatierung ab BD-005 |
+| Vue-Komponenten-Konventionen | `docs/design/vue-components.md` | APPROVED | Struktur, Naming, Props, Emits, Stores, CSS (ab BD-005) |
 | Design-Tokens (operativ) | `frontend/prototypes/DESIGN.md` | APPROVED | CSS-Variablen, Token-System |
 | Komponenten-Manifest | `frontend/prototypes/COMPONENTS.md` | APPROVED | Komponenten, Status (LIVE/EXPERIMENT/READ-ONLY/FROZEN) |
 | Modal-Definitionen | `frontend/prototypes/MODALS.md` | APPROVED | 4 Modal-Typen + Flows |
-| Barrierefreiheit | `docs/ux/accessibility.md` | DRAFT | WCAG-Anforderungen |
+| Barrierefreiheit | `docs/ux/accessibility.md` | DRAFT | WCAG-Anforderungen (Kurzfassung) |
 | Design-System (ux) | `docs/ux/design-system.md` | DRAFT | Token-System, Komponenten-Hierarchie |
 
 ### UX-Konzepte
@@ -58,6 +61,7 @@
 | Dokument | Pfad | Status | Inhalt |
 |---|---|---|---|
 | Teststrategie | `docs/testing/strategy.md` | APPROVED | Testarten, Merge-/Release-Checklisten, Testdaten-Regeln |
+| Accessibility-Audit | `docs/testing/accessibility.md` | APPROVED | WCAG-Audit-Prozess, Prüfpunkte, Bericht-Vorlage (ab BD-013) |
 
 ## Sicherheit
 
@@ -90,6 +94,7 @@
 | ADR-0002 | `DECISIONS/0002-architecture-baseline.md` | Architektur-Baseline | ACCEPTED |
 | ADR-0003 | `DECISIONS/0003-database-model.md` | Datenbank-Modell | ACCEPTED |
 | ADR-0004 | `DECISIONS/0004-technology-stack.md` | Technology-Stack | ACCEPTED |
+| ADR-0005 | `DECISIONS/0005-component-documentation.md` | Komponentendokumentation (Storybook vs. Manifest) | ACCEPTED |
 
 ---
 
