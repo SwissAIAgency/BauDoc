@@ -3971,7 +3971,7 @@
       position: relative;
       display: grid;
       gap: 32px;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(var(--gal-per-row, 6), 1fr);
     }
     @media (max-width: 1100px) {
       .vd-gal-rows { padding: 0 40px; }
@@ -8672,6 +8672,12 @@
       collapseBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
       collapseBtn.setAttribute('aria-label', collapsed ? 'Sidebar ausklappen' : 'Sidebar einklappen');
       collapseBtn.setAttribute('title', collapsed ? 'Sidebar ausklappen' : 'Sidebar einklappen');
+      // CSS-Transition dauert 240ms — danach neu prüfen ob mehr/weniger Spalten passen.
+      setTimeout(() => {
+        const newPerRow = calcGalPerRow();
+        if (newPerRow !== _galPerRow) renderGalerie();
+        else requestAnimationFrame(() => requestAnimationFrame(() => updateSerpentinePath(false)));
+      }, 260);
     });
   }
 
@@ -9315,14 +9321,19 @@
       });
     });
   }
-  // Zeilen-Aufteilung: 6 Bilder pro Zeile, alle Zeilen L→R.
-  // Galerie-v2 Pattern: 6 pro Zeile, Serpentine-Connector zwischen den
-  // Zeilen (siehe updateSerpentinePath()) – Bogen am rechten Zeilenende
-  // nach unten zum Anfang der naechsten Zeile.
-  const SLOTS_PER_ROW = 6;
-  const PHOTOS_PER_ROW = 6;
+  // Bilder pro Zeile: dynamisch je nach verfügbarer Container-Breite.
+  // Berechnung: (usable + gap) / (cellMin + gap), geklammert auf 4–9.
+  // Wird bei renderGalerie(), Sidebar-Toggle und Window-Resize neu ermittelt.
+  let _galPerRow = 6;
+  function calcGalPerRow() {
+    const container = document.getElementById('vd-gal-rows');
+    if (!container) return _galPerRow;
+    const usable = container.clientWidth - 160; // 2×80px padding
+    const n = Math.floor((usable + 32) / (140 + 32)); // cellMin=140, gap=32
+    return Math.max(4, Math.min(9, n));
+  }
   function galRows(list, perRow) {
-    perRow = perRow || PHOTOS_PER_ROW;
+    perRow = perRow || _galPerRow;
     const rows = [];
     for (let i = 0; i < list.length; i += perRow) {
       const chunk    = list.slice(i, i + perRow);
@@ -9333,10 +9344,10 @@
       if (isOdd) {
         // Ungerade Zeile R→L: Chunk umkehren, leere Slots LINKS auffüllen
         slots = chunk.slice().reverse();
-        while (slots.length < SLOTS_PER_ROW) slots.unshift(null);
+        while (slots.length < perRow) slots.unshift(null);
       } else {
         slots = chunk.slice();
-        if (!isLast) while (slots.length < SLOTS_PER_ROW) slots.push(null);
+        if (!isLast) while (slots.length < perRow) slots.push(null);
       }
       rows.push({ slots, isOdd, isLast });
     }
@@ -9345,11 +9356,13 @@
   function renderGalerie() {
     const root = document.getElementById('vd-gal-rows');
     if (!root) return;
+    _galPerRow = calcGalPerRow();
+    root.style.setProperty('--gal-per-row', _galPerRow);
     const filtered = galSorted([...MEDIA, ...GAL_DEMO].filter(galMatches));
     if (!filtered.length) {
       root.innerHTML = '<div class="vd-empty"><div class="vd-empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div><div class="vd-empty-title">Keine Treffer</div><div class="vd-empty-sub">Passe die Filter oder den Suchbegriff an, um mehr Medien zu sehen.</div></div>';
     } else {
-      const rows = galRows(filtered, PHOTOS_PER_ROW);
+      const rows = galRows(filtered, _galPerRow);
       // Galerie-v2 Pattern: SVG-Overlay + Cells ohne separaten Timeline-Strip.
       // Die Serpentine-Linie wird per JS aus den Dot-Positionen berechnet.
       root.innerHTML = `
@@ -9450,7 +9463,11 @@
   window.addEventListener('resize', () => {
     if (_galResizeRAF) cancelAnimationFrame(_galResizeRAF);
     _galResizeRAF = requestAnimationFrame(() => {
-      _galResizeRAF = requestAnimationFrame(updateSerpentinePath);
+      _galResizeRAF = requestAnimationFrame(() => {
+        const newPerRow = calcGalPerRow();
+        if (newPerRow !== _galPerRow) renderGalerie();
+        else updateSerpentinePath(false);
+      });
     });
   });
 
