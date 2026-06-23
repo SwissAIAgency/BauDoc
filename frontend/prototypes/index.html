@@ -4696,6 +4696,63 @@
         scroll-behavior: auto !important;
       }
     }
+
+    /* ============================================================
+       FINALER MOBILE-OVERRIDE-BLOCK (≤ 900px)
+       ------------------------------------------------------------
+       Bewusst ganz am Ende: gewinnt per Quell-Reihenfolge gegen
+       Basis-Regeln, die weiter oben stehen (z.B. .vd-settings-layout
+       wurde sonst von ihrer später definierten 2-Spalten-Basis
+       überschrieben → Content auf 134px gequetscht). Hier werden alle
+       Screen-Layouts verbindlich auf einspaltig/mobil gestellt.
+       ============================================================ */
+    @media (max-width: 900px) {
+
+      /* ---- EINSTELLUNG: Subnav nach oben (horizontal), Content voll ---- */
+      .vd-settings-layout {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+      }
+      .vd-settings-subnav {
+        position: static;
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 6px;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .vd-settings-subnav::-webkit-scrollbar { display: none; }
+      .vd-settings-subnav > * { flex-shrink: 0; white-space: nowrap; }
+      .vd-settings-content { width: 100%; min-width: 0; }
+
+      /* ---- ARCHIV: Stats 2-spaltig, Tabelle horizontal scrollbar ---- */
+      .vd-archiv-stats { grid-template-columns: repeat(2, 1fr); }
+      .vd-archiv-callout-grid { grid-template-columns: 1fr; }
+      /* Tabelle: bei Bedarf horizontal scrollen statt Spalten zu zerquetschen */
+      .vd-archiv-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+      }
+      .vd-archiv-head,
+      .vd-archiv-row { min-width: 520px; }
+
+      /* ---- Generische Grids, die einspaltig werden sollen ---- */
+      .vd-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .vd-dash-row-3 { grid-template-columns: 1fr; }
+      .vd-archiv-grid { grid-template-columns: 1fr; }
+      .vd-ex-format-grid { grid-template-columns: 1fr; }
+
+      /* ---- GALERIE: Mobile-Ränder klein, Scrollbar-Hack neutralisiert ---- */
+      :root { --gal-curve-pad: 14px; }
+      body[data-active-screen="galerie"] .vd-screen[data-screen="galerie"] {
+        width: 100%;
+        max-width: 100%;
+        margin-right: 0;
+        overflow-x: hidden;
+      }
+    }
   </style>
 </head>
 <body data-active-screen="dashboard">
