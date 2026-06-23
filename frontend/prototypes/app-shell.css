@@ -1670,51 +1670,83 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ============================================================
+   MOBILE BOTTOM-NAVIGATION (≤ 900px)
+   ------------------------------------------------------------
+   Auf Touch-Geräten ersetzt eine fixe Bottom-Tab-Bar die Sidebar
+   komplett (kein Drawer mehr). 5 Tabs: Dashboard, Projekte,
+   Galerie, Archiv, Profil. Aktiv-Status via switchScreen().
+   ============================================================ */
+
+/* Höhe der Bar (ohne Safe-Area). Reservierter Platz unten =
+   --bottomnav-height + env(safe-area-inset-bottom). */
+:root { --bottomnav-height: 58px; }
+
+/* Standard (Desktop): Bar versteckt */
+.vd-bottomnav { display: none; }
+
 @media (max-width: 900px) {
-  /* Hamburger einblenden */
-  .vd-hamburger { display: inline-flex; }
+  /* Sidebar + Drawer-Reste komplett aus dem Spiel nehmen */
+  .vd-sidebar,
+  .vd-sidebar-overlay,
+  .vd-hamburger,
+  .vd-sidebar-toggle-wrap { display: none !important; }
 
-  /* Sidebar: aus dem Fluss nehmen, links fixiert */
-  .vd-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: var(--sidebar-width);
-    z-index: 50;
-    transform: translateX(-100%);
-    transition: var(--drawer-transition);
-    /* Safe-Area links berücksichtigen (Landscape iPhone) */
-    padding-left: var(--safe-left);
-    /* Sidebar-Height = voller Viewport incl. Notch-Bereich oben */
-    height: 100dvh;
-  }
-
-  /* Overlay aktiv */
-  .vd-sidebar-open .vd-sidebar-overlay {
-    display: block;
-    opacity: 1;
-  }
-
-  /* Drawer geöffnet */
-  .vd-sidebar-open .vd-sidebar {
-    transform: translateX(0);
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.40);
-  }
-
-  /* Toggle-Button auf Mobile ausblenden (Hamburger übernimmt) */
-  .vd-sidebar-toggle-wrap { display: none; }
-
-  /* App-Body nimmt volle Breite — Sidebar ist nicht mehr im Fluss */
+  /* App-Body nimmt volle Breite */
   .vd-app-body { flex: 1; }
 
-  /* Collapsed-Klasse auf Mobile ignorieren (Drawer = kein Icon-Only-Modus) */
-  .vd-app-sidebar-collapsed .vd-sidebar {
-    width: var(--sidebar-width);
-    transform: translateX(-100%);
+  /* Bottom-Nav einblenden */
+  .vd-bottomnav {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    height: calc(var(--bottomnav-height) + var(--safe-bottom));
+    padding-bottom: var(--safe-bottom);  /* iPhone Home-Indicator */
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border-subtle);
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.18);
   }
-  .vd-app-sidebar-collapsed.vd-sidebar-open .vd-sidebar {
-    transform: translateX(0);
+
+  .vd-bottomnav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-width: 0;
+    text-decoration: none;
+    color: var(--text-low);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 120ms ease;
+  }
+  .vd-bottomnav-item svg {
+    width: 23px;
+    height: 23px;
+    pointer-events: none;
+  }
+  .vd-bottomnav-item span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    white-space: nowrap;
+  }
+  .vd-bottomnav-item:active { color: var(--text-mid); }
+  .vd-bottomnav-item--active { color: var(--color-primary); }
+
+  /* Content-Bereiche brauchen Platz unten, damit nichts hinter der
+     Bar verschwindet (alle scrollbaren Screen-Container). */
+  .vd-app-scroll,
+  .vd-gal-rows,
+  .vd-workspace-scroll {
+    padding-bottom: calc(var(--bottomnav-height) + var(--safe-bottom) + var(--space-4)) !important;
   }
 }
 
