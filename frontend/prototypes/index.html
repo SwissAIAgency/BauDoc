@@ -2,7 +2,7 @@
 <html lang="de-CH" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>VisiDoc – App-Shell Showcase</title>
   <meta name="description" content="VisiDoc Frontend-Showcase: Dashboard, Projekte, Projektansicht (Pläne + Galerie), Galerie, Archiv, Einstellung/Profil. Dark + Light.">
   <link rel="stylesheet" href="app-shell.css">
@@ -296,9 +296,9 @@
       overflow-x: hidden;
     }
 
-    /* Mobile: Sidebar einklappen-Default */
+    /* Mobile: Sidebar ist position:fixed als Drawer — kein Grid-Platz reservieren */
     @media (max-width: 900px) {
-      .vd-app { grid-template-columns: var(--sidebar-width-collapsed, 64px) 1fr !important; }
+      .vd-app { grid-template-columns: 1fr !important; }
     }
 
     .vd-screen {
@@ -1216,74 +1216,6 @@
       background: var(--bg-panel);
       color: var(--text-high);
     }
-
-    /* Demo-Picker Popover — position:fixed damit overflow-x:hidden der Eltern-
-       Container nicht clippt. Koordinaten werden per JS beim Öffnen gesetzt. */
-    .vd-gal-demo-picker {
-      position: fixed;
-      z-index: 9000;
-      width: 192px;
-      background: var(--bg-panel);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-default);
-      box-shadow: 0 8px 24px rgba(0,0,0,.35);
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .vd-gal-demo-picker-label {
-      font-size: 10.5px;
-      font-weight: 600;
-      color: var(--text-low);
-      text-transform: uppercase;
-      letter-spacing: .04em;
-    }
-    .vd-gal-demo-picker-btns {
-      display: flex;
-      gap: 4px;
-      flex-wrap: wrap;
-    }
-    .vd-gal-demo-picker-btns button {
-      flex: 1 1 auto;
-      height: 28px;
-      padding: 0 6px;
-      background: var(--bg-raised);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-small);
-      color: var(--text-high);
-      font-size: 11.5px;
-      font-weight: 500;
-      cursor: pointer;
-      font: inherit;
-    }
-    .vd-gal-demo-picker-btns button:hover { background: var(--bg-hover); }
-    .vd-gal-demo-clear {
-      height: 26px;
-      padding: 0 8px;
-      background: transparent;
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-small);
-      color: var(--text-low);
-      font-size: 11px;
-      cursor: pointer;
-      font: inherit;
-      text-align: center;
-    }
-    .vd-gal-demo-clear:hover { color: var(--text-high); border-color: var(--text-low); }
-
-    /* Zell-Einblend-Animation (neue Demo-Items) */
-    @keyframes vdGalCellIn {
-      from { opacity: 0; transform: scale(0.96); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-    .vd-gal-cell--new {
-      animation: vdGalCellIn 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .vd-gal-cell--new { animation: none; }
-    }
-
     .vd-proj-iconbtn {
       width: 28px;
       height: 28px;
@@ -3801,7 +3733,7 @@
       width: 100%;
       max-width: 1400px;
       margin: 0 auto;
-      padding: 0 80px;
+      padding: 0 clamp(16px, 5vw, 80px);
       /* Galerie-eigener Scroll-Container – scrollt intern, weil
          Galerie-Section im aktuellen DOM nicht im Body-Scroll
          haengt (direktes Grid-Item des App-Body). */
@@ -3971,7 +3903,7 @@
       position: relative;
       display: grid;
       gap: 32px;
-      grid-template-columns: repeat(var(--gal-per-row, 6), 1fr);
+      grid-template-columns: repeat(6, 1fr);
     }
     @media (max-width: 1100px) {
       .vd-gal-rows { padding: 0 40px; }
@@ -4138,11 +4070,6 @@
         0 0 0 var(--preview-dot-ring-width) var(--preview-dot-ring-color),
         0 0 0 calc(var(--preview-dot-ring-width) * 3) var(--preview-dot-color);
     }
-    /* CSS-Dot unsichtbar — SVG-Kreis (.vd-gal-path-node) ist das sichtbare Element.
-       Element bleibt im Layout für getBoundingClientRect(); Klicks passieren durch
-       den SVG-Overlay (pointer-events: none) hindurch auf diesen Dot. */
-    .vd-gal-stamp-dot,
-    .vd-gal-stamp-dot--active { opacity: 0; }
     .vd-gal-cell-empty {
       aspect-ratio: var(--preview-image-aspect-ratio);
       border: 2px solid #ffffff;
@@ -4559,10 +4486,13 @@
 </head>
 <body data-active-screen="dashboard">
   <div class="vd-app">
+    <!-- Overlay für Mobile-Drawer (schließt Sidebar bei Klick) -->
+    <div class="vd-sidebar-overlay" id="vd-sidebar-overlay" aria-hidden="true"></div>
+
     <!-- ============================================================
          SIDEBAR (VisiDoc)
          ============================================================ -->
-    <aside class="vd-sidebar" aria-label="Hauptnavigation">
+    <aside class="vd-sidebar" id="vd-sidebar" aria-label="Hauptnavigation">
       <a class="vd-sidebar-brand" href="#" data-nav="dashboard" aria-label="VisiDoc – Startseite">
         <img class="vd-sidebar-brand-img vd-sidebar-brand-img--full" src="visidoc-logo.png" alt="VisiDoc" width="509" height="160">
         <img class="vd-sidebar-brand-img vd-sidebar-brand-img--mark" src="visidoc-mark.png" alt="" width="398" height="227" aria-hidden="true">
@@ -4638,6 +4568,17 @@
     <div class="vd-app-body">
       <!-- TOPBAR -->
       <header class="vd-topbar" role="banner">
+        <!-- Hamburger: nur auf Mobile (≤900px) sichtbar, CSS-gesteuert -->
+        <button class="vd-hamburger" type="button" id="vd-hamburger"
+                aria-label="Navigation öffnen" aria-expanded="false"
+                aria-controls="vd-sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="4" y1="6" x2="20" y2="6"/>
+            <line x1="4" y1="12" x2="20" y2="12"/>
+            <line x1="4" y1="18" x2="20" y2="18"/>
+          </svg>
+        </button>
         <div class="vd-topbar-titles">
           <span class="vd-topbar-title" id="vd-topbar-title">Dashboard</span>
           <span class="vd-topbar-subtitle" id="vd-topbar-subtitle" aria-live="polite"></span>
@@ -5648,25 +5589,6 @@
                   </svg>
                   <span data-bind="gal-sort-label">Neueste</span>
                 </button>
-              </div>
-              <div class="vd-proj-toolgrp vd-gal-demo-wrap" role="group" aria-label="Demo-Bilder">
-                <button type="button" data-action="gal-demo-toggle" aria-label="Demo-Bilder laden" title="Demo-Bilder laden">
-                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-                  </svg>
-                  <span>Demo</span>
-                </button>
-                <div class="vd-gal-demo-picker" id="gal-demo-picker" hidden role="menu" aria-label="Anzahl Demo-Bilder wählen">
-                  <span class="vd-gal-demo-picker-label">Demo-Bilder laden</span>
-                  <div class="vd-gal-demo-picker-btns">
-                    <button type="button" data-demo-n="6">6</button>
-                    <button type="button" data-demo-n="12">12</button>
-                    <button type="button" data-demo-n="18">18</button>
-                    <button type="button" data-demo-n="24">24</button>
-                    <button type="button" data-demo-n="36">36</button>
-                  </div>
-                  <button type="button" class="vd-gal-demo-clear" data-demo-n="0">Leeren</button>
-                </div>
               </div>
             </div>
           </div>
@@ -8672,14 +8594,81 @@
       collapseBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
       collapseBtn.setAttribute('aria-label', collapsed ? 'Sidebar ausklappen' : 'Sidebar einklappen');
       collapseBtn.setAttribute('title', collapsed ? 'Sidebar ausklappen' : 'Sidebar einklappen');
-      // CSS-Transition dauert 240ms — danach neu prüfen ob mehr/weniger Spalten passen.
-      setTimeout(() => {
-        const newPerRow = calcGalPerRow();
-        if (newPerRow !== _galPerRow) renderGalerie();
-        else requestAnimationFrame(() => requestAnimationFrame(() => updateSerpentinePath(false)));
-      }, 260);
     });
   }
+
+  // ============================================================
+  // MOBILE SIDEBAR DRAWER (≤ 900px)
+  // Hamburger öffnet Sidebar als Overlay-Drawer. Overlay-Klick,
+  // Escape-Taste und Resize über 900px schliessen ihn wieder.
+  // ============================================================
+  (function () {
+    const hamburger = document.getElementById('vd-hamburger');
+    const overlay   = document.getElementById('vd-sidebar-overlay');
+    const sidebar   = document.getElementById('vd-sidebar');
+
+    function openDrawer() {
+      document.body.classList.add('vd-sidebar-open');
+      if (hamburger) {
+        hamburger.setAttribute('aria-expanded', 'true');
+        hamburger.setAttribute('aria-label', 'Navigation schliessen');
+      }
+      // Fokus in die Sidebar setzen (Accessibility)
+      if (sidebar) {
+        const first = sidebar.querySelector('a, button, [tabindex="0"]');
+        if (first) first.focus();
+      }
+    }
+
+    function closeDrawer() {
+      document.body.classList.remove('vd-sidebar-open');
+      if (hamburger) {
+        hamburger.setAttribute('aria-expanded', 'false');
+        hamburger.setAttribute('aria-label', 'Navigation öffnen');
+        hamburger.focus();
+      }
+    }
+
+    if (hamburger) {
+      hamburger.addEventListener('click', () => {
+        document.body.classList.contains('vd-sidebar-open') ? closeDrawer() : openDrawer();
+      });
+    }
+
+    if (overlay) overlay.addEventListener('click', closeDrawer);
+
+    // Escape-Taste schliesst Drawer
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.body.classList.contains('vd-sidebar-open')) {
+        closeDrawer();
+      }
+    });
+
+    // Focus-Trap: Tab bleibt innerhalb der Sidebar solange Drawer offen
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+      if (!document.body.classList.contains('vd-sidebar-open')) return;
+      if (!sidebar) return;
+      const focusable = Array.from(
+        sidebar.querySelectorAll('a, button, input, [tabindex="0"]')
+      ).filter(el => !el.disabled && el.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last  = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    });
+
+    // Drawer automatisch schliessen wenn Viewport auf Desktop-Breite wächst
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 900) closeDrawer();
+    }, { passive: true });
+  })();
 
   // ============================================================
   // ROUTING (Sidebar-Navigation)
@@ -9091,9 +9080,6 @@
     tags: 'Alle',
     sort: 'neueste',       // neueste | aelteste | name
   };
-  let GAL_DEMO    = [];        // dynamisch per Demo-Button geladen
-  let _galPathD   = '';        // vorheriger Pfad-String (für Dashoffset-Animation)
-  let _galNewIds  = new Set(); // IDs von gerade hinzugefügten Zellen (Fade-in)
   function galMatches(m) {
     if (GAL.typ !== 'Alle') {
       const want = GAL.typ === 'Foto' ? 'photo' : GAL.typ === 'Plan' ? 'plan' : 'video';
@@ -9151,9 +9137,6 @@
     let thumbStyle = '';
     if (m.type === 'photo' && m.src) {
       thumbStyle = ` style="background-image: url('${m.src}');"`;
-    } else if (m.type === 'photo' && m.bg) {
-      thumbStyle = ` style="background: ${m.bg};"`;
-      if (m.label) thumbInner = `<div class="vd-gal-cell-thumb-label">${m.label}</div>`;
     } else if (m.type === 'plan') {
       thumbInner =
         '<div class="vd-gal-cell-thumb-icon" aria-hidden="true">' +
@@ -9167,9 +9150,8 @@
         (m.duration ? '<div class="vd-gal-cell-thumb-duration">' + m.duration + '</div>' : '');
     }
 
-    const newCls = _galNewIds.has(m.id) ? ' vd-gal-cell--new' : '';
     return `
-      <div class="vd-gal-cell vd-gal-cell--${m.type}${newCls}" data-media-id="${m.id}" data-type="${m.type}" data-date="${m.date}" title="${m.name || ''}">
+      <div class="vd-gal-cell vd-gal-cell--${m.type}" data-media-id="${m.id}" data-type="${m.type}" data-date="${m.date}" title="${m.name || ''}">
         <div class="vd-gal-cell-thumb" role="img" aria-label="${m.name || 'Baustellen-Medium ' + m.id}"${thumbStyle}>
           ${thumbInner}
         </div>
@@ -9192,7 +9174,7 @@
      - Iteration ungerade (i % 2 === 1): U-Turn-Bogen nach rechts aussen,
        runter und nach links innen zum Anfang der naechsten Zeile.
      ============================================================ */
-  function updateSerpentinePath(animate) {
+  function updateSerpentinePath() {
     const svg = document.getElementById('vd-gal-serpentine-svg');
     const path = document.getElementById('vd-gal-serpentine-path');
     const container = svg ? svg.parentElement : null;
@@ -9200,53 +9182,46 @@
     const innerRows = Array.from(container.querySelectorAll('.vd-gal-row'));
     if (!innerRows.length) {
       path.setAttribute('d', '');
-      _galPathD = '';
       return;
     }
     const containerRect = container.getBoundingClientRect();
 
-    // Pro Zeile: gemeinsamen Y-Basiswert (Durchschnitt aller Dots) berechnen.
-    // Verhindert Sub-Pixel-Drift → alle Kreise sitzen exakt auf der Linie.
+    function dotPos(rowEl, childIdx) {
+      const cell = rowEl.children[childIdx];
+      const dot = cell ? cell.querySelector('.vd-gal-stamp-dot') : null;
+      if (!dot) return null;
+      const r = dot.getBoundingClientRect();
+      return {
+        x: r.left - containerRect.left + r.width / 2,
+        y: r.top - containerRect.top + r.height / 2,
+      };
+    }
+
+    // pathPoints: pro Zeile zwei Punkte (Start, Ende in Lese-Richtung).
+    // Galerie-v2 Boustrophedon-Pattern: gerade Zeilen (idx % 2 === 0)
+    // lesen L→R, ungerade Zeilen R→L. Die Bilder selbst bleiben im HTML
+    // L→R angeordnet – nur der Pfad "schlaengelt" sich durch sie.
     const pathPoints = [];
     innerRows.forEach((row, rowIndex) => {
       const cells = Array.from(row.children).filter(c => !c.classList.contains('vd-gal-cell--empty'));
       if (!cells.length) return;
-
-      let sumY = 0, nY = 0;
-      cells.forEach(cell => {
-        const dot = cell.querySelector('.vd-gal-stamp-dot');
-        if (!dot) return;
-        const r = dot.getBoundingClientRect();
-        sumY += r.top - containerRect.top + r.height / 2;
-        nY++;
-      });
-      const rowY = nY > 0 ? Math.round((sumY / nY) * 10) / 10 : 0;
-      row._rowY = rowY;
-
-      const getX = (idx) => {
-        const cell = row.children[idx];
-        const dot  = cell ? cell.querySelector('.vd-gal-stamp-dot') : null;
-        if (!dot) return 0;
-        const r = dot.getBoundingClientRect();
-        return r.left - containerRect.left + r.width / 2;
-      };
-
-      const firstIdx = Array.from(row.children).indexOf(cells[0]);
-      const lastIdx  = Array.from(row.children).indexOf(cells[cells.length - 1]);
-
+      const firstCellIdx = Array.from(row.children).indexOf(cells[0]);
+      const lastCellIdx = Array.from(row.children).indexOf(cells[cells.length - 1]);
       if (rowIndex % 2 === 0) {
-        pathPoints.push({ x: getX(firstIdx), y: rowY });
-        pathPoints.push({ x: getX(lastIdx),  y: rowY });
+        pathPoints.push(dotPos(row, firstCellIdx));
+        pathPoints.push(dotPos(row, lastCellIdx));
       } else {
-        pathPoints.push({ x: getX(lastIdx),  y: rowY });
-        pathPoints.push({ x: getX(firstIdx), y: rowY });
+        pathPoints.push(dotPos(row, lastCellIdx));
+        pathPoints.push(dotPos(row, firstCellIdx));
       }
     });
     if (pathPoints.length < 2) return;
 
+    // sideOffset & radius aus den Spec-Variablen ziehen.
     const css = getComputedStyle(document.documentElement);
     const sideOffset = parseFloat(css.getPropertyValue('--preview-serpentine-side-offset')) || 140;
     const radius = parseFloat(css.getPropertyValue('--preview-serpentine-curve-radius')) || 75;
+    // SVG-Hoehe so setzen, dass die absteigenden Schwaenge reinpassen.
     const lastRow = innerRows[innerRows.length - 1];
     const lastRect = lastRow.getBoundingClientRect();
     const neededHeight = (lastRect.bottom - containerRect.top) + sideOffset + 200;
@@ -9259,8 +9234,12 @@
       const curr = pathPoints[i];
       const next = pathPoints[i + 1];
       if (i % 2 === 0) {
+        // Horizontal innerhalb der Zeile: direkte Linie zum naechsten Punkt.
         d += ` L ${next.x} ${next.y}`;
       } else {
+        // U-Turn-Bogen zwischen den Zeilen (galerie-v2 Viertelkreis-Pattern).
+        // Bogen rechts wenn i % 4 === 1, sonst links. Damit entsteht das
+        // Boustrophedon-Schlangenmuster: rechts-rechts-links-links-...
         const isRight = (i % 4 === 1);
         if (isRight) {
           d += ` L ${curr.x + (sideOffset - radius)} ${curr.y}`;
@@ -9276,93 +9255,57 @@
         d += ` L ${next.x} ${next.y}`;
       }
     }
-
-    const changed = d !== _galPathD;
-    _galPathD = d;
     path.setAttribute('d', d);
 
-    // Stroke-Dashoffset-Animation beim ersten Render oder Pfad-Änderung
-    if (changed && animate && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      const len = path.getTotalLength();
-      path.style.transition       = 'none';
-      path.style.strokeDasharray  = len;
-      path.style.strokeDashoffset = len;
-      void path.getBoundingClientRect();
-      path.style.transition       = 'stroke-dashoffset 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-      path.style.strokeDashoffset = '0';
-      setTimeout(() => {
-        path.style.strokeDasharray  = '';
-        path.style.strokeDashoffset = '';
-        path.style.transition       = '';
-      }, 630);
-    } else if (!animate) {
-      path.style.strokeDasharray  = '';
-      path.style.strokeDashoffset = '';
-      path.style.transition       = '';
-    }
-
-    // Path-Node-Kreise: alle Zellen einer Zeile teilen denselben Y (row._rowY)
+    // Path-Node-Kreise an jedem Marker rendern (galerie-v2 Pattern):
+    // kleine Salwei-Kreise, durch die die Linie laeuft.
     svg.querySelectorAll('.vd-gal-path-node').forEach(n => n.remove());
     const SVG_NS = 'http://www.w3.org/2000/svg';
     innerRows.forEach((row) => {
-      const rowY = row._rowY || 0;
       Array.from(row.children).forEach((cell) => {
         if (cell.classList.contains('vd-gal-cell--empty')) return;
         const dot = cell.querySelector('.vd-gal-stamp-dot');
         if (!dot) return;
         const r = dot.getBoundingClientRect();
         const cx = r.left - containerRect.left + r.width / 2;
+        const cy = r.top - containerRect.top + r.height / 2;
         const circle = document.createElementNS(SVG_NS, 'circle');
         circle.setAttribute('cx', cx);
-        circle.setAttribute('cy', rowY);
+        circle.setAttribute('cy', cy);
         circle.setAttribute('r', '5');
         circle.setAttribute('class', 'vd-gal-path-node');
         svg.appendChild(circle);
       });
     });
   }
-  // Bilder pro Zeile: dynamisch je nach verfügbarer Container-Breite.
-  // Berechnung: (usable + gap) / (cellMin + gap), geklammert auf 4–9.
-  // Wird bei renderGalerie(), Sidebar-Toggle und Window-Resize neu ermittelt.
-  let _galPerRow = 6;
-  function calcGalPerRow() {
-    const container = document.getElementById('vd-gal-rows');
-    if (!container) return _galPerRow;
-    const usable = container.clientWidth - 160; // 2×80px padding
-    const n = Math.floor((usable + 32) / (140 + 32)); // cellMin=140, gap=32
-    return Math.max(4, Math.min(9, n));
-  }
+  // Zeilen-Aufteilung: 6 Bilder pro Zeile, alle Zeilen L→R.
+  // Galerie-v2 Pattern: 6 pro Zeile, Serpentine-Connector zwischen den
+  // Zeilen (siehe updateSerpentinePath()) – Bogen am rechten Zeilenende
+  // nach unten zum Anfang der naechsten Zeile.
+  const SLOTS_PER_ROW = 6;
+  const PHOTOS_PER_ROW = 6;
   function galRows(list, perRow) {
-    perRow = perRow || _galPerRow;
+    perRow = perRow || PHOTOS_PER_ROW;
     const rows = [];
     for (let i = 0; i < list.length; i += perRow) {
-      const chunk    = list.slice(i, i + perRow);
-      const rowIndex = rows.length;
-      const isOdd    = rowIndex % 2 !== 0;
-      const isLast   = (i + perRow) >= list.length;
-      let slots;
-      if (isOdd) {
-        // Ungerade Zeile R→L: Chunk umkehren, leere Slots LINKS auffüllen
-        slots = chunk.slice().reverse();
-        while (slots.length < perRow) slots.unshift(null);
-      } else {
-        slots = chunk.slice();
-        if (!isLast) while (slots.length < perRow) slots.push(null);
+      const photos = list.slice(i, i + perRow);
+      const isLast = (i + perRow) >= list.length;
+      const slots = photos.slice();
+      if (!isLast) {
+        while (slots.length < SLOTS_PER_ROW) slots.push(null); // Empty
       }
-      rows.push({ slots, isOdd, isLast });
+      rows.push({ slots, isLast });
     }
     return rows;
   }
   function renderGalerie() {
     const root = document.getElementById('vd-gal-rows');
     if (!root) return;
-    _galPerRow = calcGalPerRow();
-    root.style.setProperty('--gal-per-row', _galPerRow);
-    const filtered = galSorted([...MEDIA, ...GAL_DEMO].filter(galMatches));
+    const filtered = galSorted(MEDIA.filter(galMatches));
     if (!filtered.length) {
       root.innerHTML = '<div class="vd-empty"><div class="vd-empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div><div class="vd-empty-title">Keine Treffer</div><div class="vd-empty-sub">Passe die Filter oder den Suchbegriff an, um mehr Medien zu sehen.</div></div>';
     } else {
-      const rows = galRows(filtered, _galPerRow);
+      const rows = galRows(filtered, PHOTOS_PER_ROW);
       // Galerie-v2 Pattern: SVG-Overlay + Cells ohne separaten Timeline-Strip.
       // Die Serpentine-Linie wird per JS aus den Dot-Positionen berechnet.
       root.innerHTML = `
@@ -9396,8 +9339,8 @@
           }).join('')}
         </div>
       `;
-      // Doppelter RAF: Layout vollständig committen, dann Pfad mit Animation berechnen
-      requestAnimationFrame(() => requestAnimationFrame(() => updateSerpentinePath(true)));
+      // Serpentine-Pfad nach Layout-Commit berechnen
+      requestAnimationFrame(updateSerpentinePath);
     }
     // Klick-Bindings: Foto -> Dot markieren
     root.querySelectorAll('.vd-gal-cell').forEach(el => {
@@ -9463,11 +9406,7 @@
   window.addEventListener('resize', () => {
     if (_galResizeRAF) cancelAnimationFrame(_galResizeRAF);
     _galResizeRAF = requestAnimationFrame(() => {
-      _galResizeRAF = requestAnimationFrame(() => {
-        const newPerRow = calcGalPerRow();
-        if (newPerRow !== _galPerRow) renderGalerie();
-        else updateSerpentinePath(false);
-      });
+      _galResizeRAF = requestAnimationFrame(updateSerpentinePath);
     });
   });
 
@@ -9524,85 +9463,6 @@
       renderGalerie();
     });
   }
-  // ── Demo-Bilder ──────────────────────────────────────────────────────
-  const _DEMO_GRADIENTS = [
-    'linear-gradient(135deg, #1c2b1c 0%, #2d4a2d 100%)',
-    'linear-gradient(135deg, #1c1c2b 0%, #2d2d4a 100%)',
-    'linear-gradient(135deg, #2b1c1c 0%, #4a2d2d 100%)',
-    'linear-gradient(135deg, #1c2b2b 0%, #2d4a4a 100%)',
-    'linear-gradient(135deg, #2b2b1c 0%, #4a4a2d 100%)',
-    'linear-gradient(135deg, #251a2e 0%, #3d2a4e 100%)',
-    'linear-gradient(135deg, #2b1a0e 0%, #4a3020 100%)',
-    'linear-gradient(150deg, #112211 0%, #334433 100%)',
-  ];
-  const _DEMO_LABELS = [
-    'Rohbau', 'Trockenbau', 'Sanitär', 'Elektro',
-    'Estrich', 'Putz', 'Fassade', 'Dämmung',
-  ];
-
-  function loadDemoItems(count) {
-    GAL_DEMO = [];
-    _galNewIds.clear();
-    if (count === 0) { renderGalerie(); return; }
-
-    const base = new Date(2026, 5, 22); // 22.06.2026
-    for (let i = 0; i < count; i++) {
-      const daysAgo = Math.round(i * (180 / Math.max(count - 1, 1)));
-      const d    = new Date(base.getTime() - daysAgo * 86400000);
-      const dd   = String(d.getDate()).padStart(2, '0');
-      const mm   = String(d.getMonth() + 1).padStart(2, '0');
-      const yyyy = d.getFullYear();
-      const hh   = String(8 + ((i * 3) % 10)).padStart(2, '0');
-      const min  = String((i * 7) % 60).padStart(2, '0');
-      const id   = 'demo-' + (i + 1);
-      GAL_DEMO.push({
-        id,
-        name:         'Demo-Foto ' + (i + 1),
-        type:         'photo',
-        src:          null,
-        bg:           _DEMO_GRADIENTS[i % _DEMO_GRADIENTS.length],
-        label:        _DEMO_LABELS[i % _DEMO_LABELS.length],
-        date:         dd + '.' + mm + '.' + yyyy,
-        time:         hh + ':' + min,
-        planposition: '',
-        creator:      '',
-        tags:         [],
-        code:         '',
-      });
-      _galNewIds.add(id);
-    }
-    renderGalerie();
-    setTimeout(() => _galNewIds.clear(), 400);
-  }
-
-  const _demoPicker = document.getElementById('gal-demo-picker');
-  const _demoToggle = document.querySelector('[data-action="gal-demo-toggle"]');
-  if (_demoToggle && _demoPicker) {
-    _demoToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (_demoPicker.hidden) {
-        const r = _demoToggle.getBoundingClientRect();
-        _demoPicker.style.top   = (r.bottom + 6) + 'px';
-        _demoPicker.style.right = (window.innerWidth - r.right) + 'px';
-        _demoPicker.style.left  = 'auto';
-        _demoPicker.hidden = false;
-      } else {
-        _demoPicker.hidden = true;
-      }
-    });
-    document.addEventListener('click', (e) => {
-      if (!_demoToggle.closest('.vd-gal-demo-wrap').contains(e.target)) {
-        _demoPicker.hidden = true;
-      }
-    });
-    _demoPicker.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-demo-n]');
-      if (!btn) return;
-      loadDemoItems(parseInt(btn.dataset.demoN, 10));
-      _demoPicker.hidden = true;
-    });
-  }
-
   // 248 Medien über 18 Monate gruppiert; Klick auf Thumbnail
   // springt im Grid zur entsprechenden Karte + selektiert sie.
   // ============================================================
