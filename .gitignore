@@ -42,3 +42,4 @@ skills/*/
 # Local files
 tmp/
 temp/
+.claude/
