@@ -87,8 +87,10 @@
   --preview-serpentine-stroke-opacity: 0.7;
   --preview-serpentine-stroke-linecap: round;
   --preview-serpentine-stroke-linejoin: round;
-  --preview-serpentine-curve-radius: 75px;
-  --preview-serpentine-side-offset: 140px;
+  --preview-serpentine-curve-radius: 32px;
+  --preview-serpentine-side-offset: 44px;
+  --gal-curve-pad: 48px;
+  --gal-cols: 6;
   --preview-serpentine-row-spacing: 66px;
   --preview-serpentine-drop-shadow: 0 0 6px rgba(102, 128, 72, 0.35);
 
