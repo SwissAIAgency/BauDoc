@@ -1,0 +1,22 @@
+# Vercel lädt standardmässig ALLES hoch (ignoriert .gitignore NICHT).
+# Hier explizit ausschliessen, was nicht zur statischen Site gehört.
+
+# 1.1 GB lokale Skills — nie deployen
+skills/
+
+# Doku, Specs, Backend, Tooling — nicht Teil der ausgelieferten Site
+docs/
+design-explorations/
+DECISIONS/
+prompts/
+scripts/
+security/
+database/
+backend/
+.claude/
+.agents/
+
+# Build-/VCS-Artefakte
+.git/
+node_modules/
+*.md

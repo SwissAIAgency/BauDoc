@@ -43,3 +43,9 @@ skills/*/
 tmp/
 temp/
 .claude/
+
+# Local Netlify folder
+.netlify
+
+# Vercel
+.vercel
