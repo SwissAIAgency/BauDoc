@@ -31,7 +31,7 @@
 | Dashboard         | 🔵 LIVE | Hero, KPI-Grid, 3-Spalten-Row (Aktivität / Projekte / Tipps) |
 | Projekte          | 🔵 LIVE | Toolbar mit Status-Segmenten + Projekt-Karten-Grid |
 | Projekt-Detail    | 🔵 LIVE | Sub-Topbar, Tabs-Bar, Filter-Sidebar, Workspace |
-| Galerie           | 🔵 LIVE | Filter-Card (Pills) + Galerie-Zeilen mit Timeline-Streifen |
+| Galerie           | 🔵 LIVE | Filter-Card (Pills) + Galerie-Zeilen mit Serpentine-Timeline. **Verhalten spezifiziert** in `docs/ux/concepts/galerie-timeline-spec.md` (dynamische Spalten, Sidebar-Reaktion ±1 Spalte, 36px-symmetrisches Routing, Linie nie über Bildern) |
 | Archiv            | 🔵 LIVE | Hero + KPI-Bar (4 Stats) + Toolbar (Suche + Jahr-Segmente + Sort) + Jahr-gruppierte Projekt-Tabelle (8 Mockups) mit Retention-Bar + Audit-Log-Sektion (5 Einträge) + DSG-Callout-Grid (Aufbewahrung / Audit-Log / Export) |
 | Einstellung/Profil| 🔵 LIVE | 9 Sektionen, sticky Sub-Nav |
 

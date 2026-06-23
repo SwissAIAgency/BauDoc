@@ -52,6 +52,7 @@
 | Dokument | Pfad | Status | Inhalt |
 |---|---|---|---|
 | Dashboard-Spec | `docs/ux/concepts/dashboard-spec.md` | DRAFT | Dashboard-Layout und KPI-Aufbau |
+| Galerie-Timeline-Spec | `docs/ux/concepts/galerie-timeline-spec.md` | LIVE | Galerie-Timeline-**Verhalten**: dynamische Spalten, Sidebar-Reaktion, Serpentine-Routing |
 | Preview-Card-Spec | `docs/ux/concepts/preview-card-spec.md` | DRAFT | Karten-Geometrie (READ-ONLY) |
 | Scrollbar-Spec | `docs/ux/concepts/scrollbar-spec.md` | DRAFT | Custom-Scrollbar-Verhalten |
 | Sidebar-Brand-Spec | `docs/ux/concepts/sidebar-brand-spec.md` | DRAFT | Sidebar + Marken-Auftritt |

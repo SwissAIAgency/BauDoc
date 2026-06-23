@@ -377,6 +377,7 @@ Copy-Paste** der Geometrie nötig.
 
 ## 9. Siehe auch
 
+- [`galerie-timeline-spec.md`](galerie-timeline-spec.md) — **Verhaltens-Spec** der Galerie-Timeline (dynamische Spalten, Sidebar-Reaktion, Serpentine-Routing)
 - `frontend/prototypes/preview-card-spec.css` — Custom-Properties-Modul
 - `frontend/prototypes/COMPONENTS.md` — Lock-Status-Tracking
 - `frontend/prototypes/app-shell.css` — Geteilte Styles, Design-Tokens
