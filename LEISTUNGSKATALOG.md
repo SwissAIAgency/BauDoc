@@ -1,5 +1,10 @@
 # Leistungskatalog
 
+> **Kanonischer Ort:** `docs/project/leistungskatalog.md`  
+> Diese Datei bleibt als Referenz erhalten. Änderungen bitte nur in `docs/project/leistungskatalog.md` vornehmen.
+
+
+
 ## Hauptquelle
 
 Die fachliche Hauptquelle ist `docs/references/leistungskatalog_baufortschritt_dokumentation.html`. Dieses Dokument fasst Phase-1-relevante Module zusammen und dient als kanonische Arbeitsgrundlage im Repository.

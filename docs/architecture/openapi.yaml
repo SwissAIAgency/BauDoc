@@ -1,0 +1,1238 @@
+openapi: 3.1.0
+
+info:
+  title: VisiDoc API
+  description: |
+    Planbasierte Baufortschrittsdokumentation.
+    Auth: Laravel Sanctum (Cookie-basiert für SPA, Bearer-Token für Mobile/API-Clients).
+    Alle geschützten Endpunkte erfordern eine aktive Session oder ein gültiges Sanctum-Token.
+    Dateien werden nie als öffentliche URLs zurückgegeben — ausschließlich über kontrollierte
+    Streams oder kurzlebige Signed URLs nach Rechteprüfung.
+  version: "0.1.0-planning"
+  contact:
+    name: VisiDoc Development
+  license:
+    name: Proprietär
+
+servers:
+  - url: https://api.visidoc.app/api/v1
+    description: Produktion (geplant)
+  - url: http://localhost:8000/api/v1
+    description: Lokale Entwicklung
+
+tags:
+  - name: auth
+    description: Authentifizierung und Session
+  - name: projects
+    description: Projekte und Projektverwaltung
+  - name: members
+    description: Projektmitglieder und Rollen
+  - name: structure
+    description: Projektstruktur (Gebäude, Etagen, Räume, Zonen, Gewerke)
+  - name: plans
+    description: Pläne und Planversionen
+  - name: photos
+    description: Fotos und Dateiablage
+  - name: locations
+    description: Planpositionen (Foto auf Plan verorten)
+  - name: comments
+    description: Kommentare zu Fotos
+  - name: audit
+    description: Audit-Logs
+  - name: notifications
+    description: Benutzer-Benachrichtigungen
+
+# ─────────────────────────────────────────────
+# Paths
+# ─────────────────────────────────────────────
+
+paths:
+
+  # ── Auth ──────────────────────────────────
+
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Einloggen
+      operationId: auth.login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Erfolgreich eingeloggt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Ausloggen
+      operationId: auth.logout
+      security:
+        - sanctum: []
+      responses:
+        '204':
+          description: Session beendet
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: Aktuell eingeloggter Benutzer
+      operationId: auth.me
+      security:
+        - sanctum: []
+      responses:
+        '200':
+          description: Benutzer-Daten
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResource'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/password/forgot:
+    post:
+      tags: [auth]
+      summary: Passwort-Reset anfordern
+      operationId: auth.password.forgot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '204':
+          description: E-Mail gesendet (unabhängig davon ob Adresse existiert)
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /auth/password/reset:
+    post:
+      tags: [auth]
+      summary: Passwort zurücksetzen
+      operationId: auth.password.reset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+      responses:
+        '204':
+          description: Passwort geändert
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  # ── Projects ──────────────────────────────
+
+  /projects:
+    get:
+      tags: [projects]
+      summary: Projekte des eingeloggten Benutzers auflisten
+      operationId: projects.index
+      security:
+        - sanctum: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+      responses:
+        '200':
+          description: Projektliste
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [projects]
+      summary: Neues Projekt erstellen
+      operationId: projects.store
+      security:
+        - sanctum: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+      responses:
+        '201':
+          description: Projekt erstellt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResource'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /projects/{project}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      tags: [projects]
+      summary: Projektdetails
+      operationId: projects.show
+      security:
+        - sanctum: []
+      responses:
+        '200':
+          description: Projektdetails
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResource'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [projects]
+      summary: Projekt aktualisieren
+      operationId: projects.update
+      security:
+        - sanctum: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+      responses:
+        '200':
+          description: Projekt aktualisiert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResource'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /projects/{project}/archive:
+    post:
+      tags: [projects]
+      summary: Projekt archivieren
+      operationId: projects.archive
+      security:
+        - sanctum: []
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '204':
+          description: Projekt archiviert
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ── Members ───────────────────────────────
+
+  /projects/{project}/members:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      tags: [members]
+      summary: Mitglieder eines Projekts
+      operationId: members.index
+      security:
+        - sanctum: []
+      responses:
+        '200':
+          description: Mitgliederliste
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberListResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [members]
+      summary: Mitglied einladen
+      operationId: members.store
+      security:
+        - sanctum: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemberInviteRequest'
+      responses:
+        '201':
+          description: Mitglied eingeladen
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /projects/{project}/members/{member}:
+    patch:
+      tags: [members]
+      summary: Mitgliederrolle ändern
+      operationId: members.update
+      security:
+        - sanctum: []
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - name: member
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemberUpdateRequest'
+      responses:
+        '200':
+          description: Mitglied aktualisiert
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  # ── Plans ─────────────────────────────────
+
+  /projects/{project}/plans:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      tags: [plans]
+      summary: Pläne eines Projekts
+      operationId: plans.index
+      security:
+        - sanctum: []
+      responses:
+        '200':
+          description: Planliste
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanListResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [plans]
+      summary: Plan hochladen
+      operationId: plans.store
+      security:
+        - sanctum: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PlanUploadRequest'
+      responses:
+        '201':
+          description: Plan erstellt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanResource'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /plans/{plan}:
+    parameters:
+      - name: plan
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [plans]
+      summary: Plandetails
+      operationId: plans.show
+      security:
+        - sanctum: []
+      responses:
+        '200':
+          description: Plandetails
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanResource'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /plans/{plan}/versions:
+    post:
+      tags: [plans]
+      summary: Neue Planversion hochladen
+      operationId: plan-versions.store
+      security:
+        - sanctum: []
+      parameters:
+        - name: plan
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PlanVersionUploadRequest'
+      responses:
+        '201':
+          description: Planversion erstellt
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /plan-versions/{planVersion}/view:
+    get:
+      tags: [plans]
+      summary: Planversion anzeigen (kurzlebige URL oder Stream)
+      operationId: plan-versions.view
+      security:
+        - sanctum: []
+      parameters:
+        - name: planVersion
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Plan-Datei (Stream oder Signed-URL-Redirect)
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ── Photos ────────────────────────────────
+
+  /projects/{project}/photos:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      tags: [photos]
+      summary: Fotos eines Projekts (Galerie)
+      operationId: photos.index
+      security:
+        - sanctum: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+        - name: plan_id
+          in: query
+          schema:
+            type: integer
+        - name: gewerk
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Fotoliste
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoListResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [photos]
+      summary: Foto hochladen
+      operationId: photos.store
+      security:
+        - sanctum: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PhotoUploadRequest'
+      responses:
+        '201':
+          description: Foto hochgeladen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoResource'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /photos/{photo}:
+    parameters:
+      - name: photo
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [photos]
+      summary: Fotodetails
+      operationId: photos.show
+      security:
+        - sanctum: []
+      responses:
+        '200':
+          description: Fotodetails
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoResource'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    patch:
+      tags: [photos]
+      summary: Foto-Metadaten aktualisieren
+      operationId: photos.update
+      security:
+        - sanctum: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhotoUpdateRequest'
+      responses:
+        '200':
+          description: Foto aktualisiert
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoResource'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /photos/{photo}/file:
+    get:
+      tags: [photos]
+      summary: Foto-Datei abrufen (Stream oder Signed URL)
+      operationId: photos.file
+      security:
+        - sanctum: []
+      parameters:
+        - name: photo
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Foto-Datei
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ── Locations ─────────────────────────────
+
+  /photos/{photo}/location:
+    parameters:
+      - name: photo
+        in: path
+        required: true
+        schema:
+          type: integer
+    post:
+      tags: [locations]
+      summary: Foto auf Plan verorten
+      operationId: locations.store
+      security:
+        - sanctum: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationRequest'
+      responses:
+        '201':
+          description: Planposition gesetzt
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    patch:
+      tags: [locations]
+      summary: Planposition aktualisieren
+      operationId: locations.update
+      security:
+        - sanctum: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationRequest'
+      responses:
+        '200':
+          description: Planposition aktualisiert
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags: [locations]
+      summary: Planposition entfernen
+      operationId: locations.destroy
+      security:
+        - sanctum: []
+      responses:
+        '204':
+          description: Planposition entfernt
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ── Comments ──────────────────────────────
+
+  /photos/{photo}/comments:
+    parameters:
+      - name: photo
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      tags: [comments]
+      summary: Kommentare zu einem Foto
+      operationId: comments.index
+      security:
+        - sanctum: []
+      responses:
+        '200':
+          description: Kommentarliste
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentListResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [comments]
+      summary: Kommentar hinzufügen
+      operationId: comments.store
+      security:
+        - sanctum: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+      responses:
+        '201':
+          description: Kommentar erstellt
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  # ── Audit ─────────────────────────────────
+
+  /projects/{project}/audit-logs:
+    get:
+      tags: [audit]
+      summary: Audit-Log eines Projekts
+      operationId: audit-logs.index
+      security:
+        - sanctum: []
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+      responses:
+        '200':
+          description: Audit-Einträge
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogListResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ── Notifications ─────────────────────────
+
+  /notifications:
+    get:
+      tags: [notifications]
+      summary: Benachrichtigungen des eingeloggten Benutzers
+      operationId: notifications.index
+      security:
+        - sanctum: []
+      responses:
+        '200':
+          description: Benachrichtigungsliste
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /notifications/{notification}:
+    patch:
+      tags: [notifications]
+      summary: Benachrichtigung als gelesen markieren
+      operationId: notifications.update
+      security:
+        - sanctum: []
+      parameters:
+        - name: notification
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                read_at:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Benachrichtigung aktualisiert
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+# ─────────────────────────────────────────────
+# Components
+# ─────────────────────────────────────────────
+
+components:
+
+  securitySchemes:
+    sanctum:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum
+      description: Laravel Sanctum Token (für API-Clients). SPA verwendet Cookie-Auth.
+
+  parameters:
+    ProjectId:
+      name: project
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Projekt-ID
+
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    PerPageParam:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  responses:
+    Unauthorized:
+      description: Nicht eingeloggt
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: Keine Berechtigung für diese Ressource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Ressource nicht gefunden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ValidationError:
+      description: Validierungsfehler
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+
+    RateLimited:
+      description: Zu viele Anfragen
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+
+    # ── Requests ──────────────────────────
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    PasswordResetRequest:
+      type: object
+      required: [email, token, password, password_confirmation]
+      properties:
+        email:
+          type: string
+          format: email
+        token:
+          type: string
+        password:
+          type: string
+          format: password
+        password_confirmation:
+          type: string
+          format: password
+
+    ProjectRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+
+    MemberInviteRequest:
+      type: object
+      required: [email, role]
+      properties:
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/UserRole'
+
+    MemberUpdateRequest:
+      type: object
+      required: [role]
+      properties:
+        role:
+          $ref: '#/components/schemas/UserRole'
+
+    PlanUploadRequest:
+      type: object
+      required: [name, file]
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        file:
+          type: string
+          format: binary
+          description: PDF oder Bilddatei (max. 50 MB)
+
+    PlanVersionUploadRequest:
+      type: object
+      required: [file]
+      properties:
+        file:
+          type: string
+          format: binary
+        label:
+          type: string
+          nullable: true
+
+    PhotoUploadRequest:
+      type: object
+      required: [file]
+      properties:
+        file:
+          type: string
+          format: binary
+          description: JPEG oder PNG (max. 25 MB)
+        taken_at:
+          type: string
+          format: date-time
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        gewerk:
+          type: string
+          nullable: true
+
+    PhotoUpdateRequest:
+      type: object
+      properties:
+        note:
+          type: string
+          nullable: true
+        gewerk:
+          type: string
+          nullable: true
+
+    LocationRequest:
+      type: object
+      required: [plan_version_id, x, y]
+      properties:
+        plan_version_id:
+          type: integer
+        x:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Relative X-Position auf dem Plan (0–1)
+        y:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Relative Y-Position auf dem Plan (0–1)
+
+    CommentRequest:
+      type: object
+      required: [body]
+      properties:
+        body:
+          type: string
+          maxLength: 2000
+
+    # ── Resources ─────────────────────────
+
+    AuthResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/UserResource'
+        token:
+          type: string
+          nullable: true
+          description: Nur bei Token-Auth (nicht SPA)
+
+    UserResource:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        created_at:
+          type: string
+          format: date-time
+
+    ProjectResource:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [active, archived]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ProjectListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectResource'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    MemberResource:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/UserRole'
+        joined_at:
+          type: string
+          format: date-time
+
+    MemberListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MemberResource'
+
+    PlanResource:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        current_version_id:
+          type: integer
+          nullable: true
+        versions_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    PlanListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanResource'
+
+    PhotoResource:
+      type: object
+      properties:
+        id:
+          type: integer
+        note:
+          type: string
+          nullable: true
+        gewerk:
+          type: string
+          nullable: true
+        taken_at:
+          type: string
+          format: date-time
+          nullable: true
+        uploaded_by:
+          $ref: '#/components/schemas/UserResource'
+        location:
+          $ref: '#/components/schemas/LocationResource'
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    PhotoListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhotoResource'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    LocationResource:
+      type: object
+      properties:
+        id:
+          type: integer
+        plan_version_id:
+          type: integer
+        x:
+          type: number
+          format: float
+        y:
+          type: number
+          format: float
+
+    CommentResource:
+      type: object
+      properties:
+        id:
+          type: integer
+        body:
+          type: string
+        author:
+          $ref: '#/components/schemas/UserResource'
+        created_at:
+          type: string
+          format: date-time
+
+    CommentListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommentResource'
+
+    AuditLogResource:
+      type: object
+      properties:
+        id:
+          type: integer
+        event:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserResource'
+        auditable_type:
+          type: string
+        auditable_id:
+          type: integer
+        old_values:
+          type: object
+          nullable: true
+        new_values:
+          type: object
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    AuditLogListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLogResource'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    NotificationResource:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        data:
+          type: object
+        read_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    NotificationListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationResource'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    # ── Shared ────────────────────────────
+
+    UserRole:
+      type: string
+      enum:
+        - owner
+        - admin
+        - project_manager
+        - site_manager
+        - contractor
+        - viewer
+      description: |
+        Rollen (hierarchisch):
+        - owner: Organisationsinhaber
+        - admin: Projekt-Administrator
+        - project_manager: Projektleiter
+        - site_manager: Bauleiter
+        - contractor: Auftragnehmer (eingeschränkter Upload)
+        - viewer: Nur Lesezugriff
+
+    PaginationMeta:
+      type: object
+      properties:
+        current_page:
+          type: integer
+        last_page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        from:
+          type: integer
+          nullable: true
+        to:
+          type: integer
+          nullable: true
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string

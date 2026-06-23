@@ -1,9 +1,24 @@
-# UI Standards
+# Design-System & UI-Standards
 
-> **Kanonischer Ort:** `docs/design/system.md`  
-> Diese Datei bleibt als Referenz erhalten. Änderungen bitte nur in `docs/design/system.md` vornehmen.
+**Zuletzt aktualisiert:** 2026-06-22  
+**Verantwortlich:** Frontend/UI Agent  
+**Status:** APPROVED  
+**Bezug:** `frontend/prototypes/DESIGN.md`, `PROTOTYP.md`, `docs/design/prototype-spec.md`
 
+> **Kanonischer Ort dieser Datei:** `docs/design/system.md`  
+> Die Datei `UI_STANDARDS.md` im Root leitet hierher weiter.
 
+---
+
+## Zweck
+
+Verbindliche UI-Regeln für die produktive BauDoc-Anwendung: Layout, Komponenten, Farben, Typografie, Barrierefreiheit und Formatierung. Gilt ab BD-005 (Vue PWA Grundstruktur).
+
+## Geltungsbereich
+
+Verbindlich für alle Frontend-Änderungen ab Phase 3. Abweichungen erfordern explizite Freigabe.
+
+---
 
 ## Allgemeine UI-Prinzipien
 
@@ -68,19 +83,23 @@ BauDoc ist ein Arbeitswerkzeug für Baustelle, Bauleitung und Projektverwaltung.
 
 ## Farben
 
-Arbeitsfähige Grundpalette:
+Arbeitsfähige Grundpalette (Dark Theme):
 
-- Hintergrund dunkel: `#0f1720`
-- Panel: `#151f2b`
-- Panel 2: `#1c2938`
-- Text hell: `#f3f6f9`
-- Sekundärtext: `#aab7c4`
-- Linie: `#2c3b4d`
-- Primärakzent: `#41b6c4`
-- Sekundärakzent: `#7c8cff`
-- Erfolg: `#5dd39e`
-- Warnung: `#f5c768`
-- Fehler: `#ff7b7b`
+| Token | Wert | Verwendung |
+|---|---|---|
+| Hintergrund | `#0f1720` | App-Hintergrund |
+| Panel | `#151f2b` | Sidebar, Karten |
+| Panel 2 | `#1c2938` | Nested Panels |
+| Text hell | `#f3f6f9` | Primärer Text |
+| Sekundärtext | `#aab7c4` | Labels, Metadaten |
+| Linie | `#2c3b4d` | Trennlinien, Borders |
+| Primärakzent | `#41b6c4` | CTAs, Links |
+| Sekundärakzent | `#7c8cff` | Sekundäre Aktionen |
+| Erfolg | `#5dd39e` | Status: OK |
+| Warnung | `#f5c768` | Status: Warnung |
+| Fehler | `#ff7b7b` | Status: Fehler |
+
+> Operative Design-Tokens (CSS-Variablen) sind in `frontend/prototypes/app-shell.css` und `frontend/prototypes/DESIGN.md` definiert. Diese Farbpalette ist der fachliche Referenzrahmen.
 
 Helle Arbeitsflächen für Tabellen oder Dokumentansichten sind erlaubt, wenn Kontrast und Lesbarkeit stimmen.
 
@@ -99,10 +118,10 @@ Helle Arbeitsflächen für Tabellen oder Dokumentansichten sind erlaubt, wenn Ko
 
 ## Buttons
 
-- Primary für Hauptaktionen wie Foto aufnehmen, Plan hochladen, speichern.
-- Secondary für Navigation, Filter und Abbrechen.
-- Danger für Löschen, Rechte entziehen und Archivierung.
-- Disabled sichtbar, aber nicht interaktiv.
+- **Primary:** Hauptaktionen — Foto aufnehmen, Plan hochladen, speichern.
+- **Secondary:** Navigation, Filter, Abbrechen.
+- **Danger:** Löschen, Rechte entziehen, Archivierung.
+- **Disabled:** sichtbar, aber nicht interaktiv.
 
 ## Fehlermeldungen
 
@@ -128,10 +147,12 @@ Helle Arbeitsflächen für Tabellen oder Dokumentansichten sind erlaubt, wenn Ko
 
 ## Formatregeln
 
-- Datum: `tt.mm.yyyy`
-- Zeit: `14:32`
-- Währung: `CHF`
-- Beträge: `1'230.00`
+| Format | Standard | Beispiel |
+|---|---|---|
+| Datum | `tt.mm.yyyy` | `22.06.2026` |
+| Zeit | `HH:MM` | `14:32` |
+| Währung | `CHF` | `CHF 1'230.00` |
+| Beträge | `1'230.00` | Hochkomma als Tausendertrenner |
 
 ## Nicht erlaubte UI-Muster
 
@@ -141,6 +162,12 @@ Helle Arbeitsflächen für Tabellen oder Dokumentansichten sind erlaubt, wenn Ko
 - Ausschließlich farbliche Statuskommunikation.
 - Unklare Icon-only-Aktionen ohne Tooltip oder Label.
 
-## Übergabe von Stitch-Designs
+## Übergabe von Stitch-/Design-Exports
 
 Wenn ein Stitch-UI oder Design-Export im Projektordner liegt, muss dieser zuerst analysiert und so exakt wie technisch sinnvoll übernommen werden. Farben, Abstände, Schriften, Radien und Layouts dürfen nicht eigenmächtig geändert werden.
+
+## Änderungshistorie
+
+| Datum | Änderung | Autor |
+|---|---|---|
+| 2026-06-22 | Migriert nach `docs/design/system.md` (kanonisch) | Restructuring |

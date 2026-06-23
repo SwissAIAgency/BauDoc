@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Galerie Dynamic — VisiDoc Testbett</title>
+  <link rel="stylesheet" href="../frontend/prototypes/app-shell.css">
+  <link rel="stylesheet" href="../frontend/prototypes/preview-card-spec.css">
+  <style>
+    /* ================================================================
+       Test-Page Layout
+       ================================================================ */
+    html, body { height: 100%; overflow: hidden; }
+    body { display: flex; flex-direction: column; }
+
+    /* ================================================================
+       Control Bar
+       ================================================================ */
+    .ctrl-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border-default);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .ctrl-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-high);
+      letter-spacing: 0.04em;
+    }
+    .ctrl-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--color-primary-soft);
+      color: var(--color-primary);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .ctrl-sep { width: 1px; height: 22px; background: var(--border-default); margin: 0 2px; flex-shrink: 0; }
+    .ctrl-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      background: var(--bg-raised);
+      color: var(--text-high);
+      font-size: 12px;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      transition: background 120ms, border-color 120ms, color 120ms;
+      white-space: nowrap;
+    }
+    .ctrl-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .ctrl-btn--primary { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+    .ctrl-btn--primary:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); color: #fff; }
+    .ctrl-btn--danger:hover { border-color: var(--status-error); color: var(--status-error); }
+    .ctrl-btn--active { border-color: var(--color-primary); color: var(--color-primary); background: var(--color-primary-soft); }
+    .ctrl-count {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-mid);
+      min-width: 64px;
+    }
+    .ctrl-exif-log {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-low);
+      max-width: 360px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .ctrl-exif-log.ok       { color: var(--color-primary); }
+    .ctrl-exif-log.fallback { color: var(--status-warn); }
+    #file-input { display: none; }
+
+    /* Reduced-motion indicator */
+    .ctrl-motion {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-low);
+      opacity: 0.7;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .ctrl-motion { color: var(--status-warn); }
+    }
+
+    /* ================================================================
+       Gallery Scroll Container
+       ================================================================ */
+    .gal-wrap {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+      padding: 40px 0;
+    }
+    .gal-wrap::-webkit-scrollbar { width: var(--scrollbar-size-thin); }
+    .gal-wrap::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+    .gal-wrap::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 999px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+    .gal-wrap::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+    /* ================================================================
+       Gallery Inner Container (mirrors index.html .vd-gal-rows-inner)
+       ================================================================ */
+    .vd-gal-rows-inner {
+      position: relative;
+      width: 100%;
+      padding-left: 107px;
+      padding-right: calc(var(--preview-serpentine-side-offset, 140px) + 48px);
+      box-sizing: border-box;
+    }
+
+    /* ================================================================
+       Serpentine SVG (mirrors index.html)
+       ================================================================ */
+    .vd-gal-serpentine-svg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 5;
+      overflow: visible;
+    }
+    .vd-gal-serpentine-path {
+      stroke: var(--preview-serpentine-stroke-color, var(--color-primary));
+      stroke-width: var(--preview-serpentine-stroke-width, 2.5px);
+      fill: none;
+      stroke-linecap: var(--preview-serpentine-stroke-linecap, round);
+      stroke-linejoin: var(--preview-serpentine-stroke-linejoin, round);
+      opacity: var(--preview-serpentine-stroke-opacity, 0.7);
+      filter: drop-shadow(var(--preview-serpentine-drop-shadow));
+    }
+    .vd-gal-serpentine-arrow-head {
+      fill: var(--color-primary);
+      stroke: var(--color-primary);
+      stroke-width: 1.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.6;
+    }
+    .vd-gal-path-node {
+      fill: var(--color-primary);
+      stroke: var(--bg-base);
+      stroke-width: 2;
+      cursor: pointer;
+      transition: transform 180ms ease, filter 180ms ease;
+    }
+    .vd-gal-path-node:hover { transform: scale(1.3); filter: brightness(1.2); }
+
+    /* ================================================================
+       Row & Cell (mirrors index.html)
+       ================================================================ */
+    .vd-gal-row {
+      position: relative;
+      display: grid;
+      gap: 32px;
+      grid-template-columns: repeat(6, 1fr);
+      margin-bottom: var(--preview-serpentine-row-spacing, 66px);
+    }
+    .vd-gal-row.vd-gal-row--last { margin-bottom: 0; }
+
+    .vd-gal-cell {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: var(--preview-cell-max-width, 240px);
+      cursor: pointer;
+    }
+    .vd-gal-cell--empty { cursor: default; }
+
+    .vd-gal-cell-thumb {
+      position: relative;
+      width: 100%;
+      aspect-ratio: var(--preview-image-aspect-ratio, 16 / 9);
+      background-color: var(--bg-raised);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border: var(--preview-image-border-width, 1px) solid var(--preview-image-border-color, var(--border-subtle));
+      border-radius: var(--preview-image-border-radius, var(--radius-small));
+      overflow: hidden;
+      transition: border-color 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+    }
+    .vd-gal-cell:hover .vd-gal-cell-thumb {
+      border-color: var(--color-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+    }
+    .vd-gal-cell--selected .vd-gal-cell-thumb {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px var(--color-primary-soft);
+    }
+
+    /* Demo thumb label */
+    .vd-gal-cell-thumb-label {
+      position: absolute;
+      left: 6px; bottom: 6px;
+      padding: 2px 6px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.04em;
+      color: var(--text-mid);
+      background: rgba(15, 18, 21, 0.75);
+      border-radius: 4px;
+      backdrop-filter: blur(4px);
+      pointer-events: none;
+    }
+
+    /* ================================================================
+       Stamp + Trendline + Dot (Spec-Konsument, mirrors index.html)
+       ================================================================ */
+    .vd-gal-cell-stamp {
+      position: relative;
+      width: 100%;
+      height: var(--preview-stamp-line-height, 10px);
+      margin-top: var(--preview-stamp-margin-top, 20px);
+      margin-bottom: var(--preview-stamp-margin-bottom, 39px);
+      font-family: var(--preview-stamp-font-family, var(--font-mono));
+      font-size: var(--preview-stamp-font-size, 10px);
+      font-weight: var(--preview-stamp-font-weight, 500);
+      color: var(--preview-stamp-font-color, var(--color-primary));
+      opacity: 1;
+      font-size: 11px;
+      letter-spacing: var(--preview-stamp-font-letter-spacing, 0.08em);
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .vd-gal-stamp-date, .vd-gal-stamp-time {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      white-space: nowrap;
+    }
+    .vd-gal-stamp-date { right: calc(50% + var(--preview-stamp-gap, 14px)); }
+    .vd-gal-stamp-time { left:  calc(50% + var(--preview-stamp-gap, 14px)); }
+    .vd-gal-stamp-trendline {
+      position: absolute;
+      left: 50%; top: 0;
+      transform: translateX(-50%);
+      width: var(--preview-trendline-width, 1px);
+      height: var(--preview-trendline-height);
+      background: var(--preview-trendline-color, var(--color-primary));
+      opacity: var(--preview-trendline-opacity, 0.5);
+      pointer-events: none;
+    }
+    .vd-gal-cell-timeline {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+    /* CSS-Dot: unsichtbar, bleibt aber im Layout für getBoundingClientRect().
+       Die SVG-Kreis-Nodes (vd-gal-path-node) sind die einzigen sichtbaren Punkte.
+       opacity: 0 erhält Grösse + Position; Klicks fallen durch den SVG
+       (pointer-events: none am SVG) auf dieses Element durch. */
+    .vd-gal-stamp-dot {
+      position: relative;
+      width: var(--preview-dot-size, 5px);
+      height: var(--preview-dot-size, 5px);
+      border-radius: 50%;
+      flex-shrink: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .vd-gal-stamp-dot--active { /* kein visueller Effekt – SVG-Node übernimmt */ }
+
+    /* ================================================================
+       Cell Fade-in Animation (nur bei neu hinzugefügten Zellen)
+       ================================================================ */
+    @keyframes vd-cell-fadein {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .vd-gal-cell--new {
+      animation: vd-cell-fadein 280ms ease forwards;
+    }
+
+    /* Reduced motion: alle Animationen deaktivieren */
+    @media (prefers-reduced-motion: reduce) {
+      .vd-gal-cell--new { animation: none; }
+      .vd-gal-serpentine-path { transition: none !important; }
+    }
+
+    /* ================================================================
+       Empty State
+       ================================================================ */
+    .gal-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 80px 40px;
+      color: var(--text-low);
+    }
+    .gal-empty svg { opacity: 0.35; margin-bottom: 4px; }
+    .gal-empty-title { font-size: 15px; font-weight: 600; color: var(--text-mid); }
+    .gal-empty-sub { font-size: 13px; text-align: center; max-width: 300px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+  <!-- ================================================================
+       Control Bar
+       ================================================================ -->
+  <div class="ctrl-bar">
+    <span class="ctrl-title">Galerie Dynamic</span>
+    <span class="ctrl-badge">Testbett</span>
+    <div class="ctrl-sep"></div>
+
+    <input type="file" id="file-input" multiple accept="image/*,video/*">
+    <button class="ctrl-btn ctrl-btn--primary" onclick="document.getElementById('file-input').click()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      Bilder hochladen
+    </button>
+
+    <button class="ctrl-btn" id="btn-demo" onclick="loadDemo()">Demo-Daten</button>
+
+    <div class="ctrl-sep"></div>
+
+    <button class="ctrl-btn" id="btn-sort" onclick="toggleSort()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 6h18M7 12h10M11 18h2"/>
+      </svg>
+      <span id="sort-label">Neueste zuerst</span>
+    </button>
+
+    <div class="ctrl-sep"></div>
+
+    <button class="ctrl-btn ctrl-btn--danger" onclick="clearAll()">Alle löschen</button>
+
+    <div style="flex:1 1 auto"></div>
+
+    <span class="ctrl-count" id="ctrl-count">0 Bilder</span>
+    <span class="ctrl-exif-log" id="exif-log"></span>
+    <span class="ctrl-motion" id="motion-hint" title="prefers-reduced-motion">●&nbsp;motion</span>
+  </div>
+
+  <!-- ================================================================
+       Gallery Scroll Area
+       ================================================================ -->
+  <div class="gal-wrap" id="gal-wrap"></div>
+
+  <!-- Empty state template (moved in/out of gal-wrap by JS) -->
+  <template id="tpl-empty">
+    <div class="gal-empty">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" color="var(--color-primary)">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <circle cx="9" cy="9" r="2"/>
+        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+      </svg>
+      <div class="gal-empty-title">Noch keine Bilder</div>
+      <div class="gal-empty-sub">Lade eigene Bilder hoch (EXIF wird gelesen) oder klicke auf „Demo-Daten".</div>
+    </div>
+  </template>
+
+
+  <script>
+  /* ================================================================
+     EXIF PARSER (dependency-free, browser File API)
+     Liest DateTimeOriginal (0x9003), fällt zurück auf DateTime (0x0132).
+     Unterstützt Little-Endian und Big-Endian TIFF-Header.
+     ================================================================ */
+
+  async function readExifDate(file) {
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload  = e => { try { resolve(parseExifDate(e.target.result)); } catch(_) { resolve(null); } };
+      reader.onerror = () => resolve(null);
+      reader.readAsArrayBuffer(file.slice(0, 131072)); // 128 KB reicht für EXIF
+    });
+  }
+
+  function parseExifDate(buffer) {
+    const view = new DataView(buffer);
+    if (view.byteLength < 12) return null;
+    if (view.getUint16(0) !== 0xFFD8) return null; // kein JPEG
+    let offset = 2;
+    while (offset + 4 <= view.byteLength) {
+      const marker = view.getUint16(offset);
+      if (marker === 0xFFDA) break;                  // Start of Scan → Stopp
+      if ((marker & 0xFF00) !== 0xFF00) break;       // ungültiger Marker
+      const segLen = view.getUint16(offset + 2);
+      if (marker === 0xFFE1 && segLen >= 16) {
+        // APP1-Segment: prüfe 'Exif'-Signatur
+        const sig = String.fromCharCode(
+          view.getUint8(offset + 4), view.getUint8(offset + 5),
+          view.getUint8(offset + 6), view.getUint8(offset + 7)
+        );
+        if (sig === 'Exif') return parseTiff(buffer, offset + 10);
+      }
+      offset += 2 + segLen;
+    }
+    return null;
+  }
+
+  function parseTiff(buffer, tiffBase) {
+    const view  = new DataView(buffer);
+    const g16   = (o, le) => view.getUint16(tiffBase + o, le);
+    const g32   = (o, le) => view.getUint32(tiffBase + o, le);
+    const getStr = (o, maxLen) => {
+      let s = '';
+      for (let i = 0; i < maxLen && tiffBase + o + i < view.byteLength; i++) {
+        const b = view.getUint8(tiffBase + o + i);
+        if (b === 0) break;
+        s += String.fromCharCode(b);
+      }
+      return s;
+    };
+    const byteOrder = g16(0, false);
+    const isLE = byteOrder === 0x4949; // 'II' = little-endian, 'MM' = big-endian
+    if (g16(2, isLE) !== 42) return null; // kein gültiger TIFF-Header
+
+    const ifd0Off = g32(4, isLE);
+
+    function scanIFD(ifdOff, wantTags) {
+      if (ifdOff + 2 > view.byteLength - tiffBase) return { results: {}, exifSubOff: null };
+      const count = g16(ifdOff, isLE);
+      const results = {};
+      let exifSubOff = null;
+      for (let i = 0; i < count && i < 256; i++) {
+        const e = ifdOff + 2 + i * 12;
+        if (tiffBase + e + 12 > view.byteLength) break;
+        const tag  = g16(e, isLE);
+        const type = g16(e + 2, isLE);
+        const valOff = g32(e + 8, isLE);
+        if (tag === 0x8769) { exifSubOff = valOff; continue; } // ExifSubIFD-Zeiger
+        if (wantTags.includes(tag) && type === 2) {            // type 2 = ASCII
+          results[tag] = getStr(valOff, 25);
+        }
+      }
+      return { results, exifSubOff };
+    }
+
+    const ifd0 = scanIFD(ifd0Off, [0x0132, 0x9003]);
+    if (ifd0.results[0x9003]) return ifd0.results[0x9003];
+
+    if (ifd0.exifSubOff) {
+      const exifSub = scanIFD(ifd0.exifSubOff, [0x9003, 0x9004]);
+      if (exifSub.results[0x9003]) return exifSub.results[0x9003];
+      if (exifSub.results[0x9004]) return exifSub.results[0x9004];
+    }
+
+    if (ifd0.results[0x0132]) return ifd0.results[0x0132];
+    return null;
+  }
+
+  /** "YYYY:MM:DD HH:MM:SS" → Date-Objekt */
+  function exifStrToDate(str) {
+    if (!str || str.length < 16) return null;
+    const [datePart, timePart] = str.split(' ');
+    const [Y, Mo, D]  = datePart.split(':').map(Number);
+    const [H, Mi, S]  = (timePart || '00:00:00').split(':').map(Number);
+    if (!Y || Y < 1970) return null;
+    const d = new Date(Y, Mo - 1, D, H || 0, Mi || 0, S || 0);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+
+  /* ================================================================
+     STATE
+     ================================================================ */
+
+  let ITEMS   = [];   // { id, captureDate, src, gradient, name }
+  let sortDir = 'desc'; // 'desc' = neueste zuerst (top-left)
+  let _nextId = 1;
+  let _pathD  = '';   // zuletzt gerenderter d-String (für Change-Detection)
+  let _animTimer = null;
+
+  const prefersReducedMotion = () =>
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+
+  /* ================================================================
+     FORMAT HELPERS
+     ================================================================ */
+
+  const pad2 = n => String(n).padStart(2, '0');
+
+  function fmtDate(d) {
+    return `${pad2(d.getDate())}.${pad2(d.getMonth()+1)}.${String(d.getFullYear()).slice(2)}`;
+  }
+  function fmtTime(d) {
+    return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  }
+
+
+  /* ================================================================
+     SORT
+     ================================================================ */
+
+  function sortedItems() {
+    return ITEMS.slice().sort((a, b) =>
+      sortDir === 'desc'
+        ? b.captureDate - a.captureDate
+        : a.captureDate - b.captureDate
+    );
+  }
+
+
+  /* ================================================================
+     HTML BUILDER
+     ================================================================ */
+
+  const SLOTS_PER_ROW = 6;
+
+  function galRows(sorted) {
+    const rows = [];
+    for (let i = 0; i < sorted.length; i += SLOTS_PER_ROW) {
+      const chunk    = sorted.slice(i, i + SLOTS_PER_ROW);
+      const rowIndex = rows.length;
+      const isOdd    = rowIndex % 2 !== 0;
+      const isLast   = i + SLOTS_PER_ROW >= sorted.length;
+
+      let slots;
+      if (isOdd) {
+        // Ungerade Zeile: R→L — Chunk umkehren, leere Slots LINKS auffüllen.
+        // Erstes Element im Chunk (nächstälteres nach letzter gerader Zeile)
+        // landet damit am RECHTEN Rand (Col 6), Folgeelemente gehen nach links.
+        slots = chunk.slice().reverse();
+        while (slots.length < SLOTS_PER_ROW) slots.unshift(null);
+      } else {
+        // Gerade Zeile: L→R — leere Slots rechts (nur wenn nicht letzte Zeile)
+        slots = chunk.slice();
+        if (!isLast) while (slots.length < SLOTS_PER_ROW) slots.push(null);
+      }
+      rows.push({ slots, isLast, isOdd });
+    }
+    return rows;
+  }
+
+  function cellHTML(item, isNew) {
+    if (item === null) {
+      return '<div class="vd-gal-cell vd-gal-cell--empty" aria-hidden="true"></div>';
+    }
+    const sd = fmtDate(item.captureDate);
+    const st = fmtTime(item.captureDate);
+    const newCls = isNew ? ' vd-gal-cell--new' : '';
+
+    let thumbStyle = '';
+    if (item.src)      thumbStyle = `background-image:url('${item.src}')`;
+    else if (item.gradient) thumbStyle = `background:${item.gradient}`;
+
+    const thumbLabel = item.gradient // Demo-Item: Name als Label im Thumb
+      ? `<div class="vd-gal-cell-thumb-label">${item.name}</div>` : '';
+
+    return `
+      <div class="vd-gal-cell${newCls}" data-id="${item.id}" title="${item.name}">
+        <div class="vd-gal-cell-thumb" style="${thumbStyle}">${thumbLabel}</div>
+        <div class="vd-gal-cell-stamp" aria-label="Aufnahme ${sd} um ${st}">
+          <span class="vd-gal-stamp-date">${sd}</span>
+          <span class="vd-gal-stamp-time">${st}</span>
+          <span class="vd-gal-stamp-trendline" aria-hidden="true"></span>
+        </div>
+        <div class="vd-gal-cell-timeline">
+          <span class="vd-gal-stamp-dot" data-marker aria-label="${sd} ${st}"></span>
+        </div>
+      </div>`;
+  }
+
+
+  /* ================================================================
+     RENDER
+     ================================================================ */
+
+  function renderGallery(animatePath, newIds) {
+    newIds = newIds || new Set();
+    const wrap   = document.getElementById('gal-wrap');
+    const sorted = sortedItems();
+
+    // Update counter
+    document.getElementById('ctrl-count').textContent =
+      sorted.length + ' Bild' + (sorted.length !== 1 ? 'er' : '');
+
+    if (!sorted.length) {
+      const tpl = document.getElementById('tpl-empty');
+      wrap.innerHTML = '';
+      wrap.appendChild(tpl.content.cloneNode(true));
+      _pathD = '';
+      return;
+    }
+
+    const rows = galRows(sorted);
+    const rowsHTML = rows.map((row, idx) => `
+      <div class="vd-gal-row${row.isLast ? ' vd-gal-row--last' : ''}" data-row="${idx}">
+        ${row.slots.map(item => cellHTML(item, item && newIds.has(item.id))).join('')}
+      </div>`).join('');
+
+    wrap.innerHTML = `
+      <div class="vd-gal-rows-inner" id="gal-inner">
+        <svg class="vd-gal-serpentine-svg" id="gal-svg" aria-hidden="true">
+          <defs>
+            <marker id="gal-arrow" markerWidth="8" markerHeight="8" refX="0" refY="4" orient="auto">
+              <path class="vd-gal-serpentine-arrow-head" d="M 0 0 L 8 4 L 0 8"></path>
+            </marker>
+          </defs>
+          <path class="vd-gal-serpentine-path" d="" id="gal-path"
+                marker-start="url(#gal-arrow)" marker-end="url(#gal-arrow)"></path>
+        </svg>
+        ${rowsHTML}
+      </div>`;
+
+    // Cell click → select
+    wrap.querySelectorAll('.vd-gal-cell:not(.vd-gal-cell--empty)').forEach(el => {
+      el.addEventListener('click', () => {
+        wrap.querySelectorAll('.vd-gal-cell').forEach(c => c.classList.remove('vd-gal-cell--selected'));
+        el.classList.add('vd-gal-cell--selected');
+      });
+    });
+
+    // Dot click → select cell
+    wrap.querySelectorAll('.vd-gal-stamp-dot').forEach(dot => {
+      dot.addEventListener('click', e => {
+        e.stopPropagation();
+        const cell = dot.closest('.vd-gal-cell');
+        if (!cell) return;
+        wrap.querySelectorAll('.vd-gal-cell').forEach(c => c.classList.remove('vd-gal-cell--selected'));
+        wrap.querySelectorAll('.vd-gal-stamp-dot').forEach(d => d.classList.remove('vd-gal-stamp-dot--active'));
+        cell.classList.add('vd-gal-cell--selected');
+        dot.classList.add('vd-gal-stamp-dot--active');
+        cell.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    });
+
+    // Doppelter RAF: sicherstellen dass Layout vollständig berechnet ist
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => updatePath(animatePath))
+    );
+  }
+
+
+  /* ================================================================
+     SERPENTINE PATH
+     Exakt gleicher Algorithmus wie index.html updateSerpentinePath().
+     Stroke-Dashoffset-Animation für Morphing bei Daten-Änderung.
+     ================================================================ */
+
+  function updatePath(animate) {
+    const svg   = document.getElementById('gal-svg');
+    const path  = document.getElementById('gal-path');
+    const inner = document.getElementById('gal-inner');
+    if (!svg || !path || !inner) return;
+
+    const rows = Array.from(inner.querySelectorAll('.vd-gal-row'));
+    if (!rows.length) { path.setAttribute('d', ''); _pathD = ''; return; }
+
+    const containerRect = inner.getBoundingClientRect();
+
+    // Pro Zeile: gemeinsamen Y-Basiswert (Durchschnitt aller nicht-leeren Dots) berechnen.
+    // Verhindert Sub-Pixel-Drift zwischen Zellen → alle Kreise sitzen exakt auf der Linie.
+    const pts = [];
+    rows.forEach((row, ri) => {
+      const cells = Array.from(row.children).filter(c => !c.classList.contains('vd-gal-cell--empty'));
+      if (!cells.length) return;
+
+      // Y-Baseline: Mittelwert der Dot-Mittelpunkte aller Zellen dieser Zeile
+      let sumY = 0, nY = 0;
+      cells.forEach(cell => {
+        const dot = cell.querySelector('.vd-gal-stamp-dot');
+        if (!dot) return;
+        const r = dot.getBoundingClientRect();
+        sumY += r.top - containerRect.top + r.height / 2;
+        nY++;
+      });
+      const rowY = nY > 0 ? Math.round((sumY / nY) * 10) / 10 : 0;
+      row._rowY = rowY; // für Circle-Rendering cachen
+
+      const getX = (idx) => {
+        const cell = row.children[idx];
+        const dot  = cell ? cell.querySelector('.vd-gal-stamp-dot') : null;
+        if (!dot) return 0;
+        const r = dot.getBoundingClientRect();
+        return r.left - containerRect.left + r.width / 2;
+      };
+
+      const firstIdx = Array.from(row.children).indexOf(cells[0]);
+      const lastIdx  = Array.from(row.children).indexOf(cells[cells.length - 1]);
+
+      if (ri % 2 === 0) {
+        pts.push({ x: getX(firstIdx), y: rowY });
+        pts.push({ x: getX(lastIdx),  y: rowY });
+      } else {
+        pts.push({ x: getX(lastIdx),  y: rowY });
+        pts.push({ x: getX(firstIdx), y: rowY });
+      }
+    });
+    if (pts.length < 2) return;
+
+    const css        = getComputedStyle(document.documentElement);
+    const sideOffset = parseFloat(css.getPropertyValue('--preview-serpentine-side-offset')) || 140;
+    const radius     = parseFloat(css.getPropertyValue('--preview-serpentine-curve-radius'))  || 75;
+
+    // SVG-Höhe an letzten Row anpassen
+    const lastRect  = rows[rows.length - 1].getBoundingClientRect();
+    const neededH   = lastRect.bottom - containerRect.top + sideOffset + 200;
+    svg.setAttribute('height', String(neededH));
+
+    // d-String aufbauen (identisch mit index.html)
+    let d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const curr = pts[i];
+      const next = pts[i + 1];
+      if (i % 2 === 0) {
+        // Horizontale Linie innerhalb der Zeile
+        d += ` L ${next.x} ${next.y}`;
+      } else {
+        // U-Turn-Bogen zwischen Zeilen
+        const isRight = (i % 4 === 1);
+        if (isRight) {
+          d += ` L ${curr.x + sideOffset - radius} ${curr.y}`;
+          d += ` Q ${curr.x + sideOffset} ${curr.y} ${curr.x + sideOffset} ${curr.y + radius}`;
+          d += ` L ${curr.x + sideOffset} ${next.y - radius}`;
+          d += ` Q ${curr.x + sideOffset} ${next.y} ${curr.x + sideOffset - radius} ${next.y}`;
+        } else {
+          d += ` L ${curr.x - sideOffset + radius} ${curr.y}`;
+          d += ` Q ${curr.x - sideOffset} ${curr.y} ${curr.x - sideOffset} ${curr.y + radius}`;
+          d += ` L ${curr.x - sideOffset} ${next.y - radius}`;
+          d += ` Q ${curr.x - sideOffset} ${next.y} ${curr.x - sideOffset + radius} ${next.y}`;
+        }
+        d += ` L ${next.x} ${next.y}`;
+      }
+    }
+
+    const changed = (d !== _pathD);
+    _pathD = d;
+    path.setAttribute('d', d);
+
+    // Stroke-Dashoffset-Animation: Pfad "zeichnet sich neu" bei Änderung
+    if (changed && animate && !prefersReducedMotion()) {
+      const len = path.getTotalLength();
+      path.style.transition      = 'none';
+      path.style.strokeDasharray = len;
+      path.style.strokeDashoffset = len;
+      void path.getBoundingClientRect(); // Force reflow
+      path.style.transition       = 'stroke-dashoffset 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      path.style.strokeDashoffset = '0';
+      if (_animTimer) clearTimeout(_animTimer);
+      _animTimer = setTimeout(() => {
+        path.style.strokeDasharray  = '';
+        path.style.strokeDashoffset = '';
+        path.style.transition       = '';
+      }, 630);
+    } else if (!animate || !changed) {
+      path.style.strokeDasharray  = '';
+      path.style.strokeDashoffset = '';
+      path.style.transition       = '';
+    }
+
+    // Path-Node-Kreise: alle Zellen einer Zeile teilen denselben Y (row._rowY),
+    // damit die Kreise exakt auf der horizontalen Pfad-Linie sitzen.
+    svg.querySelectorAll('.vd-gal-path-node').forEach(n => n.remove());
+    const NS = 'http://www.w3.org/2000/svg';
+    rows.forEach(row => {
+      const rowY = row._rowY || 0;
+      Array.from(row.children).forEach(cell => {
+        if (cell.classList.contains('vd-gal-cell--empty')) return;
+        const dot = cell.querySelector('.vd-gal-stamp-dot');
+        if (!dot) return;
+        const r  = dot.getBoundingClientRect();
+        const cx = r.left - containerRect.left + r.width / 2;
+        const c  = document.createElementNS(NS, 'circle');
+        c.setAttribute('cx', cx);
+        c.setAttribute('cy', rowY);
+        c.setAttribute('r', '5');
+        c.setAttribute('class', 'vd-gal-path-node');
+        svg.appendChild(c);
+      });
+    });
+  }
+
+
+  /* ================================================================
+     RESIZE HANDLER
+     ================================================================ */
+
+  let _resizeRAF = 0;
+  window.addEventListener('resize', () => {
+    if (_resizeRAF) cancelAnimationFrame(_resizeRAF);
+    _resizeRAF = requestAnimationFrame(() => {
+      _resizeRAF = requestAnimationFrame(() => updatePath(false));
+    });
+  });
+
+
+  /* ================================================================
+     FILE UPLOAD (EXIF → captureDate)
+     ================================================================ */
+
+  document.getElementById('file-input').addEventListener('change', async e => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    const newIds = new Set();
+    const logEl  = document.getElementById('exif-log');
+    logEl.textContent = `Lese ${files.length} Datei…`;
+    logEl.className   = 'ctrl-exif-log';
+
+    let lastLog = '';
+
+    for (const file of files) {
+      const id = _nextId++;
+      let captureDate = null;
+      let source      = '';
+
+      // 1. EXIF DateTimeOriginal / DateTime
+      const exifStr = await readExifDate(file);
+      if (exifStr) {
+        captureDate = exifStrToDate(exifStr);
+        if (captureDate) source = 'EXIF';
+      }
+
+      // 2. file.lastModified
+      if (!captureDate) {
+        captureDate = new Date(file.lastModified);
+        source      = 'lastModified';
+      }
+
+      // 3. Aktuelles Datum
+      if (!captureDate || isNaN(captureDate.getTime())) {
+        captureDate = new Date();
+        source      = 'jetzt';
+      }
+
+      const src = URL.createObjectURL(file);
+      ITEMS.push({ id, captureDate, src, name: file.name });
+      newIds.add(id);
+
+      lastLog = `${file.name} → ${source}: ${fmtDate(captureDate)} ${fmtTime(captureDate)}`;
+      logEl.textContent = lastLog;
+      logEl.className   = 'ctrl-exif-log ' + (source === 'EXIF' ? 'ok' : 'fallback');
+    }
+
+    e.target.value = '';
+    renderGallery(true, newIds);
+  });
+
+
+  /* ================================================================
+     CONTROLS
+     ================================================================ */
+
+  function toggleSort() {
+    sortDir = sortDir === 'desc' ? 'asc' : 'desc';
+    document.getElementById('sort-label').textContent =
+      sortDir === 'desc' ? 'Neueste zuerst' : 'Älteste zuerst';
+    document.getElementById('btn-sort').classList.toggle('ctrl-btn--active', sortDir === 'asc');
+    renderGallery(true, new Set());
+  }
+
+  function clearAll() {
+    ITEMS.forEach(i => { if (i.src && i.src.startsWith('blob:')) URL.revokeObjectURL(i.src); });
+    ITEMS  = [];
+    _pathD = '';
+    renderGallery(false, new Set());
+    document.getElementById('exif-log').textContent = '';
+  }
+
+
+  /* ================================================================
+     DEMO DATA (14 synthetische Aufnahmen, unterschiedliche Daten)
+     Gradients: Bau-Tönungen im VisiDoc-Dark-Theme
+     ================================================================ */
+
+  const DEMO = [
+    { name: 'Abnahme',    date: new Date(2026, 5, 20, 14, 32), gradient: 'linear-gradient(135deg, #263322 0%, #1a2418 100%)' },
+    { name: 'Putz EG',    date: new Date(2026, 5, 18,  9, 15), gradient: 'linear-gradient(135deg, #1e2d3a 0%, #141f29 100%)' },
+    { name: 'Fassade N',  date: new Date(2026, 5, 17, 16, 48), gradient: 'linear-gradient(135deg, #2e2416 0%, #1f1910 100%)' },
+    { name: 'Treppe OG',  date: new Date(2026, 5, 15, 11,  5), gradient: 'linear-gradient(135deg, #1c2c40 0%, #12202f 100%)' },
+    { name: 'Dach',       date: new Date(2026, 5, 12,  8, 22), gradient: 'linear-gradient(135deg, #27211a 0%, #1c1712 100%)' },
+    { name: 'UG Beton',   date: new Date(2026, 5, 10, 15, 33), gradient: 'linear-gradient(135deg, #1a2c28 0%, #111f1c 100%)' },
+    { name: 'Fenster W',  date: new Date(2026, 5,  7, 10, 11), gradient: 'linear-gradient(135deg, #281c2c 0%, #1c1420 100%)' },
+    { name: 'Elektro',    date: new Date(2026, 5,  5, 13, 45), gradient: 'linear-gradient(135deg, #22281c 0%, #171c14 100%)' },
+    { name: 'Sanitär',    date: new Date(2026, 5,  2,  9,  8), gradient: 'linear-gradient(135deg, #263322 0%, #1a2418 100%)' },
+    { name: 'Estrich',    date: new Date(2026, 4, 28, 14, 19), gradient: 'linear-gradient(135deg, #1e2d3a 0%, #141f29 100%)' },
+    { name: 'Trockenbau', date: new Date(2026, 4, 25, 11, 52), gradient: 'linear-gradient(135deg, #2e2416 0%, #1f1910 100%)' },
+    { name: 'Innenausbau',date: new Date(2026, 4, 22,  8, 37), gradient: 'linear-gradient(135deg, #1c2c40 0%, #12202f 100%)' },
+    { name: 'Rohbau',     date: new Date(2026, 4, 19, 16,  4), gradient: 'linear-gradient(135deg, #27211a 0%, #1c1712 100%)' },
+    { name: 'EG Beginn',  date: new Date(2026, 4, 15, 10, 29), gradient: 'linear-gradient(135deg, #1a2c28 0%, #111f1c 100%)' },
+  ];
+
+  function loadDemo() {
+    clearAll();
+    const newIds = new Set();
+    DEMO.forEach(d => {
+      const id = _nextId++;
+      ITEMS.push({ id, captureDate: d.date, src: null, gradient: d.gradient, name: d.name });
+      newIds.add(id);
+    });
+    const logEl = document.getElementById('exif-log');
+    logEl.textContent = `${DEMO.length} Demo-Aufnahmen geladen · Datum aus Demo-Daten`;
+    logEl.className   = 'ctrl-exif-log ok';
+    renderGallery(true, newIds);
+  }
+
+
+  /* ================================================================
+     REDUCED-MOTION INDICATOR
+     ================================================================ */
+
+  (function () {
+    const el = document.getElementById('motion-hint');
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => { el.title = mq.matches ? 'prefers-reduced-motion: aktiv (Animationen deaktiviert)' : 'prefers-reduced-motion: inaktiv'; };
+    mq.addEventListener('change', update);
+    update();
+  })();
+
+
+  /* ================================================================
+     INIT
+     ================================================================ */
+
+  renderGallery(false, new Set());
+  </script>
+</body>
+</html>

@@ -1,5 +1,10 @@
 # Testing
 
+> **Kanonischer Ort:** `docs/testing/strategy.md`  
+> Diese Datei bleibt als Referenz erhalten. Änderungen bitte nur in `docs/testing/strategy.md` vornehmen.
+
+
+
 ## Ziel der Tests
 
 Tests sichern Authentifizierung, Rollen, private Dateiablage, Planversionen, Planpositionen, Fotozuordnung, Audit und UI-Kernflows ab. Kritische Rechte- und Datenschutzfälle sind ausdrücklich zu prüfen.

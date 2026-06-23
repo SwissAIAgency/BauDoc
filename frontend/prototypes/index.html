@@ -2,7 +2,7 @@
 <html lang="de-CH" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>VisiDoc – App-Shell Showcase</title>
   <meta name="description" content="VisiDoc Frontend-Showcase: Dashboard, Projekte, Projektansicht (Pläne + Galerie), Galerie, Archiv, Einstellung/Profil. Dark + Light.">
   <link rel="stylesheet" href="app-shell.css">
@@ -296,9 +296,9 @@
       overflow-x: hidden;
     }
 
-    /* Mobile: Sidebar einklappen-Default */
+    /* Mobile: Sidebar ist position:fixed als Drawer — kein Grid-Platz reservieren */
     @media (max-width: 900px) {
-      .vd-app { grid-template-columns: var(--sidebar-width-collapsed, 64px) 1fr !important; }
+      .vd-app { grid-template-columns: 1fr !important; }
     }
 
     .vd-screen {
@@ -3733,7 +3733,7 @@
       width: 100%;
       max-width: 1400px;
       margin: 0 auto;
-      padding: 0 80px;
+      padding: 0 clamp(16px, 5vw, 80px);
       /* Galerie-eigener Scroll-Container – scrollt intern, weil
          Galerie-Section im aktuellen DOM nicht im Body-Scroll
          haengt (direktes Grid-Item des App-Body). */
@@ -4486,10 +4486,13 @@
 </head>
 <body data-active-screen="dashboard">
   <div class="vd-app">
+    <!-- Overlay für Mobile-Drawer (schließt Sidebar bei Klick) -->
+    <div class="vd-sidebar-overlay" id="vd-sidebar-overlay" aria-hidden="true"></div>
+
     <!-- ============================================================
          SIDEBAR (VisiDoc)
          ============================================================ -->
-    <aside class="vd-sidebar" aria-label="Hauptnavigation">
+    <aside class="vd-sidebar" id="vd-sidebar" aria-label="Hauptnavigation">
       <a class="vd-sidebar-brand" href="#" data-nav="dashboard" aria-label="VisiDoc – Startseite">
         <img class="vd-sidebar-brand-img vd-sidebar-brand-img--full" src="visidoc-logo.png" alt="VisiDoc" width="509" height="160">
         <img class="vd-sidebar-brand-img vd-sidebar-brand-img--mark" src="visidoc-mark.png" alt="" width="398" height="227" aria-hidden="true">
@@ -4565,6 +4568,17 @@
     <div class="vd-app-body">
       <!-- TOPBAR -->
       <header class="vd-topbar" role="banner">
+        <!-- Hamburger: nur auf Mobile (≤900px) sichtbar, CSS-gesteuert -->
+        <button class="vd-hamburger" type="button" id="vd-hamburger"
+                aria-label="Navigation öffnen" aria-expanded="false"
+                aria-controls="vd-sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="4" y1="6" x2="20" y2="6"/>
+            <line x1="4" y1="12" x2="20" y2="12"/>
+            <line x1="4" y1="18" x2="20" y2="18"/>
+          </svg>
+        </button>
         <div class="vd-topbar-titles">
           <span class="vd-topbar-title" id="vd-topbar-title">Dashboard</span>
           <span class="vd-topbar-subtitle" id="vd-topbar-subtitle" aria-live="polite"></span>
@@ -8582,6 +8596,79 @@
       collapseBtn.setAttribute('title', collapsed ? 'Sidebar ausklappen' : 'Sidebar einklappen');
     });
   }
+
+  // ============================================================
+  // MOBILE SIDEBAR DRAWER (≤ 900px)
+  // Hamburger öffnet Sidebar als Overlay-Drawer. Overlay-Klick,
+  // Escape-Taste und Resize über 900px schliessen ihn wieder.
+  // ============================================================
+  (function () {
+    const hamburger = document.getElementById('vd-hamburger');
+    const overlay   = document.getElementById('vd-sidebar-overlay');
+    const sidebar   = document.getElementById('vd-sidebar');
+
+    function openDrawer() {
+      document.body.classList.add('vd-sidebar-open');
+      if (hamburger) {
+        hamburger.setAttribute('aria-expanded', 'true');
+        hamburger.setAttribute('aria-label', 'Navigation schliessen');
+      }
+      // Fokus in die Sidebar setzen (Accessibility)
+      if (sidebar) {
+        const first = sidebar.querySelector('a, button, [tabindex="0"]');
+        if (first) first.focus();
+      }
+    }
+
+    function closeDrawer() {
+      document.body.classList.remove('vd-sidebar-open');
+      if (hamburger) {
+        hamburger.setAttribute('aria-expanded', 'false');
+        hamburger.setAttribute('aria-label', 'Navigation öffnen');
+        hamburger.focus();
+      }
+    }
+
+    if (hamburger) {
+      hamburger.addEventListener('click', () => {
+        document.body.classList.contains('vd-sidebar-open') ? closeDrawer() : openDrawer();
+      });
+    }
+
+    if (overlay) overlay.addEventListener('click', closeDrawer);
+
+    // Escape-Taste schliesst Drawer
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.body.classList.contains('vd-sidebar-open')) {
+        closeDrawer();
+      }
+    });
+
+    // Focus-Trap: Tab bleibt innerhalb der Sidebar solange Drawer offen
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+      if (!document.body.classList.contains('vd-sidebar-open')) return;
+      if (!sidebar) return;
+      const focusable = Array.from(
+        sidebar.querySelectorAll('a, button, input, [tabindex="0"]')
+      ).filter(el => !el.disabled && el.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last  = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    });
+
+    // Drawer automatisch schliessen wenn Viewport auf Desktop-Breite wächst
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 900) closeDrawer();
+    }, { passive: true });
+  })();
 
   // ============================================================
   // ROUTING (Sidebar-Navigation)

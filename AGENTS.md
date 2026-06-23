@@ -4,17 +4,29 @@
 
 BauDoc ist eine Web- und Mobile/PWA-Anwendung für planbasierte Baufortschrittsdokumentation. Der MVP dokumentiert Fotos, Pläne, Planversionen, Planpositionen, Kommentare, Rollen, Berechtigungen, Chronologie und Audit-Logs. KI, 360-Viewer, Offline-Synchronisation und produktive Drittintegrationen sind spätere Erweiterungen.
 
+## AGENTS.md Hierarchie
+
+Es gibt mehrere `AGENTS.md`-Dateien im Repository. Sie gelten in dieser Reihenfolge:
+
+1. **`AGENTS.md` (Root, diese Datei)** — globale Defaults, gelten für alle Bereiche
+2. **`frontend/AGENTS.md`** — Frontend-spezifische Ergänzungen, überschreiben Root wo nötig
+3. **`backend/AGENTS.md`** — Backend-spezifische Ergänzungen
+4. **`database/AGENTS.md`** — Datenbank-spezifische Ergänzungen
+
+Layer-spezifische `AGENTS.md`-Dateien müssen die Root-Regeln nicht wiederholen — sie ergänzen oder präzisieren nur. Bei Widerspruch gilt die spezifischere Datei, aber nie gegen Sicherheits- oder Datenschutzregeln aus Root.
+
 ## Verbindliche Quellen
 
 Vor Änderungen müssen passende Dokumente gelesen werden:
 - Github: https://github.com/SwissAIAgency/BauDoc.git
-- `PROJECT_DEFINITION.md`
-- `LEISTUNGSKATALOG.md`
-- `ARCHITECTURE.md`
-- `SECURITY_PRIVACY.md`
-- `UI_STANDARDS.md`, falls UI betroffen ist
-- `TESTING.md`
+- `docs/project/definition.md` (kanonisch; Root: `PROJECT_DEFINITION.md`)
+- `docs/project/leistungskatalog.md` (kanonisch; Root: `LEISTUNGSKATALOG.md`)
+- `docs/architecture/overview.md` (kanonisch; Root: `ARCHITECTURE.md`)
+- `docs/security/overview.md` → `SECURITY_PRIVACY.md`
+- `docs/design/system.md` (kanonisch; Root: `UI_STANDARDS.md`), falls UI betroffen ist
+- `docs/testing/strategy.md` (kanonisch; Root: `TESTING.md`)
 - `docs/references/leistungskatalog_baufortschritt_dokumentation.html`
+- `docs/development/code-conventions.md`, falls Code-Konventionen relevant sind
 - relevante Bereichs-`AGENTS.md`
 
 Die fachliche Hauptquelle ist `docs/references/leistungskatalog_baufortschritt_dokumentation.html`.

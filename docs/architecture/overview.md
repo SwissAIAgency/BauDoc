@@ -1,7 +1,24 @@
-# Architektur
+# Systemarchitektur
 
-> **Kanonischer Ort:** `docs/architecture/overview.md`  
-> Diese Datei bleibt als Referenz erhalten. Änderungen bitte nur in `docs/architecture/overview.md` vornehmen.
+**Zuletzt aktualisiert:** 2026-06-22  
+**Verantwortlich:** Lead Software Architect Agent  
+**Status:** APPROVED  
+**Bezug:** `DECISIONS/0004-technology-stack.md`, `docs/technical/api-contracts.md`, `docs/technical/database-model.md`
+
+> **Kanonischer Ort dieser Datei:** `docs/architecture/overview.md`  
+> Die Datei `ARCHITECTURE.md` im Root leitet hierher weiter.
+
+---
+
+## Zweck
+
+Diese Datei beschreibt die Zielarchitektur von BauDoc: System-Übersicht, Schichten, Datenflüsse, Sicherheitsgrenzen und technische Entscheidungen. Sie ist verbindliche Referenz für alle Implementierungsphasen.
+
+## Geltungsbereich
+
+Verbindlich für Backend, Frontend, Datenbank, Storage und Deployment. Änderungen erfordern ein ADR.
+
+---
 
 ## Architekturziel
 
@@ -102,11 +119,11 @@ Redis / Queue Worker
 
 ## Datenflüsse
 
-- Anmeldung: PWA authentifiziert sich über Laravel Sanctum, API prüft Rechte pro Anfrage.
-- Fotoaufnahme: Datei wird privat gespeichert, Metadaten werden validiert, Datenbankeintrag und Audit-Event entstehen.
-- Planposition: Marker wird relativ zu einer konkreten Planversion gespeichert.
-- Planversion: neue Version erzeugt unveränderliche Referenz und Benachrichtigung.
-- Ansicht/Download: Backend prüft Recht und erzeugt kontrollierten Zugriff.
+- **Anmeldung:** PWA authentifiziert sich über Laravel Sanctum, API prüft Rechte pro Anfrage.
+- **Fotoaufnahme:** Datei wird privat gespeichert, Metadaten werden validiert, Datenbankeintrag und Audit-Event entstehen.
+- **Planposition:** Marker wird relativ zu einer konkreten Planversion gespeichert.
+- **Planversion:** Neue Version erzeugt unveränderliche Referenz und Benachrichtigung.
+- **Ansicht/Download:** Backend prüft Recht und erzeugt kontrollierten Zugriff.
 
 ## Sicherheitsgrenzen
 
@@ -173,3 +190,9 @@ Redis / Queue Worker
 - Dateiablage wird öffentlich konfiguriert.
 - Planpositionen werden ohne Planversion gespeichert.
 - Audit-Retention bleibt zu lange offen.
+
+## Änderungshistorie
+
+| Datum | Änderung | Autor |
+|---|---|---|
+| 2026-06-22 | Migriert nach `docs/architecture/overview.md` (kanonisch) | Restructuring |

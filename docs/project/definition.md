@@ -1,13 +1,28 @@
 # Projektdefinition
 
-> **Kanonischer Ort:** `docs/project/definition.md`  
-> Diese Datei bleibt als Referenz erhalten. Änderungen bitte nur in `docs/project/definition.md` vornehmen.
+**Zuletzt aktualisiert:** 2026-06-22  
+**Verantwortlich:** Product & Requirements Agent  
+**Status:** APPROVED  
+**Bezug:** `DECISIONS/0001-project-baseline.md`, `docs/project/leistungskatalog.md`, `docs/architecture/overview.md`
 
+> **Kanonischer Ort dieser Datei:** `docs/project/definition.md`  
+> Die Datei `PROJECT_DEFINITION.md` im Root leitet hierher weiter.
 
+---
+
+## Zweck
+
+Diese Datei definiert Ziel, Scope, Zielgruppe, Anforderungen und Erfolgskriterien des BauDoc-MVP. Sie ist Ausgangspunkt für alle Architektur-, Sicherheits- und Implementierungsentscheidungen.
+
+## Geltungsbereich
+
+Verbindlich für alle Phasen bis MVP-Release. Änderungen am Scope erfordern ein neues ADR.
+
+---
 
 ## Projektname
 
-BauDoc - planbasierte Baufortschrittsdokumentation.
+BauDoc — planbasierte Baufortschrittsdokumentation.
 
 ## Kurzbeschreibung
 
@@ -164,3 +179,9 @@ Die Software soll Baufortschritte strukturiert erfassen, verorten, schützen, fi
 - Öffentliche Datei-URLs führen zu Datenabfluss.
 - Planpositionen werden ohne feste Planversion modelliert.
 - KI-Funktionen werden zu früh aktiviert.
+
+## Änderungshistorie
+
+| Datum | Änderung | Autor |
+|---|---|---|
+| 2026-06-22 | Migriert nach `docs/project/definition.md` (kanonisch) | Restructuring |

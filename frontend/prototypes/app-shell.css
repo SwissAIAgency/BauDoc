@@ -46,6 +46,23 @@
   --topbar-height: 64px;
   --sidebar-width: 240px;
   --sidebar-width-collapsed: 64px;
+
+  /* Breakpoints (als Referenz-Tokens; in Media Queries hardcoded, da
+     CSS Custom Properties in @media nicht auflösen) */
+  --bp-mobile-s: 480px;   /* Kleine Smartphones (iPhone SE) */
+  --bp-mobile-l: 768px;   /* Grosse Smartphones / kleines Tablet */
+  --bp-tablet:  1100px;   /* Tablet bis kleines Laptop */
+  --bp-desktop-s: 1280px; /* Standard-Laptop */
+  --bp-desktop-l: 1440px; /* Grosse Monitore (Content-Max-Width) */
+
+  /* Safe-Area-Insets (iPhone-Notch / Dynamic Island) */
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left, 0px);
+  --safe-right:  env(safe-area-inset-right, 0px);
+
+  /* Drawer-Transition */
+  --drawer-transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Dark Theme (Default) */
@@ -112,7 +129,7 @@ html, body { margin: 0; padding: 0; }
 body {
   font-family: var(--font-sans);
   font-size: 14px;
-  line-height: 1.45;
+  line-height: 1.5;
   font-weight: 400;
   font-variant-numeric: tabular-nums lining-nums;
   color: var(--text-high);
@@ -609,6 +626,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;
+  touch-action: manipulation;
   transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 .vd-button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
@@ -636,6 +654,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   border: 1px solid transparent;
   border-radius: var(--radius-small);
   color: var(--text-mid);
+  touch-action: manipulation;
   transition: background 120ms ease, color 120ms ease;
 }
 .vd-icon-button:hover { background: var(--bg-raised); color: var(--text-high); }
@@ -1593,4 +1612,255 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
     width: auto;
     height: auto;
   }
+}
+
+/* ============================================================
+   MOBILE SIDEBAR DRAWER (≤ 900px)
+   ------------------------------------------------------------
+   Auf kleinen Viewports öffnet die Sidebar als Overlay-Drawer
+   von links. Der Hamburger-Button ersetzt den Toggle-Button.
+   Das Dark-Overlay schliesst den Drawer bei Klick.
+
+   Zustände:
+   - Standard: Sidebar versteckt (translateX(-100%))
+   - .vd-sidebar-open: Sidebar eingefahren (translateX(0))
+   ============================================================ */
+
+/* Hamburger-Button: nur sichtbar auf Mobile */
+.vd-hamburger {
+  display: none;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-small);
+  color: var(--text-mid);
+  cursor: pointer;
+  touch-action: manipulation;
+  flex-shrink: 0;
+  transition: background 120ms ease, color 120ms ease;
+}
+.vd-hamburger:hover { background: var(--bg-raised); color: var(--text-high); }
+.vd-hamburger:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.vd-hamburger svg { width: 22px; height: 22px; pointer-events: none; }
+
+/* Dark-Overlay (hinter dem Drawer, vor dem Content) */
+.vd-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.56);
+  z-index: 40;
+  opacity: 0;
+  transition: opacity 280ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 900px) {
+  /* Hamburger einblenden */
+  .vd-hamburger { display: inline-flex; }
+
+  /* Sidebar: aus dem Fluss nehmen, links fixiert */
+  .vd-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: var(--drawer-transition);
+    /* Safe-Area links berücksichtigen (Landscape iPhone) */
+    padding-left: var(--safe-left);
+    /* Sidebar-Height = voller Viewport incl. Notch-Bereich oben */
+    height: 100dvh;
+  }
+
+  /* Overlay aktiv */
+  .vd-sidebar-open .vd-sidebar-overlay {
+    display: block;
+    opacity: 1;
+  }
+
+  /* Drawer geöffnet */
+  .vd-sidebar-open .vd-sidebar {
+    transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.40);
+  }
+
+  /* Toggle-Button auf Mobile ausblenden (Hamburger übernimmt) */
+  .vd-sidebar-toggle-wrap { display: none; }
+
+  /* App-Body nimmt volle Breite — Sidebar ist nicht mehr im Fluss */
+  .vd-app-body { flex: 1; }
+
+  /* Collapsed-Klasse auf Mobile ignorieren (Drawer = kein Icon-Only-Modus) */
+  .vd-app-sidebar-collapsed .vd-sidebar {
+    width: var(--sidebar-width);
+    transform: translateX(-100%);
+  }
+  .vd-app-sidebar-collapsed.vd-sidebar-open .vd-sidebar {
+    transform: translateX(0);
+  }
+}
+
+/* ============================================================
+   SAFE-AREA / NOTCH (iPhone X–16, Dynamic Island)
+   ============================================================ */
+
+/* Topbar: Höhe nach oben erweitern wenn Notch vorhanden */
+.vd-topbar {
+  padding-top: var(--safe-top);
+  height: calc(var(--topbar-height) + var(--safe-top));
+}
+
+/* Hauptbereich: Innenabstand unten (Home-Indicator) */
+.vd-app-scroll {
+  padding-bottom: var(--safe-bottom);
+}
+
+/* ============================================================
+   TOUCH TARGETS (pointer: coarse = Touch-Gerät)
+   ------------------------------------------------------------
+   Alle interaktiven Elemente erhalten mind. 44×44px Hit-Area.
+   Sichtgrösse bleibt unverändert — nur die tap-fähige Fläche
+   wird über padding oder min-height erweitert.
+   ============================================================ */
+
+@media (pointer: coarse) {
+  /* Body-Text: 16px Mindestgrösse für Lesbarkeit */
+  body { font-size: 16px; }
+
+  /* Buttons: volle Touch-Target-Grösse */
+  .vd-button {
+    min-height: 44px;
+    height: auto;
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-3);
+  }
+
+  /* Icon-Buttons: 44×44px */
+  .vd-icon-button {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Nav-Items: 44px Höhe */
+  .vd-nav-item {
+    height: 44px;
+  }
+
+  /* Chips: grössere Touch-Area via vertikales Padding */
+  .vd-chip {
+    min-height: 36px;
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
+
+  /* Theme-Pill: etwas grösser */
+  .vd-theme-pill {
+    width: 80px;
+    height: 44px;
+  }
+  .vd-theme-pill-thumb {
+    width: 34px;
+    height: 34px;
+    top: 4px;
+    left: 4px;
+  }
+  .vd-theme-pill[data-state="dark"] .vd-theme-pill-thumb {
+    transform: translateX(36px);
+  }
+}
+
+/* ============================================================
+   BREAKPOINT 480px — Mobile S (iPhone SE, kleine Androids)
+   ============================================================ */
+
+@media (max-width: 480px) {
+  /* Topbar: kompakter, mehr Platz für Content */
+  .vd-topbar {
+    padding: 0 var(--space-2);
+    gap: var(--space-1);
+  }
+
+  /* Hauptbereich: minimales Padding */
+  .vd-main {
+    padding: var(--space-3) var(--space-2);
+  }
+
+  /* Page-Titel verkleinern */
+  .vd-page-title { font-size: 20px; }
+
+  /* Karten: kompakter */
+  .vd-card { padding: var(--space-3) var(--space-4); }
+
+  /* Hero: vertikal stapeln */
+  .vd-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+  }
+  .vd-hero-stat {
+    align-items: flex-start;
+    border-left: none;
+    border-top: 1px solid var(--border-subtle);
+    padding-left: 0;
+    padding-top: var(--space-3);
+    width: 100%;
+  }
+
+  /* Topbar-Actions: nur Icons, kein Label */
+  .vd-topbar-brand-text { display: none; }
+}
+
+/* ============================================================
+   BREAKPOINT 768px — Tablet (iPad Mini, grosse Phones Landscape)
+   ============================================================ */
+
+@media (max-width: 768px) {
+  /* Suche: schmaler */
+  .vd-search-wrap { max-width: 280px; }
+}
+
+/* ============================================================
+   PICKER-STRIP: Snap-Scrolling + Overflow-Schutz
+   ============================================================ */
+
+.vd-picker-strip {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.vd-picker-strip > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   PRINT
+   ============================================================ */
+
+@media print {
+  .vd-sidebar,
+  .vd-topbar,
+  .vd-sidebar-overlay,
+  .vd-hamburger,
+  .vd-sidebar-toggle-wrap { display: none !important; }
+
+  .vd-app { display: block; }
+  .vd-app-body { display: block; }
+  .vd-main {
+    padding: 0;
+    max-width: none;
+  }
+
+  body { background: #fff; color: #000; font-size: 12pt; }
+  .vd-card { border: 1px solid #ccc; break-inside: avoid; }
+  a { color: #000; text-decoration: underline; }
 }

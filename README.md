@@ -17,25 +17,38 @@ BauDoc dokumentiert Baufortschritt mit Fotos, Plänen, Planversionen, Planpositi
 - `docs/references/leistungskatalog_baufortschritt_dokumentation.html`
 - `docs/references/unternehmensstandard-codex-agenten.txt`
 
-## Wichtige Dokumente
+## Dokumentations-Navigation
 
-- `AGENTS.md`: verbindliche Arbeitsregeln.
-- `PROJECT_DEFINITION.md`: Projektdefinition.
-- `LEISTUNGSKATALOG.md`: Module, Funktionen und Akzeptanzkriterien.
-- `ARCHITECTURE.md`: Zielarchitektur und technische Entscheidungen.
-- `SECURITY_PRIVACY.md`: Sicherheits- und Datenschutzgrundlage.
-- `UI_STANDARDS.md`: UI-, Brand- und Accessibility-Regeln.
-- `TESTING.md`: Teststrategie.
-- `PROTOTYP.md`: Single Source of Truth für den HTML-Prototyp
-  in `frontend/prototypes/`. Definiert alle Screens und führt
-  einen Änderungs-Log (Abschnitt 10). Jede HTML-Änderung wird
-  dort nachgetragen.
-- `docs/technical/project-analysis.md`: Projektanalyse vor Implementierung.
-- `docs/technical/development-plan.md`: priorisierter Entwicklungsplan.
-- `security/threat-model.md`: Threat Model.
-- `security/risk-register.md`: Security Risk Register.
-- `docs/legal/privacy-review.md`: Datenschutz Review vor Implementierung.
-- `DECISIONS/0004-technology-stack.md`: finalisierte Stackentscheidung.
+Alle Dokumente sind in `docs/_INDEX.md` verzeichnet. Wichtigste Einstiegspunkte:
+
+### Binding Rules & Entscheidungen
+- `AGENTS.md` — verbindliche Arbeitsregeln (global), inkl. AGENTS.md-Hierarchie
+- `RESTRUKTURIERUNG.md` — Projektstruktur-Leitfaden, Konventionen, Checklisten
+- `DECISIONS/` — Architecture Decision Records (ADR-0001 bis ADR-0004)
+
+### Projekt & Anforderungen
+- `docs/project/definition.md` — Projektdefinition, Scope, Erfolgskriterien
+- `docs/project/leistungskatalog.md` — Module, Funktionen, Akzeptanzkriterien
+- `docs/technical/development-plan.md` — BD-001 bis BD-015, priorisierter Entwicklungsplan
+
+### Architektur & Code
+- `docs/architecture/overview.md` — Systemarchitektur (Laravel + Vue + PostgreSQL)
+- `docs/development/code-conventions.md` — Naming, Struktur, Kommentar-Standards
+- `docs/technical/api-contracts.md` — API Request/Response-Formate
+- `docs/technical/database-model.md` — Entity-Beziehungen
+
+### Design & UI
+- `PROTOTYP.md` — Single Source of Truth für den HTML-Prototyp (6 Screens, 4 Modals)
+- `docs/design/system.md` — Produktive UI-Standards, Farben, Typografie
+- `frontend/prototypes/DESIGN.md` — Operative Design-Tokens (CSS-Variablen)
+- `frontend/prototypes/COMPONENTS.md` — Komponenten-Manifest mit Status
+
+### Sicherheit & Datenschutz
+- `docs/security/overview.md` → `SECURITY_PRIVACY.md`, Threat Model, Risk Register
+- `docs/legal/privacy-review.md` — Datenschutz-Review (Swiss DSG + DSGVO)
+
+### Tests
+- `docs/testing/strategy.md` — Teststrategie, Testarten, Merge-/Release-Checkliste
 
 ## Zielarchitektur
 
@@ -51,33 +64,53 @@ BauDoc dokumentiert Baufortschritt mit Fotos, Plänen, Planversionen, Planpositi
 
 ```text
 BauDoc/
-├── AGENTS.md
-├── README.md
-├── PROJECT_DEFINITION.md
-├── LEISTUNGSKATALOG.md
-├── ARCHITECTURE.md
-├── SECURITY_PRIVACY.md
-├── UI_STANDARDS.md
-├── TESTING.md
-├── CHANGELOG.md
-├── .env.example
-├── DECISIONS/
-├── docs/
-│   ├── business/
-│   ├── technical/
-│   ├── legal/
-│   ├── ux/
-│   └── references/
-├── frontend/
-├── backend/
-├── database/
-├── integrations/
-├── security/
-├── devops/
-├── tests/
-├── scripts/
-├── skills/
-└── prompts/
+│
+├── ── Root (Navigation & Binding)
+│   ├── README.md              ← dieser Einstiegspunkt
+│   ├── AGENTS.md              ← globale Arbeitsregeln (verbindlich)
+│   ├── RESTRUKTURIERUNG.md    ← Leitfaden, Konventionen, Checklisten
+│   ├── PROTOTYP.md            ← HTML-Prototyp Single Source of Truth
+│   ├── CHANGELOG.md
+│   ├── CONTRIBUTING.md
+│   └── .env.example
+│
+├── ── DECISIONS/              ← Architecture Decision Records
+│   ├── 0001-project-baseline.md
+│   ├── 0002-architecture-baseline.md
+│   ├── 0003-database-model.md
+│   └── 0004-technology-stack.md
+│
+├── ── docs/                   ← Alle Specs, Pläne, Policies (→ _INDEX.md)
+│   ├── _INDEX.md              ← Navigationsdatei
+│   ├── project/               ← Projektdefinition, Leistungskatalog
+│   ├── architecture/          ← Systemarchitektur (kanonisch)
+│   ├── development/           ← Entwicklungsplan, Code-Konventionen
+│   ├── design/                ← UI-Standards, Prototype-Spec
+│   ├── testing/               ← Teststrategie (kanonisch)
+│   ├── security/              ← Sicherheits-Übersicht
+│   ├── legal/                 ← Datenschutz, DSG, Retention
+│   ├── business/              ← Rollen, User Flows
+│   ├── technical/             ← API-Verträge, Datenbankmodell, Entwicklungsplan
+│   ├── ux/                    ← Accessibility, Design-System, Konzepte
+│   └── references/            ← Fachliche Quellen (HTML-Referenz)
+│
+├── ── frontend/
+│   ├── AGENTS.md              ← Frontend-spezifische Regeln
+│   └── prototypes/            ← HTML-Prototyp (file://-kompatibel)
+│       ├── index.html         ← Haupt-Prototyp (LIVE)
+│       ├── app-shell.css      ← CSS-Token-Quelle
+│       ├── DESIGN.md          ← Operative Design-Spec
+│       ├── COMPONENTS.md      ← Komponenten-Manifest
+│       └── components/        ← Extrahierte Web Components (POC)
+│
+├── ── design-explorations/    ← EXPERIMENT-Varianten (kein Produktionseinfluss)
+│
+├── ── backend/                ← Laravel API (ab BD-001)
+├── ── database/               ← Migrations, Seeds (ab BD-002)
+├── ── security/               ← Threat Model, Risk Register
+├── ── integrations/           ← (geplant)
+├── ── devops/                 ← (geplant)
+└── ── tests/                  ← (ab BD-013)
 ```
 
 ## Lokales Setup
