@@ -9215,10 +9215,23 @@
     });
     if (pathPoints.length < 2) return;
 
-    // sideOffset & radius aus den Spec-Variablen ziehen.
+    // sideOffset DYNAMISCH: ab Dot-Mitte bis in die Padding-Zone NEBEN dem Bild.
+    // Der Dot ist in der Zellmitte zentriert; die vertikale Linie muss aber
+    // ausserhalb des Bildrands verlaufen (Vorgabe: "aussen herum, nie über die
+    // Bilder"). Daher = halbe Zellbreite + Marge.
     const css = getComputedStyle(document.documentElement);
-    const sideOffset = parseFloat(css.getPropertyValue('--preview-serpentine-side-offset')) || 140;
-    const radius = parseFloat(css.getPropertyValue('--preview-serpentine-curve-radius')) || 75;
+    const radius = parseFloat(css.getPropertyValue('--preview-serpentine-curve-radius')) || 32;
+    // Referenz-Zellbreite aus erster nicht-leerer Zelle messen.
+    let cellHalf = 80;
+    {
+      const sampleCell = innerRows[0] && Array.from(innerRows[0].children)
+        .find(c => !c.classList.contains('vd-gal-cell--empty'));
+      if (sampleCell) cellHalf = sampleCell.getBoundingClientRect().width / 2;
+    }
+    // sideOffset = halbe Bildbreite + 36px Marge. Bei --gal-curve-pad = 72px
+    // sitzt die Linie damit mittig in der Lücke: 36px zum Bild, 36px zum Rand.
+    // Der Bogen (radius 32px) passt (36 + 32 = 68 ≤ 72).
+    const sideOffset = cellHalf + 36;
     // SVG-Hoehe so setzen, dass die absteigenden Schwaenge reinpassen.
     const lastRow = innerRows[innerRows.length - 1];
     const lastRect = lastRow.getBoundingClientRect();
@@ -9283,7 +9296,10 @@
   function calcGalCols() {
     const rowsEl = document.getElementById('vd-gal-rows');
     if (!rowsEl || !rowsEl.clientWidth) return 6;
-    const PAD = 48;  // --gal-curve-pad
+    // PAD live aus --gal-curve-pad lesen, damit Spalten-Rechnung und
+    // tatsächliches Inner-Padding nie auseinanderlaufen.
+    const PAD = parseFloat(getComputedStyle(document.documentElement)
+      .getPropertyValue('--gal-curve-pad')) || 72;
     const GAP = 32;  // .vd-gal-row gap
     const THUMB_MIN = 150;
     const avail = rowsEl.clientWidth - 2 * PAD;
