@@ -1288,7 +1288,9 @@
       .vd-proj-actions { width: 100%; flex-wrap: wrap; }
       .vd-proj-tabs { border-right: none; padding-right: 0; margin-right: 0; }
       .vd-proj-count { margin-left: 0; }
-      .vd-proj-tools { margin-left: 0; }
+      .vd-proj-tools { display: none; }
+      .vd-proj-filters { flex-wrap: nowrap; }
+      .vd-proj-pills { flex: 1 1 auto; }
     }
 
     /* Project-Detail: Filter-Card hat den gleichen Abstand zum rechten
@@ -1861,6 +1863,13 @@
         left: var(--safe-left, 0px);
         right: var(--safe-right, 0px);
       }
+      /* Mobile: kein Head, kein Axis — nur kompakter Bild-Streifen */
+      .vd-filmstrip-head { display: none; }
+      .vd-filmstrip-axis { display: none; }
+      .vd-filmstrip-track-wrap { height: 40px; }
+      .vd-filmstrip-item { width: 28px; height: 28px; border-radius: 3px; }
+      .vd-filmstrip-item-num { min-width: 13px; height: 13px; font-size: 8px; top: -4px; right: -4px; padding: 0 3px; }
+      .vd-filmstrip-track { padding: 6px 16px; gap: 4px; }
     }
 
     /* Inneres Panel (das eigentliche Strip-UI) */
@@ -3357,6 +3366,20 @@
 
     .vd-danger-zone { margin-top: var(--space-5); padding: var(--space-4); background: rgba(200,70,70,.06); border: 1px solid rgba(200,70,70,.2); border-radius: var(--radius-default); }
 
+    /* ---- INTEGRATIONEN ---- */
+    .vd-integration-list { display: flex; flex-direction: column; gap: 4px; }
+    .vd-integration-item { display: flex; align-items: center; gap: var(--space-4); padding: 10px 12px; border-radius: var(--radius-default); border: 1px solid var(--border-subtle); background: var(--bg-raised); transition: border-color 120ms; }
+    .vd-integration-item:hover { border-color: var(--border-default); }
+    .vd-integration-icon { flex-shrink: 0; width: 36px; height: 36px; border-radius: var(--radius-small); background: var(--bg-panel); border: 1px solid var(--border-default); display: flex; align-items: center; justify-content: center; color: var(--text-mid); }
+    .vd-integration-icon svg { width: 18px; height: 18px; }
+    .vd-integration-icon--info { background: rgba(91,155,213,.08); color: #5b9bd5; border-color: rgba(91,155,213,.2); }
+    .vd-integration-icon--primary { background: rgba(100,180,120,.08); color: var(--color-primary); border-color: rgba(100,180,120,.2); }
+    .vd-integration-meta { display: flex; flex-direction: column; gap: 2px; flex: 1 1 auto; min-width: 0; }
+    .vd-integration-name { font-size: 13px; font-weight: 500; color: var(--text-high); }
+    .vd-integration-detail { font-size: 11.5px; color: var(--text-low); }
+    .vd-integration-status { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 500; color: var(--color-primary); padding: 3px 10px; background: rgba(100,180,120,.08); border: 1px solid rgba(100,180,120,.2); border-radius: var(--radius-pill); white-space: nowrap; }
+    .vd-integration-status--off { color: var(--text-low); background: var(--bg-raised); border-color: var(--border-default); }
+
     /* ============================================================
        ARCHIV — Seite (abgeschlossene Projekte)
        Drei Bausteine:
@@ -4798,6 +4821,8 @@
         scrollbar-width: none;
       }
       .vd-screen[data-screen="galerie"] .vd-proj-pills::-webkit-scrollbar { display: none; }
+      .vd-screen[data-screen="galerie"] .vd-proj-filters { padding: 0 14px; margin: 0; }
+      .vd-screen[data-screen="galerie"] .vd-proj-tools { display: none; }
 
       /* Monats-Gruppe + Header */
       .vd-galm-group { margin-bottom: 22px; }
