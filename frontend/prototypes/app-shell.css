@@ -47,12 +47,24 @@
   --sidebar-width: 240px;
   --sidebar-width-collapsed: 64px;
 
-  /* Breakpoints (als Referenz-Tokens; in Media Queries hardcoded, da
-     CSS Custom Properties in @media nicht auflösen) */
-  --bp-mobile-s: 480px;   /* Kleine Smartphones (iPhone SE) */
-  --bp-mobile-l: 768px;   /* Grosse Smartphones / kleines Tablet */
-  --bp-tablet:  1100px;   /* Tablet bis kleines Laptop */
-  --bp-desktop-s: 1280px; /* Standard-Laptop */
+  /* ------------------------------------------------------------------
+     BREAKPOINT-SYSTEM — Single Source of Truth (Doku-Anker)
+     CSS Custom Properties lösen in @media NICHT auf, daher sind die
+     Werte in den Media Queries hartkodiert. Diese Tokens sind die
+     verbindliche Referenz: jede @media-Query MUSS einem dieser Werte
+     entsprechen — keine Ausreißer (kein 720/600/920 als Layout-Grenze).
+
+        ≤ 480px   Mobile S  — iPhone SE, kleine Androids
+        ≤ 768px   Mobile    — Workspace 1-spaltig, Filter-Sidebar aus
+       769–900px  Tablet    — Drawer-Nav, aber Workspace 2-spaltig
+        ≤ 900px   Drawer    — Sidebar wird Overlay-Drawer (Hamburger)
+        ≤1280px   Desktop S — Workspace 3→2-spaltig (Detail-Panel aus)
+       1281px+    Desktop   — volles 3-spaltiges Layout
+     ------------------------------------------------------------------ */
+  --bp-mobile-s:  480px;  /* Kleine Smartphones (iPhone SE) */
+  --bp-mobile:    768px;  /* Mobile-Grenze: Workspace einspaltig */
+  --bp-drawer:    900px;  /* Sidebar→Drawer; Tablet-Tier ist 768–900 */
+  --bp-desktop-s: 1280px; /* Detail-Panel aus, Workspace 2-spaltig */
   --bp-desktop-l: 1440px; /* Grosse Monitore (Content-Max-Width) */
 
   /* Safe-Area-Insets (iPhone-Notch / Dynamic Island) */
@@ -1812,9 +1824,6 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
     padding-top: var(--space-3);
     width: 100%;
   }
-
-  /* Topbar-Actions: nur Icons, kein Label */
-  .vd-topbar-brand-text { display: none; }
 }
 
 /* ============================================================

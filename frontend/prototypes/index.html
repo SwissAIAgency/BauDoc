@@ -266,6 +266,9 @@
        font-weight: 600;
        color: var(--text-high);
        white-space: nowrap;
+       overflow: hidden;
+       text-overflow: ellipsis;
+       min-width: 0;   /* erlaubt Schrumpfen im Flex-Container statt Überlauf */
      }
      .vd-topbar-subtitle {
        font-size: 11.5px;
@@ -278,6 +281,18 @@
      }
      .vd-topbar-subtitle:empty { display: none; }
      .vd-topbar-spacer { flex: 1; }
+
+     /* ≤480px: Primär-CTA wird Icon-Only (das Plus-Icon bleibt), damit der
+        Screen-Titel nicht verdrängt wird. 44px = Touch-Target (iOS HIG). */
+     @media (max-width: 480px) {
+       #vd-cta-label { display: none; }
+       #vd-cta-btn {
+         padding: 0;
+         width: 44px;
+         min-width: 44px;
+         justify-content: center;
+       }
+     }
 
     /* Scroll-Container innerhalb des App-Body (fuer Single-Screen
        und Sub-Topbar plus Workspace). Inhalt scrollt hier intern. */
@@ -1112,6 +1127,8 @@
       flex: 1 1 auto;           /* wächst bis .vd-proj-tools rechts anstösst */
       overflow-x: auto;
       overflow-y: hidden;
+      overscroll-behavior-x: contain;     /* horizontales Wischen greift nicht auf die Seite über */
+      -webkit-overflow-scrolling: touch;  /* iOS-Momentum-Scrolling */
       padding: 4px 6px;         /* Sub-Track-Luft innen, damit Pills nicht an
                                    Container-Kante kleben */
       background: var(--bg-raised);
@@ -1123,6 +1140,9 @@
     .vd-proj-pills::-webkit-scrollbar { display: none; }
     .vd-proj-pills::-webkit-scrollbar-track,
     .vd-proj-pills::-webkit-scrollbar-thumb { display: none; }
+    /* Pills behalten ihre natürliche Breite und scrollen, statt zu zerquetschen */
+    .vd-proj-pills > .vd-proj-pill,
+    .vd-proj-pills > .vd-proj-pill-clear { flex-shrink: 0; }
     .vd-proj-pill {
       position: relative;
       display: inline-flex;
@@ -1342,12 +1362,23 @@
       .vd-workspace { grid-template-columns: 240px 1fr; }
       .vd-detail-panel { display: none; }
     }
-    @media (max-width: 900px) {
+    /* Mobile (≤768px): einspaltig, Filter-Sidebar ausgeblendet.
+       Kollaps liegt bewusst bei 768 (nicht 900), damit die Tablet-Stufe
+       768–900px zweispaltig bleiben kann. Drawer-Schwelle bleibt 900px. */
+    @media (max-width: 768px) {
       .vd-workspace {
         grid-template-columns: 1fr;
         padding: var(--space-3) var(--space-3) calc(var(--space-6) + var(--timeline-height-current));
       }
       .vd-filter-sidebar { display: none; }
+    }
+    /* Tablet-Stufe (769–900px): Sidebar-Navigation läuft als Overlay-Drawer
+       (Sidebar ist <900px aus dem Flow), der Arbeitsbereich bleibt aber
+       2-spaltig. Ohne eigene Regeln greift hier die ≤1280px-Regel
+       (240px 1fr) — funktioniert, aber 240px Filter-Sidebar ist bei nur
+       768–900px Gesamtbreite eng. Dieser Block ist der Feinschliff. */
+    @media (min-width: 769px) and (max-width: 900px) {
+      /* TODO(human): Tablet-Workspace-Layout definieren */
     }
 
     /* ============================================================
@@ -1475,6 +1506,16 @@
       flex-direction: column;
     }
     .vd-app-sidebar-collapsed .vd-picker { left: var(--sidebar-width-collapsed, 64px); }
+
+    /* ≤900px: Sidebar ist Overlay-Drawer (nicht mehr im Flow) → Picker
+       darf keinen Platz mehr für sie reservieren, sonst nur ~87px nutzbar. */
+    @media (max-width: 900px) {
+      .vd-picker,
+      .vd-app-sidebar-collapsed .vd-picker {
+        left: var(--safe-left, 0px);
+        right: var(--safe-right, 0px);
+      }
+    }
 
     .vd-picker-head {
       display: flex;
@@ -1771,12 +1812,23 @@
       left: calc(var(--sidebar-width, 240px) + var(--space-6, 24px));
       right: var(--space-6, 24px);
       bottom: 0;
+      padding-bottom: var(--safe-bottom, 0px);  /* iOS Home-Indicator nicht überlappen */
       z-index: 39;                    /* unter .vd-picker (40), ueber normalem Content */
       pointer-events: none;           /* nur das innere Panel hoert Mausevents */
       transition: left 240ms cubic-bezier(0.32, 0.72, 0, 1);
     }
     .vd-app-sidebar-collapsed .vd-filmstrip-zone {
       left: calc(var(--sidebar-width-collapsed, 64px) + var(--space-6, 24px));
+    }
+
+    /* ≤900px: Sidebar ist Overlay-Drawer → Filmstrip darf keinen Platz für
+       sie reservieren. Volle Breite (mit Safe-Area links/rechts im Landscape). */
+    @media (max-width: 900px) {
+      .vd-filmstrip-zone,
+      .vd-app-sidebar-collapsed .vd-filmstrip-zone {
+        left: var(--safe-left, 0px);
+        right: var(--safe-right, 0px);
+      }
     }
 
     /* Inneres Panel (das eigentliche Strip-UI) */
@@ -2142,14 +2194,14 @@
       border-radius: var(--radius-preview);
       width: min(1200px, 94vw);
       max-width: 94vw;
-      max-height: 90vh;
+      max-height: 90dvh;   /* dvh statt vh → kein Höhensprung bei iOS-Adressleiste */
       display: grid;
       grid-template-columns: 1fr 360px;
       overflow: hidden;
       box-shadow: 0 16px 48px rgba(0,0,0,0.4);
     }
     @media (max-width: 900px) {
-      .vd-modal { grid-template-columns: 1fr; max-height: 96vh; }
+      .vd-modal { grid-template-columns: 1fr; max-height: 96dvh; }
       .vd-modal-side { display: none; }
     }
     .vd-modal-main {
@@ -2286,7 +2338,7 @@
       padding-top: var(--space-2);
       border-top: 1px solid var(--border-subtle);
     }
-    .vd-modal-actions .vd-button { flex: 1; height: 32px; font-size: 12px; }
+    .vd-modal-actions .vd-button { flex: 1; min-height: 32px; font-size: 12px; }
 
     /* ============================================================
        WIZARD-MODAL (Datei wählen)
@@ -2521,7 +2573,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      height: 32px;
+      min-height: 32px;   /* min- statt fix, damit @media(pointer:coarse) auf 44px aufstocken kann */
       padding: 0 12px;
       background: var(--bg-panel);
       border: 1px solid var(--border-default);
@@ -3120,11 +3172,6 @@
       .vd-archiv-grid { grid-template-columns: 1fr; }
       .vd-settings-layout { grid-template-columns: 1fr; }
       .vd-channel-table { grid-template-columns: 1fr 60px 60px 60px; }
-    }
-    @media (max-width: 600px) {
-      .vd-screen { padding: var(--space-4) var(--space-3) var(--space-6); }
-      .vd-subtopbar { padding: 0 var(--space-3); }
-    }
     }
     @media (max-width: 600px) {
       .vd-screen { padding: var(--space-4) var(--space-3) var(--space-6); }
@@ -4046,7 +4093,7 @@
     }
     @media (max-width: 720px) {
       .vd-gal-rows { padding: 0 20px; }
-      .vd-gal-row { gap: 16px; grid-template-columns: repeat(3, 1fr); }
+      .vd-gal-row { gap: 16px; }   /* Spaltenzahl kommt ALLEIN aus --gal-cols (calcGalCols) */
       .vd-gal-serpentine-svg { display: none; }
     }
 
@@ -4616,6 +4663,22 @@
       border: 1px solid var(--border-subtle);
       border-radius: 3px;
       color: var(--text-mid);
+    }
+
+    /* ============================================================
+       REDUCED MOTION — global (DESIGN.md: prefers-reduced-motion)
+       Neutralisiert ALLE Transitions/Animationen bei OS-Einstellung
+       "Bewegung reduzieren". Fängt auch die vielen inline definierten
+       Keyframes/Transitions (Modal-In, Serpentine, Drawer) ab, die der
+       Block in app-shell.css nicht kennt.
+       ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
     }
   </style>
 </head>
@@ -8746,9 +8809,17 @@
     const hamburger = document.getElementById('vd-hamburger');
     const overlay   = document.getElementById('vd-sidebar-overlay');
     const sidebar   = document.getElementById('vd-sidebar');
+    const appScroll = document.querySelector('.vd-app-scroll');
 
     function openDrawer() {
       document.body.classList.add('vd-sidebar-open');
+      // Hintergrund-Content sperren: verhindert Scroll-Bleed UND macht ihn
+      // unfokussierbar/klickbar (inert). Topbar (Hamburger) und Sidebar
+      // bleiben bedienbar, da sie ausserhalb von .vd-app-scroll liegen.
+      if (appScroll) {
+        appScroll.style.overflow = 'hidden';
+        appScroll.setAttribute('inert', '');
+      }
       if (hamburger) {
         hamburger.setAttribute('aria-expanded', 'true');
         hamburger.setAttribute('aria-label', 'Navigation schliessen');
@@ -8762,6 +8833,10 @@
 
     function closeDrawer() {
       document.body.classList.remove('vd-sidebar-open');
+      if (appScroll) {
+        appScroll.style.overflow = '';
+        appScroll.removeAttribute('inert');
+      }
       if (hamburger) {
         hamburger.setAttribute('aria-expanded', 'false');
         hamburger.setAttribute('aria-label', 'Navigation öffnen');
@@ -9442,11 +9517,15 @@
     // tatsächliches Inner-Padding nie auseinanderlaufen.
     const PAD = parseFloat(getComputedStyle(document.documentElement)
       .getPropertyValue('--gal-curve-pad')) || 72;
-    const GAP = 32;  // .vd-gal-row gap
+    // GAP an die CSS-Media-Queries (.vd-gal-row gap: 32 / 24 @1100 / 16 @720)
+    // koppeln — sonst rechnet die Spaltenzahl mit anderem Abstand als das
+    // tatsächlich gerenderte Grid und es entstehen Phantom-Slots.
+    const vw = window.innerWidth;
+    const GAP = vw <= 720 ? 16 : (vw <= 1100 ? 24 : 32);
     const THUMB_MIN = 150;
     const avail = rowsEl.clientWidth - 2 * PAD;
     const cols = Math.floor((avail + GAP) / (THUMB_MIN + GAP));
-    return Math.max(3, Math.min(8, cols));
+    return Math.max(2, Math.min(8, cols));  // Floor 2 für sehr schmale Phones (≤375px)
   }
   let SLOTS_PER_ROW = 6;
   let PHOTOS_PER_ROW = 6;
