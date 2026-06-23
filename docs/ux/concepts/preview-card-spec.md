@@ -99,10 +99,12 @@ CSS-Datei.
 | `--preview-serpentine-stroke-opacity` | `0.7` | Halbtransparent |
 | `--preview-serpentine-stroke-linecap` | `round` | Pill-Cap |
 | `--preview-serpentine-stroke-linejoin` | `round` | Pill-Join |
-| `--preview-serpentine-curve-radius` | `75px` | Viertelkreis-Radius |
-| `--preview-serpentine-side-offset` | `140px` | Horizontaler Abstand für Bogen |
+| `--preview-serpentine-curve-radius` | `32px` | Viertelkreis-Radius (2026-06-23: 75→32, engerer Bogen am Bild) |
+| `--preview-serpentine-side-offset` | `44px` | ⚠️ **Deprecated** seit 2026-06-23: nicht mehr gelesen. `updateSerpentinePath()` berechnet den Offset dynamisch (`cellHalf + 36px`). Wert nur als Fallback/Doku. |
 | `--preview-serpentine-row-spacing` | `66px` | Vertikaler Abstand zwischen Zeilen |
 | `--preview-serpentine-drop-shadow` | `0 0 6px rgba(102, 128, 72, 0.35)` | Salwei-Glow |
+| `--gal-curve-pad` | `72px` | Galerie-Box-Padding links/rechts (Konsument: `index.html`). Muss ≥ Marge(36) + curve-radius(32) sein, damit der Bogen nicht abgeschnitten wird. |
+| `--gal-cols` | `6` | Galerie-Spalten-Default. Wird von `calcGalCols()` zur Laufzeit nach verfügbarer Breite überschrieben (Sidebar offen/zu → ∓1 Spalte). |
 
 ### Berechnete Werte (NICHT direkt überschreiben)
 

@@ -88,7 +88,16 @@
   --preview-serpentine-stroke-linecap: round;
   --preview-serpentine-stroke-linejoin: round;
   --preview-serpentine-curve-radius: 32px;
+  /* HINWEIS: --preview-serpentine-side-offset wird seit 2026-06-23 NICHT mehr
+     gelesen. updateSerpentinePath() berechnet den Offset dynamisch aus der
+     gemessenen Bildbreite (cellHalf + 36px Marge), damit die Linie bei jeder
+     Spaltenzahl mittig in der Padding-Lücke NEBEN dem Bild sitzt (nie darüber).
+     Wert bleibt nur als Fallback/Doku erhalten. */
   --preview-serpentine-side-offset: 44px;
+  /* Galerie-Grid-Layout (Konsument: index.html .vd-gal-rows-inner / .vd-gal-row).
+     --gal-curve-pad = Padding links/rechts der Galerie-Box; muss >= Marge(36)
+     + curve-radius(32) sein, damit der Bogen nicht abgeschnitten wird.
+     --gal-cols = Spalten-Default, von calcGalCols() zur Laufzeit überschrieben. */
   --gal-curve-pad: 72px;
   --gal-cols: 6;
   --preview-serpentine-row-spacing: 66px;
