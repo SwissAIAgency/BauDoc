@@ -1682,8 +1682,9 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
    --bottomnav-height + env(safe-area-inset-bottom). */
 :root { --bottomnav-height: 58px; }
 
-/* Standard (Desktop): Bar versteckt */
+/* Standard (Desktop): Bar + Mobile-Avatar versteckt */
 .vd-bottomnav { display: none; }
+.vd-topbar-avatar { display: none; }
 
 @media (max-width: 900px) {
   /* Sidebar + Drawer-Reste komplett aus dem Spiel nehmen */
@@ -1740,6 +1741,67 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   }
   .vd-bottomnav-item:active { color: var(--text-mid); }
   .vd-bottomnav-item--active { color: var(--color-primary); }
+
+  /* Mittiger Spacer (gleiche Breite wie ein Tab) — Platz für den FAB */
+  .vd-bottomnav-spacer { flex: 1; }
+
+  /* Zentraler FAB: schwebt mittig, überlappt die Bar-Oberkante (Notch-Look) */
+  .vd-fab {
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--safe-bottom) + 12px);
+    transform: translateX(-50%);
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    border: 3px solid var(--bg-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 120ms ease, filter 120ms ease;
+  }
+  .vd-fab svg { width: 27px; height: 27px; pointer-events: none; }
+  .vd-fab:active { transform: translateX(-50%) scale(0.93); }
+  .vd-fab:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+
+  /* Profil-Avatar in der Topbar (ersetzt Profil-Tab) */
+  .vd-topbar-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--color-primary-soft, var(--bg-raised));
+    color: var(--color-primary);
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .vd-topbar-avatar:active { filter: brightness(0.92); }
+
+  /* Topbar aufräumen: Subtitle weg (zu lang), Titel truncaten, Spacer raus —
+     damit die Actions (inkl. Avatar) garantiert in den Viewport passen. */
+  .vd-topbar-subtitle { display: none; }
+  .vd-topbar-spacer { display: none; }
+  .vd-topbar-titles { flex: 1 1 auto; min-width: 0; }
+  .vd-topbar-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  .vd-topbar-actions { flex-shrink: 0; }
 
   /* Content-Bereiche brauchen Platz unten, damit nichts hinter der
      Bar verschwindet (alle scrollbaren Screen-Container). */
