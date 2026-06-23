@@ -33,7 +33,6 @@
     body[data-active-screen="projekte"]      .vd-screen[data-screen="projekte"]      { display: flex !important; flex-direction: column; }
     body[data-active-screen="projekt-detail"] .vd-screen[data-screen="projekt-detail"] { display: flex !important; flex-direction: column; }
     body[data-active-screen="galerie"]       .vd-screen[data-screen="galerie"]       { display: flex !important; flex-direction: column; }
-    body[data-active-screen="archiv"]        .vd-screen[data-screen="archiv"]        { display: flex !important; flex-direction: column; }
     body[data-active-screen="einstellung"]   .vd-screen[data-screen="einstellung"]   { display: flex !important; flex-direction: column; }
 
     /* Detail-only Markup (Sub-Topbar, Tabs-Bar, Workspace, Picker,
@@ -173,7 +172,6 @@
     body[data-active-screen="projekte"]    .vd-screen[data-screen="projekte"]    { display: flex; flex-direction: column; }
     body[data-active-screen="projekt-detail"] .vd-screen[data-screen="projekt-detail"] { display: flex; flex-direction: column; }
     body[data-active-screen="galerie"]     .vd-screen[data-screen="galerie"]     { display: flex; flex-direction: column; }
-    body[data-active-screen="archiv"]      .vd-screen[data-screen="archiv"]      { display: flex; flex-direction: column; }
     body[data-active-screen="einstellung"] .vd-screen[data-screen="einstellung"] { display: flex; flex-direction: column; }
 
     /* ============================================================
@@ -4888,13 +4886,6 @@
           <span class="vd-nav-item-label">Galerie</span>
           <span class="vd-nav-item-count" id="vd-count-sidebar-galerie" data-demo-counts="true" title="Aus window.VISIDOC_DEMO (deterministisch)">—</span>
         </a>
-        <a class="vd-nav-item" href="#" data-nav="archiv" data-label="Archiv">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="2" y="3" width="20" height="5" rx="1.5"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>
-          </svg>
-          <span class="vd-nav-item-label">Archiv</span>
-          <span class="vd-nav-item-count" aria-label="8 abgeschlossene Projekte">8</span>
-        </a>
         <div class="vd-sidebar-divider"></div>
       </nav>
       <div class="vd-sidebar-footer">
@@ -5189,10 +5180,9 @@
             <input type="search" placeholder="Projektname, Adresse oder ID" aria-label="Projekte filtern">
           </div>
           <div class="vd-toolbar-segments" role="tablist" aria-label="Status-Filter">
-            <button type="button" aria-pressed="true">Alle <span class="seg-count">12</span></button>
-            <button type="button" aria-pressed="false">In Prüfung <span class="seg-count">4</span></button>
-            <button type="button" aria-pressed="false">Freigegeben <span class="seg-count">5</span></button>
-            <button type="button" aria-pressed="false">Archiviert <span class="seg-count">3</span></button>
+            <button type="button" data-projekt-filter="aktuelle" aria-pressed="true">Aktuelle <span class="seg-count" data-seg-count="aktuelle">–</span></button>
+            <button type="button" data-projekt-filter="abgeschlossen" aria-pressed="false">Abgeschlossen <span class="seg-count" data-seg-count="abgeschlossen">–</span></button>
+            <button type="button" data-projekt-filter="alle" aria-pressed="false">Alle <span class="seg-count" data-seg-count="alle">–</span></button>
           </div>
           <select class="vd-select" aria-label="Sortierung">
             <option>Zuletzt geändert</option>
@@ -6001,601 +5991,7 @@
         <div class="vd-gal-mobile" id="vd-gal-mobile" aria-label="Fotos nach Monat"></div>
       </section>
 
-      <!-- ============================================================
-           SCREEN 5: ARCHIV (abgeschlossene Projekte)
-           Aufbau:
-             1) Hero (Titel + Counts + CTA-Buttons)
-             2) Stat-Bar (4 KPIs)
-             3) Toolbar (Suche + Jahr-Segmente + Sort)
-             4) Jahr-Trenner + Projekt-Tabelle mit Retention-Bar
-             5) Audit-Log-Bereich
-             6) DSG-/Aufbewahrungs-Callout-Grid
-           ============================================================ -->
-      <section class="vd-screen" data-screen="archiv">
-
-        <!-- HERO-Aktionen (Title + Subtitle leben jetzt in der Topbar,
-             siehe vd-topbar-titles; vd-page-head-Title hier entfernt
-             weil er sonst den Topbar-Titel doppelt). -->
-        <div class="vd-archiv-hero-actions vd-archiv-hero-actions--solo">
-            <button class="vd-button vd-button--ghost" type="button">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Export (Bundle)
-            </button>
-            <button class="vd-button vd-button--secondary" type="button">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              Audit-Log
-            </button>
-            <button class="vd-button vd-button--primary" type="button" data-open="export-modal">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Archiv exportieren
-            </button>
-        </div>
-
-        <!-- 1) STAT-BAR -->
-        <div class="vd-archiv-stats">
-          <div class="vd-archiv-stat">
-            <div class="vd-archiv-stat-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="5" rx="1.5"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>
-            </div>
-            <div class="vd-archiv-stat-body">
-              <div class="vd-archiv-stat-label">Abgeschlossene Projekte</div>
-              <div class="vd-archiv-stat-value">8</div>
-              <div class="vd-archiv-stat-meta">davon 3 in 2026 · 5 in 2025</div>
-            </div>
-          </div>
-          <div class="vd-archiv-stat vd-archiv-stat--info">
-            <div class="vd-archiv-stat-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            </div>
-            <div class="vd-archiv-stat-body">
-              <div class="vd-archiv-stat-label">Medien gespeichert</div>
-              <div class="vd-archiv-stat-value">2'273<span class="vd-archiv-stat-unit">Medien</span></div>
-              <div class="vd-archiv-stat-meta">17.4 GB auf S3-Storage · CH-FRA1</div>
-            </div>
-          </div>
-          <div class="vd-archiv-stat vd-archiv-stat--warn">
-            <div class="vd-archiv-stat-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-            </div>
-            <div class="vd-archiv-stat-body">
-              <div class="vd-archiv-stat-label">Pläne (Planversionen)</div>
-              <div class="vd-archiv-stat-value">41<span class="vd-archiv-stat-unit">Pläne</span></div>
-              <div class="vd-archiv-stat-meta">unveränderlich seit Abschluss</div>
-            </div>
-          </div>
-          <div class="vd-archiv-stat vd-archiv-stat--muted">
-            <div class="vd-archiv-stat-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
-            </div>
-            <div class="vd-archiv-stat-body">
-              <div class="vd-archiv-stat-label">Audit-Log-Einträge</div>
-              <div class="vd-archiv-stat-value">186</div>
-              <div class="vd-archiv-stat-meta">Letzte 90 Tage · 4 pro Tag Ø</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 2) TOOLBAR -->
-        <div class="vd-archiv-toolbar">
-          <div class="vd-archiv-search">
-            <svg class="vd-archiv-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            <input type="search" placeholder="Archiv durchsuchen — Projekt, Adresse, ID, Bauleiter" aria-label="Archiv durchsuchen">
-          </div>
-          <div class="vd-archiv-segments" role="group" aria-label="Jahr-Filter">
-            <button type="button" aria-pressed="false">Alle <span class="seg-count">8</span></button>
-            <button type="button" aria-pressed="true">2026 <span class="seg-count">3</span></button>
-            <button type="button" aria-pressed="false">2025 <span class="seg-count">5</span></button>
-            <button type="button" aria-pressed="false">Älter</button>
-          </div>
-          <select class="vd-select" aria-label="Sortierung">
-            <option>Abschlussdatum (neueste zuerst)</option>
-            <option>Abschlussdatum (älteste zuerst)</option>
-            <option>Projektname (A–Z)</option>
-            <option>Medien-Anzahl (absteigend)</option>
-            <option>Aufbewahrung (kürzeste zuerst)</option>
-          </select>
-        </div>
-
-        <!-- 3) JAHR-TRENNER 2026 + TABELLE -->
-        <div class="vd-year-divider">
-          <span class="vd-year-divider-year">2026</span>
-          <span class="vd-year-divider-label">Abgeschlossen Q1 / Q2</span>
-          <span class="vd-year-divider-line"></span>
-          <span class="vd-year-divider-count">3 Projekte · 681 Medien</span>
-        </div>
-
-        <div class="vd-archiv-table" role="table" aria-label="Archivierte Projekte 2026">
-          <div class="vd-archiv-head" role="row">
-            <span role="columnheader" aria-label="Status"></span>
-            <span role="columnheader" data-sort>Projekt</span>
-            <span role="columnheader">ID</span>
-            <span role="columnheader" data-sort class="is-sorted">Abschluss <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-            <span role="columnheader" class="vd-archiv-col-team">Bauleiter · Team</span>
-            <span role="columnheader" data-sort style="text-align:right;">Medien</span>
-            <span role="columnheader" style="text-align:right;">Pläne</span>
-            <span role="columnheader">Aufbewahrung</span>
-            <span role="columnheader" aria-label="Aktion"></span>
-          </div>
-
-          <!-- Projekt: EFH Renovation Küsnacht (PRJ-2025-028) -->
-          <a class="vd-archiv-row" href="#" role="row" tabindex="0">
-            <span class="vd-archiv-status vd-archiv-status--archived" aria-label="Archiviert"></span>
-            <div class="vd-archiv-title-block">
-              <div class="vd-archiv-title">
-                <span class="vd-archiv-title-text">Renovation Villa Seeblick</span>
-                <span class="vd-pill vd-pill--muted" style="height:18px;font-size:10px;padding:0 8px;">Archiviert</span>
-              </div>
-              <div class="vd-archiv-subtitle">Seestrasse 5, 8708 Männedorf · EFH, 2 Etagen · Renovation</div>
-            </div>
-            <span class="vd-archiv-id">PRJ-2025-028</span>
-            <span class="vd-archiv-date"><strong>14.04.2026</strong></span>
-            <div class="vd-archiv-team vd-archiv-col-team">
-              <span class="vd-avatar vd-avatar--ring-primary" aria-hidden="true">AP</span>
-              <span class="vd-archiv-team-name">A. Peter</span>
-              <span class="vd-archiv-team-extra">+2</span>
-            </div>
-            <div class="vd-archiv-count">
-              <div class="vd-archiv-count-value">98</div>
-              <div class="vd-archiv-count-label">Medien</div>
-            </div>
-            <div class="vd-archiv-count">
-              <div class="vd-archiv-count-value">2</div>
-              <div class="vd-archiv-count-label">Pläne</div>
-            </div>
-            <div class="vd-archiv-retention">
-              <div class="vd-archiv-retention-bar"><span class="vd-archiv-retention-fill" style="--retention-used: 2%; width: 2%;"></span></div>
-              <div class="vd-archiv-retention-meta"><strong>9.8 J</strong> · 02 %</div>
-            </div>
-            <button class="vd-archiv-action" type="button" aria-label="Aktionen für Renovation Villa Seeblick" onclick="event.preventDefault();">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-            </button>
-          </a>
-
-          <!-- Projekt: Sanierung Schulhaus Wettingen (PRJ-2023-009) -->
-          <a class="vd-archiv-row" href="#" role="row" tabindex="0">
-            <span class="vd-archiv-status vd-archiv-status--archived" aria-label="Archiviert"></span>
-            <div class="vd-archiv-title-block">
-              <div class="vd-archiv-title">
-                <span class="vd-archiv-title-text">Sanierung Schulhaus Wettingen</span>
-                <span class="vd-pill vd-pill--muted" style="height:18px;font-size:10px;padding:0 8px;">Archiviert</span>
-              </div>
-              <div class="vd-archiv-subtitle">Schulhausstrasse 14, 5430 Wettingen · Schulgebäude, 3 Etagen · Sanierung</div>
-            </div>
-            <span class="vd-archiv-id">PRJ-2023-009</span>
-            <span class="vd-archiv-date"><strong>28.02.2026</strong></span>
-            <div class="vd-archiv-team vd-archiv-col-team">
-              <span class="vd-avatar vd-avatar--ring-primary" aria-hidden="true">TK</span>
-              <span class="vd-archiv-team-name">T. Keller</span>
-              <span class="vd-archiv-team-extra">+3</span>
-            </div>
-            <div class="vd-archiv-count">
-              <div class="vd-archiv-count-value">248</div>
-              <div class="vd-archiv-count-label">Medien</div>
-            </div>
-            <div class="vd-archiv-count">
-              <div class="vd-archiv-count-value">4</div>
-              <div class="vd-archiv-count-label">Pläne</div>
-            </div>
-            <div class="vd-archiv-retention">
-              <div class="vd-archiv-retention-bar"><span class="vd-archiv-retention-fill" style="--retention-used: 4%; width: 4%;"></span></div>
-              <div class="vd-archiv-retention-meta"><strong>9.6 J</strong> · 04 %</div>
-            </div>
-            <button class="vd-archiv-action" type="button" aria-label="Aktionen für Sanierung Schulhaus Wettingen" onclick="event.preventDefault();">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-            </button>
-          </a>
-
-          <!-- Projekt: EFM Lagerhalle Thalwil (PRJ-2024-031) -->
-          <a class="vd-archiv-row" href="#" role="row" tabindex="0">
-            <span class="vd-archiv-status vd-archiv-status--info" aria-label="Audit aktiv"></span>
-            <div class="vd-archiv-title-block">
-              <div class="vd-archiv-title">
-                <span class="vd-archiv-title-text">EFM Lagerhalle Thalwil</span>
-                <span class="vd-pill vd-pill--info" style="height:18px;font-size:10px;padding:0 8px;">Audit offen</span>
-              </div>
-              <div class="vd-archiv-subtitle">Industriestrasse 6, 8800 Thalwil · Lagerhalle, 1 Etage · Neubau</div>
-            </div>
-            <span class="vd-archiv-id">PRJ-2024-031</span>
-            <span class="vd-archiv-date"><strong>02.02.2026</strong></span>
-            <div class="vd-archiv-team vd-archiv-col-team">
-              <span class="vd-avatar vd-avatar--ring-primary" aria-hidden="true">SH</span>
-              <span class="vd-archiv-team-name">S. Huber</span>
-              <span class="vd-archiv-team-extra">+2</span>
-            </div>
-            <div class="vd-archiv-count">
-              <div class="vd-archiv-count-value">335</div>
-              <div class="vd-archiv-count-label">Medien</div>
-            </div>
-            <div class="vd-archiv-count">
-              <div class="vd-archiv-count-value">7</div>
-              <div class="vd-archiv-count-label">Pläne</div>
-            </div>
-            <div class="vd-archiv-retention">
-              <div class="vd-archiv-retention-bar"><span class="vd-archiv-retention-fill" style="--retention-used: 5%; width: 5%;"></span></div>
-              <div class="vd-archiv-retention-meta"><strong>9.5 J</strong> · 05 %</div>
-            </div>
-            <button class="vd-archiv-action" type="button" aria-label="Aktionen für EFM Lagerhalle Thalwil" onclick="event.preventDefault();">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-            </button>
-          </a>
-        </div>
-
-        <!-- JAHR-TRENNER 2025 -->
-        <div class="vd-year-divider">
-          <span class="vd-year-divider-year">2025</span>
-          <span class="vd-year-divider-label">Abgeschlossen Q2 – Q4</span>
-          <span class="vd-year-divider-line"></span>
-          <span class="vd-year-divider-count">5 Projekte · 1'592 Medien</span>
-        </div>
-
-        <div class="vd-archiv-table" role="table" aria-label="Archivierte Projekte 2025">
-          <div class="vd-archiv-head" role="row">
-            <span role="columnheader" aria-label="Status"></span>
-            <span role="columnheader" data-sort>Projekt</span>
-            <span role="columnheader">ID</span>
-            <span role="columnheader" data-sort class="is-sorted">Abschluss <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-            <span role="columnheader" class="vd-archiv-col-team">Bauleiter · Team</span>
-            <span role="columnheader" data-sort style="text-align:right;">Medien</span>
-            <span role="columnheader" style="text-align:right;">Pläne</span>
-            <span role="columnheader">Aufbewahrung</span>
-            <span role="columnheader" aria-label="Aktion"></span>
-          </div>
-
-          <!-- Bürogebäude Baufeld, Basel (PRJ-2024-002) -->
-          <a class="vd-archiv-row" href="#" role="row" tabindex="0">
-            <span class="vd-archiv-status vd-archiv-status--archived" aria-label="Archiviert"></span>
-            <div class="vd-archiv-title-block">
-              <div class="vd-archiv-title">
-                <span class="vd-archiv-title-text">Bürogebäude Baufeld</span>
-                <span class="vd-pill vd-pill--muted" style="height:18px;font-size:10px;padding:0 8px;">Archiviert</span>
-              </div>
-              <div class="vd-archiv-subtitle">Zürcherstrasse 88, 4052 Basel · Bürogebäude, 5 Etagen · Neubau</div>
-            </div>
-            <span class="vd-archiv-id">PRJ-2024-002</span>
-            <span class="vd-archiv-date"><strong>12.12.2025</strong></span>
-            <div class="vd-archiv-team vd-archiv-col-team">
-              <span class="vd-avatar vd-avatar--ring-primary" aria-hidden="true">MB</span>
-              <span class="vd-archiv-team-name">M. Brunner</span>
-              <span class="vd-archiv-team-extra">+5</span>
-            </div>
-            <div class="vd-archiv-count">
-              <div class="vd-archiv-count-value">421</div>
-              <div class="vd-archiv-count-label">Medien</div>
-            </div>
-            <div class="vd-archiv-count">
-              <div class="vd-archiv-count-value">6</div>
-              <div class="vd-archiv-count-label">Pläne</div>
-            </div>
-            <div class="vd-archiv-retention">
-              <div class="vd-archiv-retention-bar"><span class="vd-archiv-retention-fill" style="--retention-used: 7%; width: 7%;"></span></div>
-              <div class="vd-archiv-retention-meta"><strong>9.3 J</strong> · 07 %</div>
-            </div>
-            <button class="vd-archiv-action" type="button" aria-label="Aktionen für Bürogebäude Baufeld" onclick="event.preventDefault();">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-            </button>
-          </a>
-
-          <!-- EFH Renovation Küsnacht (PRJ-2024-007) -->
-          <a class="vd-archiv-row" href="#" role="row" tabindex="0">
-            <span class="vd-archiv-status vd-archiv-status--archived" aria-label="Archiviert"></span>
-            <div class="vd-archiv-title-block">
-              <div class="vd-archiv-title">
-                <span class="vd-archiv-title-text">EFH Renovation Küsnacht</span>
-                <span class="vd-pill vd-pill--muted" style="height:18px;font-size:10px;padding:0 8px;">Archiviert</span>
-              </div>
-              <div class="vd-archiv-subtitle">Seestrasse 142, 8700 Küsnacht · EFH, 3 Etagen · Renovation</div>
-            </div>
-            <span class="vd-archiv-id">PRJ-2024-007</span>
-            <span class="vd-archiv-date"><strong>24.11.2025</strong></span>
-            <div class="vd-archiv-team vd-archiv-col-team">
-              <span class="vd-avatar vd-avatar--ring-primary" aria-hidden="true">AP</span>
-              <span class="vd-archiv-team-name">A. Peter</span>
-              <span class="vd-archiv-team-extra">+1</span>
-            </div>
-            <div class="vd-archiv-count">
-              <div class="vd-archiv-count-value">156</div>
-              <div class="vd-archiv-count-label">Medien</div>
-            </div>
-            <div class="vd-archiv-count">
-              <div class="vd-archiv-count-value">3</div>
-              <div class="vd-archiv-count-label">Pläne</div>
-            </div>
-            <div class="vd-archiv-retention">
-              <div class="vd-archiv-retention-bar"><span class="vd-archiv-retention-fill" style="--retention-used: 8%; width: 8%;"></span></div>
-              <div class="vd-archiv-retention-meta"><strong>9.2 J</strong> · 08 %</div>
-            </div>
-            <button class="vd-archiv-action" type="button" aria-label="Aktionen für EFH Renovation Küsnacht" onclick="event.preventDefault();">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-            </button>
-          </a>
-
-          <!-- Werkhof Aufstockung Bern (PRJ-2024-014) -->
-          <a class="vd-archiv-row" href="#" role="row" tabindex="0">
-            <span class="vd-archiv-status vd-archiv-status--archived" aria-label="Archiviert"></span>
-            <div class="vd-archiv-title-block">
-              <div class="vd-archiv-title">
-                <span class="vd-archiv-title-text">Werkhof Aufstockung Bern</span>
-                <span class="vd-pill vd-pill--muted" style="height:18px;font-size:10px;padding:0 8px;">Archiviert</span>
-              </div>
-              <div class="vd-archiv-subtitle">Werkstrasse 8, 3008 Bern · Werkhof, 2 Etagen · Aufstockung</div>
-            </div>
-            <span class="vd-archiv-id">PRJ-2024-014</span>
-            <span class="vd-archiv-date"><strong>06.10.2025</strong></span>
-            <div class="vd-archiv-team vd-archiv-col-team">
-              <span class="vd-avatar vd-avatar--ring-primary" aria-hidden="true">SH</span>
-              <span class="vd-archiv-team-name">S. Huber</span>
-              <span class="vd-archiv-team-extra">+2</span>
-            </div>
-            <div class="vd-archiv-count">
-              <div class="vd-archiv-count-value">189</div>
-              <div class="vd-archiv-count-label">Medien</div>
-            </div>
-            <div class="vd-archiv-count">
-              <div class="vd-archiv-count-value">4</div>
-              <div class="vd-archiv-count-label">Pläne</div>
-            </div>
-            <div class="vd-archiv-retention">
-              <div class="vd-archiv-retention-bar"><span class="vd-archiv-retention-fill" style="--retention-used: 10%; width: 10%;"></span></div>
-              <div class="vd-archiv-retention-meta"><strong>9.0 J</strong> · 10 %</div>
-            </div>
-            <button class="vd-archiv-action" type="button" aria-label="Aktionen für Werkhof Aufstockung Bern" onclick="event.preventDefault();">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-            </button>
-          </a>
-
-          <!-- Hochwasserschutz Aare Süd (PRJ-2023-031) -->
-          <a class="vd-archiv-row" href="#" role="row" tabindex="0">
-            <span class="vd-archiv-status vd-archiv-status--archived" aria-label="Archiviert"></span>
-            <div class="vd-archiv-title-block">
-              <div class="vd-archiv-title">
-                <span class="vd-archiv-title-text">Hochwasserschutz Aare Süd</span>
-                <span class="vd-pill vd-pill--muted" style="height:18px;font-size:10px;padding:0 8px;">Archiviert</span>
-              </div>
-              <div class="vd-archiv-subtitle">Aarepromenade, 3014 Bern · Infrastruktur, 1.2 km · Tiefbau</div>
-            </div>
-            <span class="vd-archiv-id">PRJ-2023-031</span>
-            <span class="vd-archiv-date"><strong>18.08.2025</strong></span>
-            <div class="vd-archiv-team vd-archiv-col-team">
-              <span class="vd-avatar vd-avatar--ring-primary" aria-hidden="true">TK</span>
-              <span class="vd-archiv-team-name">T. Keller</span>
-              <span class="vd-archiv-team-extra">+4</span>
-            </div>
-            <div class="vd-archiv-count">
-              <div class="vd-archiv-count-value">287</div>
-              <div class="vd-archiv-count-label">Medien</div>
-            </div>
-            <div class="vd-archiv-count">
-              <div class="vd-archiv-count-value">9</div>
-              <div class="vd-archiv-count-label">Pläne</div>
-            </div>
-            <div class="vd-archiv-retention">
-              <div class="vd-archiv-retention-bar"><span class="vd-archiv-retention-fill" style="--retention-used: 12%; width: 12%;"></span></div>
-              <div class="vd-archiv-retention-meta"><strong>8.8 J</strong> · 12 %</div>
-            </div>
-            <button class="vd-archiv-action" type="button" aria-label="Aktionen für Hochwasserschutz Aare Süd" onclick="event.preventDefault();">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-            </button>
-          </a>
-
-          <!-- Wohnsiedlung Horgen (PRJ-2024-021) -->
-          <a class="vd-archiv-row" href="#" role="row" tabindex="0">
-            <span class="vd-archiv-status vd-archiv-status--warn" aria-label="Retention bald ablaufend"></span>
-            <div class="vd-archiv-title-block">
-              <div class="vd-archiv-title">
-                <span class="vd-archiv-title-text">Wohnsiedlung Horgen</span>
-                <span class="vd-pill vd-pill--warn" style="height:18px;font-size:10px;padding:0 8px;">Retention prüfen</span>
-              </div>
-              <div class="vd-archiv-subtitle">Seestrasse 22, 8810 Horgen · Wohnsiedlung, 4 Etagen · Neubau</div>
-            </div>
-            <span class="vd-archiv-id">PRJ-2024-021</span>
-            <span class="vd-archiv-date"><strong>04.07.2025</strong></span>
-            <div class="vd-archiv-team vd-archiv-col-team">
-              <span class="vd-avatar vd-avatar--ring-primary" aria-hidden="true">AP</span>
-              <span class="vd-archiv-team-name">A. Peter</span>
-              <span class="vd-archiv-team-extra">+3</span>
-            </div>
-            <div class="vd-archiv-count">
-              <div class="vd-archiv-count-value">312</div>
-              <div class="vd-archiv-count-label">Medien</div>
-            </div>
-            <div class="vd-archiv-count">
-              <div class="vd-archiv-count-value">5</div>
-              <div class="vd-archiv-count-label">Pläne</div>
-            </div>
-            <div class="vd-archiv-retention">
-              <div class="vd-archiv-retention-bar"><span class="vd-archiv-retention-fill vd-archiv-retention-fill--high" style="--retention-used: 88%; width: 88%;"></span></div>
-              <div class="vd-archiv-retention-meta"><strong>1.2 J</strong> · 88 %</div>
-            </div>
-            <button class="vd-archiv-action" type="button" aria-label="Aktionen für Wohnsiedlung Horgen" onclick="event.preventDefault();">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-            </button>
-          </a>
-        </div>
-
-        <!-- Footer: Anzahl + Pagination -->
-        <div class="vd-archiv-foot">
-          <div class="vd-archiv-foot-info">
-            <strong>8</strong> Projekte angezeigt · Filter: 2026+2025 · Sortierung: Abschlussdatum ↓
-          </div>
-          <div class="vd-archiv-pager" role="navigation" aria-label="Seitennavigation Archiv">
-            <button type="button" disabled aria-label="Vorherige Seite">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            <button type="button" aria-current="page">1</button>
-            <button type="button">2</button>
-            <button type="button" aria-label="Nächste Seite">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- 4) AUDIT-LOG-BEREICH -->
-        <div class="vd-archiv-section">
-          <div class="vd-archiv-section-head">
-            <div class="vd-archiv-section-title">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
-              Audit-Log Archiv
-            </div>
-            <div class="vd-archiv-section-meta">Letzte <strong>5</strong> archiv-relevante Aktionen · 90 Tage</div>
-          </div>
-
-          <div class="vd-archiv-audit-list">
-            <div class="vd-archiv-audit-item">
-              <div class="vd-archiv-audit-time">
-                <span class="vd-archiv-audit-time-date">21.06.2026</span>
-                <span class="vd-archiv-audit-time-clock">14:32</span>
-              </div>
-              <div class="vd-archiv-audit-body">
-                <div class="vd-archiv-audit-title">
-                  <em>Wohnsiedlung Horgen</em> für Retention-Prüfung markiert (88 % verbraucht)
-                </div>
-                <div class="vd-archiv-audit-meta">
-                  <span>durch</span> <code>audit-bot</code>
-                  <span>·</span>
-                  <span>Aktion: <code>archive.retention.check</code></span>
-                </div>
-              </div>
-              <div class="vd-archiv-audit-id">AUD-2026-04481</div>
-            </div>
-
-            <div class="vd-archiv-audit-item">
-              <div class="vd-archiv-audit-time">
-                <span class="vd-archiv-audit-time-date">02.02.2026</span>
-                <span class="vd-archiv-audit-time-clock">10:14</span>
-              </div>
-              <div class="vd-archiv-audit-body">
-                <div class="vd-archiv-audit-title">
-                  <em>EFM Lagerhalle Thalwil</em> abgeschlossen und ins Archiv überführt
-                </div>
-                <div class="vd-archiv-audit-meta">
-                  <span>durch</span> <code>S. Huber</code>
-                  <span>·</span>
-                  <span>Aktion: <code>archive.project.seal</code></span>
-                  <span>·</span>
-                  <span>335 Medien · 7 Pläne versiegelt</span>
-                </div>
-              </div>
-              <div class="vd-archiv-audit-id">AUD-2026-03102</div>
-            </div>
-
-            <div class="vd-archiv-audit-item">
-              <div class="vd-archiv-audit-time">
-                <span class="vd-archiv-audit-time-date">28.02.2026</span>
-                <span class="vd-archiv-audit-time-clock">16:48</span>
-              </div>
-              <div class="vd-archiv-audit-body">
-                <div class="vd-archiv-audit-title">
-                  <em>Sanierung Schulhaus Wettingen</em> abgeschlossen und ins Archiv überführt
-                </div>
-                <div class="vd-archiv-audit-meta">
-                  <span>durch</span> <code>T. Keller</code>
-                  <span>·</span>
-                  <span>Aktion: <code>archive.project.seal</code></span>
-                  <span>·</span>
-                  <span>248 Medien · 4 Pläne versiegelt</span>
-                </div>
-              </div>
-              <div class="vd-archiv-audit-id">AUD-2026-03519</div>
-            </div>
-
-            <div class="vd-archiv-audit-item">
-              <div class="vd-archiv-audit-time">
-                <span class="vd-archiv-audit-time-date">12.12.2025</span>
-                <span class="vd-archiv-audit-time-clock">11:02</span>
-              </div>
-              <div class="vd-archiv-audit-body">
-                <div class="vd-archiv-audit-title">
-                  Archiv-Export (Bundle, verschlüsselt) durchgeführt — 3 Projekte · 1.4 GB
-                </div>
-                <div class="vd-archiv-audit-meta">
-                  <span>durch</span> <code>M. Brunner</code>
-                  <span>·</span>
-                  <span>Aktion: <code>archive.export.bundle</code></span>
-                  <span>·</span>
-                  <span>Signatur <code>0x8a4f…d921</code></span>
-                </div>
-              </div>
-              <div class="vd-archiv-audit-id">AUD-2025-09812</div>
-            </div>
-
-            <div class="vd-archiv-audit-item">
-              <div class="vd-archiv-audit-time">
-                <span class="vd-archiv-audit-time-date">04.07.2025</span>
-                <span class="vd-archiv-audit-time-clock">09:28</span>
-              </div>
-              <div class="vd-archiv-audit-body">
-                <div class="vd-archiv-audit-title">
-                  <em>Wohnsiedlung Horgen</em> abgeschlossen und ins Archiv überführt
-                </div>
-                <div class="vd-archiv-audit-meta">
-                  <span>durch</span> <code>A. Peter</code>
-                  <span>·</span>
-                  <span>Aktion: <code>archive.project.seal</code></span>
-                  <span>·</span>
-                  <span>312 Medien · 5 Pläne versiegelt</span>
-                </div>
-              </div>
-              <div class="vd-archiv-audit-id">AUD-2025-07228</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 5) DSG-/AUFBEWAHRUNGS-CALLOUT-GRID -->
-        <div class="vd-archiv-callout-grid">
-          <div class="vd-archiv-callout">
-            <div class="vd-archiv-callout-head">
-              <div class="vd-archiv-callout-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              </div>
-              <div>
-                <div class="vd-archiv-callout-title">10 Jahre Aufbewahrung</div>
-                <div class="vd-archiv-callout-subtitle">Schweizer DSG · SIA 118</div>
-              </div>
-            </div>
-            <div class="vd-archiv-callout-text">
-              Abgeschlossene Projekte werden 10 Jahre revisionssicher aufbewahrt. Pläne und Audit-Log
-              sind unveränderlich. Nach Ablauf erfolgt automatische Prüfung mit 90-Tage-Vorlauf.
-            </div>
-            <a class="vd-archiv-callout-link" href="#">Aufbewahrungsrichtlinie</a>
-          </div>
-
-          <div class="vd-archiv-callout">
-            <div class="vd-archiv-callout-head">
-              <div class="vd-archiv-callout-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-              </div>
-              <div>
-                <div class="vd-archiv-callout-title">Audit-Log-Pflicht</div>
-                <div class="vd-archiv-callout-subtitle">Vollständig · 10 Jahre</div>
-              </div>
-            </div>
-            <div class="vd-archiv-callout-text">
-              Jede Lese-, Export- und Wiederherstellungs-Aktion wird im Audit-Log protokolliert —
-              inklusive Benutzer, Zeitstempel und Signatur. Volltextsuche im Audit-Log ist
-              jederzeit verfügbar.
-            </div>
-            <a class="vd-archiv-callout-link" href="#">Audit-Log öffnen</a>
-          </div>
-
-          <div class="vd-archiv-callout">
-            <div class="vd-archiv-callout-head">
-              <div class="vd-archiv-callout-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              </div>
-              <div>
-                <div class="vd-archiv-callout-title">Archiv-Export</div>
-                <div class="vd-archiv-callout-subtitle">PDF · ZIP · SIGN-PDF</div>
-              </div>
-            </div>
-            <div class="vd-archiv-callout-text">
-              Vollständiges Archiv als verschlüsseltes Bundle exportieren — inklusive aller
-              Pläne, Medien, Audit-Log und Übergabeprotokoll. Signatur nach SIA 118 kompatibel.
-            </div>
-            <a class="vd-archiv-callout-link" href="#" data-open="export-modal">Archiv exportieren</a>
-          </div>
-        </div>
-
-      </section>
+      <!-- SCREEN 5 (ARCHIV) entfernt: Archiv ist in Projekte (Filter 'Abgeschlossen') integriert. -->
 
       <!-- ============================================================
            SCREEN 6: EINSTELLUNG / PROFIL (volle Breite, alle 9 Sektionen)
@@ -6969,6 +6365,13 @@
                       <option>Komfortabel</option>
                     </select>
                   </div>
+                  <div class="vd-field">
+                    <label class="vd-field-label" for="setting-default-gewerk">Standard-Gewerk</label>
+                    <select class="vd-field-select" id="setting-default-gewerk">
+                      <option value="">– kein Standard –</option>
+                    </select>
+                    <span class="vd-field-help">Wird beim Foto-Hinzufügen als Gewerk vorbelegt.</span>
+                  </div>
                 </div>
                 <div class="vd-toggle-row">
                   <div class="vd-toggle-text">
@@ -7219,13 +6622,6 @@
        State laufen über switchScreen().
        ============================================================ -->
   <nav class="vd-bottomnav" aria-label="Hauptnavigation (mobil)">
-    <a class="vd-bottomnav-item" href="#" data-nav="dashboard" aria-label="Dashboard">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <rect x="3" y="3" width="7" height="9" rx="1.2"/><rect x="14" y="3" width="7" height="5" rx="1.2"/>
-        <rect x="14" y="12" width="7" height="9" rx="1.2"/><rect x="3" y="16" width="7" height="5" rx="1.2"/>
-      </svg>
-      <span>Dashboard</span>
-    </a>
     <a class="vd-bottomnav-item" href="#" data-nav="projekte" aria-label="Projekte">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>
@@ -7240,12 +6636,6 @@
         <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
       </svg>
       <span>Galerie</span>
-    </a>
-    <a class="vd-bottomnav-item" href="#" data-nav="archiv" aria-label="Archiv">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <rect x="2" y="3" width="20" height="5" rx="1.5"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>
-      </svg>
-      <span>Archiv</span>
     </a>
     <!-- Zentraler FAB: Foto direkt hinzufügen (öffnet foto-aufnahme-modal via data-open) -->
     <button class="vd-fab" type="button" data-open="foto-aufnahme-modal" aria-label="Foto hinzufügen">
@@ -9126,7 +8516,6 @@
     projekte: 'Projekte',
     'projekt-detail': 'Projektansicht',
     galerie: 'Galerie',
-    archiv: 'Archiv',
     einstellung: 'Einstellung und Profil',
   };
   function switchScreen(target) {
@@ -9162,9 +8551,6 @@
         setSubtitle('Alle Medien des Mandanten · ohne Filter');
         if (typeof renderGalerie === 'function') renderGalerie();
         break;
-      case 'archiv':
-        setSubtitle('8 abgeschlossene Projekte · 2’273 Medien · 41 Pläne · 10 Jahre Aufbewahrung');
-        break;
       case 'einstellung':
         setSubtitle('Persönliche Angaben, Sicherheit, Benachrichtigungen, Anzeige und Datenschutz an einem Ort.');
         break;
@@ -9179,7 +8565,6 @@
       projekte: 'Neues Projekt',
       'projekt-detail': 'Datei wählen',
       galerie: 'Hochladen',
-      archiv: 'Wiederherstellen',
       einstellung: 'Speichern',
     };
     if (cta && ctas[target]) cta.textContent = ctas[target];
@@ -9191,7 +8576,6 @@
       projekte: 'neues-projekt-modal',
       'projekt-detail': 'datei-waehlen-modal',
       galerie: 'foto-aufnahme-modal',
-      archiv: 'export-modal',
       einstellung: null,
     };
     const targetModal = (ctaOpens[target] !== undefined) ? ctaOpens[target] : 'neues-projekt-modal';
@@ -9293,16 +8677,20 @@
     `;
   }
 
-  // Render auf Dashboard (4 zuletzt) und auf Projekte (alle)
+  // Render auf Dashboard (4 zuletzt). Das Projekte-Grid + die Liste
+  // werden Filter-gesteuert von renderProjekteFiltered() befuellt
+  // (siehe PROJEKTE-FILTER-Modul weiter unten).
   const recentGrid = document.getElementById('vd-dash-recent');
   const projectsGrid = document.getElementById('vd-projects-grid');
   if (recentGrid)  recentGrid.innerHTML  = PROJECTS.slice(0, 4).map(projectCardHTML).join('');
-  if (projectsGrid) projectsGrid.innerHTML = PROJECTS.map(projectCardHTML).join('');
 
-  // Klick auf Karte → Projektansicht.
+  // Klick auf Karte → Projektansicht (nur Dashboard-Karten; die
+  // Projekte-Grid-/Listen-Karten werden weiter unten DELEGIERT gebunden,
+  // weil sie bei jedem Filterwechsel neu gerendert werden).
   // Karten, deren Vorfahre data-no-nav="true" hat (z.B. die Dashboard-Quick-View)
-  // bleiben inaktiv und springen NICHT ins Detail. Nur die Listen-/Grid-Karten
-  // im Projekte-Screen routen.
+  // bleiben inaktiv und springen NICHT ins Detail.
+  // Zum Bindezeitpunkt ist das Projekte-Grid noch leer (Filter rendert
+  // spaeter), daher trifft dieser breite Selektor nur Dashboard-Karten.
   document.querySelectorAll('[data-project]').forEach(el => {
     el.addEventListener('click', e => {
       if (el.closest('[data-no-nav="true"]')) return;
@@ -9345,25 +8733,9 @@
       </a>
     `;
   }
-  if (projectsListBody) projectsListBody.innerHTML = PROJECTS.map(projectListRowHTML).join('');
-
-  // Klick auf Listen-Zeile → Projektansicht
-  if (projectsListBody) {
-    projectsListBody.querySelectorAll('.vd-list-row').forEach(el => {
-      el.addEventListener('click', e => {
-        // Wenn auf Action-Button geklickt, behalte Default
-        if (e.target.closest('.vd-list-action')) return;
-        e.preventDefault();
-        const pid = el.getAttribute('data-project');
-        const p = PROJECTS.find(x => x.id === pid) || PROJECTS[0];
-        const titleEl = document.getElementById('vd-pd-title');
-        const bcEl = document.getElementById('vd-pd-breadcrumb');
-        if (titleEl) titleEl.textContent = p.title;
-        if (bcEl) bcEl.textContent = p.title;
-        switchScreen('projekt-detail');
-      });
-    });
-  }
+  // Hinweis: Grid + Liste werden NICHT mehr statisch befuellt, sondern
+  // von renderProjekteFiltered() (PROJEKTE-FILTER-Modul). Navigation
+  // laeuft delegiert (siehe dort), damit sie Re-Renders ueberlebt.
 
   // ============================================================
   // PROJEKTE – View-Toggle (Cards ⇄ Liste)
@@ -10226,16 +9598,89 @@
   // ============================================================
 
   // ============================================================
-  // PROJEKTE: Status-Segmente
+  // PROJEKTE: Filter (Aktuelle / Abgeschlossen / Alle)
   // ============================================================
-  document.querySelectorAll('.vd-screen[data-screen="projekte"] .vd-toolbar-segments button').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.vd-screen[data-screen="projekte"] .vd-toolbar-segments button').forEach(t => {
-        t.setAttribute('aria-pressed', 'false');
+  // Das frühere Archiv ist hier integriert: "Abgeschlossen" zeigt die
+  // archivierten/abgeschlossenen Projekte, "Aktuelle" alle übrigen.
+  //
+  // Entscheide, woran ein Projekt als "abgeschlossen/archiviert"
+  // erkannt wird (Markierung in der Funktion unten).
+  // Datenmodell-Hinweise (siehe PROJECTS oben):
+  //   • p.status     – 'warn' | 'primary' | 'error' | 'info' | 'muted'
+  //   • p.statusLabel– z.B. 'In Prüfung','Freigegeben','Abgeschlossen','Archiviert'
+  //   • p.progress   – 0..100
+  // Beispiel-Datensätze p11/p12 sind abgeschlossen bzw. archiviert.
+  function isProjektArchiviert(p) {
+    // TODO(human): Prädikat implementieren (2–4 Zeilen).
+  }
+
+  (function initProjekteFilter() {
+    const projekteScreen = document.querySelector('.vd-screen[data-screen="projekte"]');
+    if (!projekteScreen) return;
+    const grid = document.getElementById('vd-projects-grid');
+    const listBody = document.getElementById('vd-projects-list-body');
+    const segBtns = Array.from(projekteScreen.querySelectorAll('.vd-toolbar-segments button[data-projekt-filter]'));
+
+    // Filter-Definitionen: key → Prädikat über ein Projekt.
+    const FILTERS = {
+      aktuelle:      p => !isProjektArchiviert(p),
+      abgeschlossen: p => !!isProjektArchiviert(p),
+      alle:          () => true,
+    };
+
+    function listFor(key) {
+      return PROJECTS.filter(FILTERS[key] || FILTERS.alle);
+    }
+
+    function updateSegCounts() {
+      Object.keys(FILTERS).forEach(key => {
+        const el = projekteScreen.querySelector(`[data-seg-count="${key}"]`);
+        if (el) el.textContent = listFor(key).length;
       });
-      tab.setAttribute('aria-pressed', 'true');
+    }
+
+    function renderProjekteFiltered(key) {
+      const items = listFor(key);
+      if (grid)     grid.innerHTML     = items.map(projectCardHTML).join('');
+      if (listBody) listBody.innerHTML = items.map(projectListRowHTML).join('');
+      if (!items.length && grid) {
+        grid.innerHTML = '<p class="vd-empty-hint" style="color:var(--text-low);padding:24px 4px;">Keine Projekte in dieser Ansicht.</p>';
+      }
+    }
+
+    // Navigation DELEGIERT (überlebt Re-Renders bei Filterwechsel).
+    function navigateFromEl(el) {
+      const pid = el.getAttribute('data-project');
+      const p = PROJECTS.find(x => x.id === pid) || PROJECTS[0];
+      const titleEl = document.getElementById('vd-pd-title');
+      const bcEl = document.getElementById('vd-pd-breadcrumb');
+      if (titleEl) titleEl.textContent = p.title;
+      if (bcEl) bcEl.textContent = p.title;
+      switchScreen('projekt-detail');
+    }
+    [grid, listBody].forEach(container => {
+      if (!container) return;
+      container.addEventListener('click', e => {
+        if (e.target.closest('.vd-list-action')) return;
+        const el = e.target.closest('[data-project]');
+        if (!el) return;
+        e.preventDefault();
+        navigateFromEl(el);
+      });
     });
-  });
+
+    // Segment-Klicks: aktiven Zustand + Render.
+    segBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        segBtns.forEach(b => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
+        renderProjekteFiltered(btn.getAttribute('data-projekt-filter'));
+      });
+    });
+
+    // Initial: "Aktuelle" (Default).
+    updateSegCounts();
+    renderProjekteFiltered('aktuelle');
+  })();
 
   // ============================================================
   // EINSTELLUNG: Sub-Nav Scroll-Spy
@@ -10250,8 +9695,72 @@
     });
   });
 
-  // Default-Routing auf Dashboard
-  switchScreen('dashboard');
+  // ============================================================
+  // STANDARD-GEWERK (Einstellungen) + FOTO-FLOW (Projekt/Gewerk)
+  // Kein Backend → Persistenz via localStorage.
+  // ============================================================
+  function initFotoFlow() {
+    const LS_GEWERK = 'visidoc:defaultGewerk';
+    const LS_PROJEKT = 'visidoc:lastProject';
+    const GEWERKE = (window.VISIDOC_DEMO && window.VISIDOC_DEMO.gewerke) || [];
+
+    const read = (k) => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
+    const write = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+
+    const fillOptions = (sel, values, selected) => {
+      if (!sel) return;
+      // Erste Option (Platzhalter) behalten, Rest ersetzen.
+      const placeholder = sel.querySelector('option');
+      sel.innerHTML = '';
+      if (placeholder) sel.appendChild(placeholder);
+      values.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v; o.textContent = v;
+        if (v === selected) o.selected = true;
+        sel.appendChild(o);
+      });
+    };
+
+    // --- Einstellungen: Standard-Gewerk ---
+    const settingGewerk = document.getElementById('setting-default-gewerk');
+    if (settingGewerk) {
+      fillOptions(settingGewerk, GEWERKE, read(LS_GEWERK));
+      settingGewerk.addEventListener('change', () => write(LS_GEWERK, settingGewerk.value));
+    }
+
+    // --- Foto-Modal: Projekt (Pflicht) + Gewerk (optional) ---
+    const fotoProjekt = document.getElementById('foto-projekt');
+    const fotoGewerk  = document.getElementById('foto-gewerk');
+    if (fotoProjekt && typeof PROJECTS !== 'undefined') {
+      const titles = PROJECTS.map(p => p.title);
+      fillOptions(fotoProjekt, titles, '');
+      // Letztes Projekt merken.
+      fotoProjekt.addEventListener('change', () => write(LS_PROJEKT, fotoProjekt.value));
+    }
+    if (fotoGewerk) fillOptions(fotoGewerk, GEWERKE, read(LS_GEWERK));
+
+    // Beim Öffnen des Foto-Modals Defaults frisch anwenden (Standard-
+    // Gewerk + zuletzt gewähltes Projekt). data-open ist document-
+    // delegiert, daher hängen wir uns hier separat ein.
+    document.addEventListener('click', (e) => {
+      const trigger = e.target.closest('[data-open="foto-aufnahme-modal"]');
+      if (!trigger) return;
+      if (fotoGewerk) fotoGewerk.value = read(LS_GEWERK);
+      if (fotoProjekt) fotoProjekt.value = read(LS_PROJEKT);
+    }, true);
+  }
+  // Die Foto-Modal-Markup steht im DOM NACH diesem Script-Block, daher
+  // erst nach DOMContentLoaded initialisieren (sonst sind #foto-projekt
+  // / #foto-gewerk noch nicht geparst).
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFotoFlow);
+  } else {
+    initFotoFlow();
+  }
+
+  // Default-Routing: Desktop startet auf Dashboard, Mobile (<=900px)
+  // hat kein Dashboard mehr und startet daher auf Projekte.
+  switchScreen(window.matchMedia('(max-width: 900px)').matches ? 'projekte' : 'dashboard');
   </script>
 
   <!-- ============================================================
@@ -10448,7 +9957,23 @@
 
             <div class="vd-modal-section-label">Zuordnung</div>
 
-            <div class="vd-field-group">
+            <div class="vd-field-group" data-foto-projekt-group>
+              <label class="vd-field-label" for="foto-projekt">Projekt <span class="vd-field-required" aria-hidden="true">*</span></label>
+              <select class="vd-field-select" id="foto-projekt" required>
+                <option value="">– Projekt wählen –</option>
+              </select>
+              <span class="vd-field-help" data-foto-projekt-hint>Zu welchem Projekt gehören die Bilder?</span>
+            </div>
+
+            <div class="vd-field-group" style="margin-top:10px;">
+              <label class="vd-field-label" for="foto-gewerk">Gewerk <span style="color:var(--text-low);font-weight:400;">(optional)</span></label>
+              <select class="vd-field-select" id="foto-gewerk">
+                <option value="">– kein Gewerk –</option>
+              </select>
+              <span class="vd-field-help">Wer führt die Arbeit aus? Vorbelegt mit deinem Standard-Gewerk.</span>
+            </div>
+
+            <div class="vd-field-group" style="margin-top:10px;">
               <label class="vd-field-label" for="foto-planpos">Planposition</label>
               <select class="vd-field-select" id="foto-planpos">
                 <option value="">– bitte wählen –</option>
