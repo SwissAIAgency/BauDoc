@@ -373,6 +373,40 @@
       gap: var(--space-3);
       margin: var(--space-4) 0;
     }
+
+    /* Fotos nach Gewerk (Dashboard) — bild-geführte Kategorie-Kacheln */
+    .vd-dash-gewerke-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin: var(--space-5) 0 var(--space-3);
+    }
+    .vd-dash-gewerke-title { font-size: 16px; font-weight: 600; color: var(--text-high); }
+    .vd-dash-gewerke {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: var(--space-3);
+    }
+    .vd-gewerk-tile {
+      display: flex; flex-direction: column;
+      background: var(--bg-panel); border: 1px solid var(--border-subtle);
+      border-radius: 14px; overflow: hidden; padding: 0;
+      text-align: left; cursor: pointer;
+      transition: border-color 120ms ease, transform 120ms ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .vd-gewerk-tile:hover { border-color: var(--color-primary); }
+    .vd-gewerk-tile:active { transform: scale(0.985); }
+    .vd-gewerk-cover {
+      position: relative; width: 100%; aspect-ratio: 16 / 10;
+      background-color: var(--bg-raised); background-size: cover; background-position: center;
+    }
+    .vd-gewerk-count {
+      position: absolute; top: 8px; right: 8px;
+      font-size: 12px; font-weight: 600; color: #F2F4F7;
+      background: rgba(20, 24, 27, 0.78); padding: 3px 9px; border-radius: 999px;
+    }
+    .vd-gewerk-meta { padding: 9px 11px 11px; display: flex; flex-direction: column; gap: 2px; }
+    .vd-gewerk-name { font-size: 14px; font-weight: 500; color: var(--text-high); line-height: 1.25; }
+    .vd-gewerk-sub { font-size: 12px; color: var(--color-primary); }
     .vd-kpi {
       background: var(--surface-1);
       border: none;
@@ -4113,6 +4147,9 @@
       }
     }
 
+    /* Mobile-Galerie-Raster: auf Desktop versteckt (Serpentine aktiv) */
+    .vd-gal-mobile { display: none; }
+
     /* Foto-Card in der Zeile (Spec-Pattern, galerie-v2 Look) */
     .vd-gal-cell {
       position: relative;
@@ -4744,7 +4781,7 @@
       .vd-archiv-grid { grid-template-columns: 1fr; }
       .vd-ex-format-grid { grid-template-columns: 1fr; }
 
-      /* ---- GALERIE: Mobile-Ränder klein, Scrollbar-Hack neutralisiert ---- */
+      /* ---- GALERIE: Desktop-Timeline aus, Mobile-Raster an ---- */
       :root { --gal-curve-pad: 14px; }
       body[data-active-screen="galerie"] .vd-screen[data-screen="galerie"] {
         width: 100%;
@@ -4752,6 +4789,66 @@
         margin-right: 0;
         overflow-x: hidden;
       }
+      #vd-gal-rows { display: none !important; }
+      .vd-gal-mobile { display: block; flex: 1; overflow-y: auto; padding: 4px 14px 0; }
+
+      /* Filter-Pills als kompakte, scrollbare Chip-Reihe */
+      .vd-screen[data-screen="galerie"] .vd-proj-pills {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .vd-screen[data-screen="galerie"] .vd-proj-pills::-webkit-scrollbar { display: none; }
+
+      /* Monats-Gruppe + Header */
+      .vd-galm-group { margin-bottom: 22px; }
+      .vd-galm-h {
+        display: flex; align-items: baseline; gap: 8px;
+        font-size: 15px; font-weight: 600; color: var(--text-high);
+        margin: 6px 2px 12px; position: sticky; top: 0; z-index: 2;
+        background: var(--bg-base); padding: 6px 0;
+      }
+      .vd-galm-h-count { font-size: 13px; font-weight: 500; color: var(--color-primary); }
+
+      /* 2-Spalten-Foto-Raster */
+      .vd-galm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+      /* Foto-Kachel (trägt .vd-gal-cell für Lightbox-Delegation) */
+      .vd-gal-mobile .vd-gal-cell.vd-galm-cell {
+        display: flex; flex-direction: column; align-items: stretch;
+        max-width: none; width: 100%;
+        background: var(--bg-panel); border: 1px solid var(--border-subtle);
+        border-radius: 14px; overflow: hidden; padding: 0;
+        text-align: left; cursor: pointer; position: relative;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .vd-gal-mobile .vd-gal-cell.vd-galm-cell:active { transform: scale(0.985); }
+      .vd-galm-thumb {
+        width: 100%; aspect-ratio: 4 / 3;
+        background-color: var(--bg-raised); background-size: cover; background-position: center;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--text-low); position: relative;
+      }
+      .vd-galm-thumb--plan { color: var(--color-primary); flex-direction: column; gap: 6px; }
+      .vd-galm-thumb--plan svg { width: 30px; height: 30px; }
+      .vd-galm-thumb--video svg { width: 34px; height: 34px; color: rgba(255,255,255,0.9); }
+      .vd-galm-thumb--video::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.28); }
+      .vd-galm-thumb--video svg { position: relative; z-index: 1; }
+      .vd-galm-code { font-size: 11px; }
+      .vd-galm-dur { position: absolute; bottom: 6px; right: 6px; z-index: 2; font-size: 11px; font-weight: 500; color: #fff; background: rgba(0,0,0,0.6); padding: 2px 7px; border-radius: 999px; }
+      .vd-galm-tag {
+        position: absolute; top: 8px; left: 8px;
+        font-size: 11px; font-weight: 500; color: #fff;
+        background: rgba(20,24,27,0.78); padding: 3px 9px; border-radius: 999px;
+      }
+      .vd-galm-name {
+        font-size: 13px; font-weight: 500; color: var(--text-high);
+        padding: 8px 10px 0; line-height: 1.3;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .vd-galm-sub { font-size: 11px; color: var(--text-low); padding: 2px 10px 10px; }
+      .vd-galm-empty { padding: 48px 16px; text-align: center; color: var(--text-low); font-size: 14px; }
     }
   </style>
 </head>
@@ -4958,6 +5055,16 @@
             <div class="vd-kpi-spark"><svg viewBox="0 0 80 24" preserveAspectRatio="none"><path d="M 0.0,24.0 L 13.3,18.5 L 26.7,14.8 L 40.0,9.2 L 53.3,5.5 L 66.7,1.8 L 80.0,0.0" fill="none" stroke="var(--text-low)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           </div>
         </div>
+
+        <!-- ============================================================
+             FOTOS NACH GEWERK — bild-geführte Kategorie-Übersicht.
+             Befuellt von renderDashboardGewerke(). Tap → Galerie.
+             ============================================================ -->
+        <div class="vd-dash-gewerke-head">
+          <h2 class="vd-dash-gewerke-title">Fotos nach Gewerk</h2>
+          <a class="vd-dash-card-link" href="#" data-nav="galerie">Alle Fotos →</a>
+        </div>
+        <div class="vd-dash-gewerke" id="vd-dash-gewerke"></div>
 
         <div class="vd-dash-row-3">
           <div class="vd-dash-card">
@@ -5884,6 +5991,14 @@
              Zeile am unteren Rand (sticky).
              ============================================================ -->
         <div class="vd-gal-rows" id="vd-gal-rows" data-bind="gal-grid"></div>
+
+        <!-- ============================================================
+             GALERIE – MOBILE-LAYOUT (≤900px)
+             Datum-gruppiertes 2-Spalten-Raster statt Serpentine-Timeline.
+             Wird von renderGalerieMobile() befuellt. Zellen tragen
+             .vd-gal-cell + data-media-id → Lightbox oeffnet automatisch.
+             ============================================================ -->
+        <div class="vd-gal-mobile" id="vd-gal-mobile" aria-label="Fotos nach Monat"></div>
       </section>
 
       <!-- ============================================================
@@ -9767,7 +9882,101 @@
                   || GAL.ersteller !== 'Alle' || GAL.tags !== 'Alle' || GAL.search;
       resetBtn.hidden = !hasAny;
     }
+    // Mobile-Layout (≤900px) parallel rendern — gleiche gefilterte Liste.
+    renderGalerieMobile(filtered);
   }
+
+  // ============================================================
+  // GALERIE MOBILE — Datum-gruppiertes 2-Spalten-Raster
+  // Eigene, mobil-optimierte Anordnung (statt Serpentine-Timeline).
+  // ============================================================
+  function galMonthLabel(dateStr) {
+    const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(dateStr || '');
+    if (!m) return { key: '0000-00', label: 'Ohne Datum' };
+    const months = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+    return { key: m[3] + '-' + m[2], label: months[parseInt(m[2], 10) - 1] + ' ' + m[3] };
+  }
+  function galMobileCellHTML(m) {
+    let thumb;
+    if (m.type === 'photo' && m.src) {
+      thumb = '<div class="vd-galm-thumb" style="background-image:url(\'' + m.src + '\')"></div>';
+    } else if (m.type === 'plan') {
+      thumb = '<div class="vd-galm-thumb vd-galm-thumb--plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 3v18"/></svg><span class="vd-galm-code">' + (m.code || 'Plan') + '</span></div>';
+    } else if (m.type === 'video') {
+      thumb = '<div class="vd-galm-thumb vd-galm-thumb--video"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>' + (m.duration ? '<span class="vd-galm-dur">' + m.duration + '</span>' : '') + '</div>';
+    } else {
+      thumb = '<div class="vd-galm-thumb"></div>';
+    }
+    const tag = (m.tags && m.tags[0]) ? '<span class="vd-galm-tag">' + m.tags[0] + '</span>' : '';
+    return '<button type="button" class="vd-gal-cell vd-galm-cell" data-media-id="' + m.id + '" data-type="' + m.type + '" aria-label="' + (m.name || 'Medium') + '">'
+      + thumb + tag
+      + '<span class="vd-galm-name">' + (m.name || '') + '</span>'
+      + '<span class="vd-galm-sub">' + (m.date || '') + ' · ' + (m.creator || '') + '</span>'
+      + '</button>';
+  }
+  // Echtes Datum als sortierbarer Wert "YYYYMMDD" (galSorted vergleicht
+  // fälschlich die "DD.MM.YYYY"-Strings → Tag zuerst; hier korrekt).
+  function galDateVal(dateStr) {
+    const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(dateStr || '');
+    return m ? (m[3] + m[2] + m[1]) : '00000000';
+  }
+  function renderGalerieMobile(list) {
+    const root = document.getElementById('vd-gal-mobile');
+    if (!root) return;
+    if (!list || !list.length) {
+      root.innerHTML = '<div class="vd-galm-empty">Keine Treffer · Filter anpassen</div>';
+      return;
+    }
+    // Für das datum-gruppierte Raster IMMER chronologisch sortieren
+    // (Richtung folgt GAL.sort: aelteste = aufsteigend, sonst neueste zuerst).
+    const asc = (typeof GAL !== 'undefined' && GAL.sort === 'aelteste');
+    const sorted = list.slice().sort((a, b) =>
+      asc ? galDateVal(a.date).localeCompare(galDateVal(b.date))
+          : galDateVal(b.date).localeCompare(galDateVal(a.date)));
+    const groups = [];
+    const idx = {};
+    sorted.forEach(m => {
+      const g = galMonthLabel(m.date);
+      if (!(g.key in idx)) { idx[g.key] = groups.length; groups.push({ label: g.label, items: [] }); }
+      groups[idx[g.key]].items.push(m);
+    });
+    root.innerHTML = groups.map(g =>
+      '<section class="vd-galm-group">'
+      + '<h3 class="vd-galm-h">' + g.label + '<span class="vd-galm-h-count">' + g.items.length + '</span></h3>'
+      + '<div class="vd-galm-grid">' + g.items.map(galMobileCellHTML).join('') + '</div>'
+      + '</section>'
+    ).join('');
+  }
+
+  // ============================================================
+  // DASHBOARD — Fotos nach Gewerk (bild-geführte Kategorie-Kacheln)
+  // Cover-Bilder aus assets/generated/; Tap → Galerie.
+  // ============================================================
+  function renderDashboardGewerke() {
+    const root = document.getElementById('vd-dash-gewerke');
+    if (!root) return;
+    const DASH_GEWERKE = [
+      { name: 'Rohbau',          count: 32, img: 'assets/generated/betonwand-stahl-helm.jpg' },
+      { name: 'Elektro',         count: 24, img: 'assets/generated/elektro-verteiler.jpg' },
+      { name: 'Sanitär',         count: 18, img: 'assets/generated/sanitaer-rohre-wasserwaage.jpg' },
+      { name: 'Heizung/Lüftung', count: 16, img: 'assets/generated/treppe-schweiss.jpg' },
+      { name: 'Innenausbau',     count: 14, img: 'assets/generated/schulhaus-klassenzimmer.jpg' },
+      { name: 'Fassade',         count: 12, img: 'assets/generated/schulhaus-fassade-herbst.jpg' },
+      { name: 'Dach',            count: 10, img: 'assets/generated/dach-ziegel.jpg' },
+      { name: 'Bodenbeläge',     count:  8, img: 'assets/generated/parkett-herringbone.jpg' },
+      { name: 'Holzbau',         count:  6, img: 'assets/generated/holz-dachstuhl-werkstatt.jpg' },
+      { name: 'Malerarbeiten',   count:  5, img: 'assets/generated/sandstein-reinigung.jpg' },
+    ];
+    root.innerHTML = DASH_GEWERKE.map(g =>
+      '<button type="button" class="vd-gewerk-tile" data-gewerk="' + g.name + '">'
+      + '<div class="vd-gewerk-cover" style="background-image:url(\'' + g.img + '\')"><span class="vd-gewerk-count">' + g.count + '</span></div>'
+      + '<div class="vd-gewerk-meta"><span class="vd-gewerk-name">' + g.name + '</span><span class="vd-gewerk-sub">' + g.count + ' Fotos</span></div>'
+      + '</button>'
+    ).join('');
+    root.querySelectorAll('.vd-gewerk-tile').forEach(t =>
+      t.addEventListener('click', () => { if (typeof switchScreen === 'function') switchScreen('galerie'); }));
+  }
+  renderDashboardGewerke();
   renderGalerie();
 
   // Galerie-Serpentine auf Resize neu berechnen. Da .vd-gal-rows
