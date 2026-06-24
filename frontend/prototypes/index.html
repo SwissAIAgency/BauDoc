@@ -1289,8 +1289,10 @@
       .vd-proj-tabs { border-right: none; padding-right: 0; margin-right: 0; }
       .vd-proj-count { margin-left: 0; }
       .vd-proj-tools { display: none; }
-      .vd-proj-filters { flex-wrap: nowrap; }
-      .vd-proj-pills { flex: 1 1 auto; }
+      /* Filter-Reihe bleibt immer horizontal — überschreibt flex-direction:column
+         das .vd-proj-row auf allen Reihen setzt */
+      .vd-proj-filters { flex-direction: row; align-items: stretch; flex-wrap: nowrap; }
+      .vd-proj-pills { flex: 1 1 auto; min-width: 0; }
     }
 
     /* Project-Detail: Filter-Card hat den gleichen Abstand zum rechten
@@ -2791,9 +2793,12 @@
 
     /* Form fields (die meisten gibt's schon, hier nur Lücken schließen) */
     .vd-field-input, .vd-field-select, .vd-field-textarea {
+      padding: 9px 12px;
+      line-height: 1.4;
       background: var(--bg-raised);
       color: var(--text-high);
       border: 1px solid var(--border-default);
+      border-radius: var(--radius-small);   /* war nie gesetzt → Browser-Default-Ecken; Prefix-Regel (~Z. 3270) setzt sie schon voraus */
       font-family: var(--font-sans);
       font-size: 13px;
       transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
@@ -2807,6 +2812,7 @@
       color: var(--text-high);
     }
     .vd-field-input:focus, .vd-field-select:focus, .vd-field-textarea:focus {
+      outline: none;                        /* UA-Outline lag bisher ÜBER Border+Halo → "fremder" dritter Rahmen */
       border-color: var(--color-primary);
       box-shadow: 0 0 0 3px var(--color-primary-soft);
     }
@@ -5095,8 +5101,8 @@
       /* "38 Treffer"-Zeile auf Mobile ausblenden (Platz sparen, Info redundant) */
       .vd-screen[data-screen="projekt-detail"] .vd-proj-count { display: none; }
       /* Pills: max-width:100% damit overflow-x:auto korrekt greift */
-      .vd-screen[data-screen="projekt-detail"] .vd-proj-pills { max-width: 100%; }
-      .vd-screen[data-screen="projekt-detail"] .vd-proj-filters { margin-left: 0; margin-right: 0; }
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-pills { max-width: 100%; min-width: 0; width: 100%; }
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-filters { margin-left: 0; margin-right: 0; flex-direction: row; align-items: stretch; width: 100%; min-width: 0; }
       .vd-screen[data-screen="projekt-detail"] .vd-proj-tools { display: none !important; }
 
       /* ---- 2) UPLOAD-BUTTONS: 2×2 Grid, 52px, Icon 20px, Text 14px ---- */
@@ -5290,6 +5296,28 @@
       border-color: #AEB4A6;
     }
     [data-theme="light"] .vd-field-select option { background: #FFFFFF; }
+
+    /* Ruhezustand hell: hauchdünne Innen-Tiefe, damit das Feld als eigenes
+       Objekt liest statt als aufgemalter Kasten. :not(:focus), damit der
+       Fokus-Ring darunter sauber bleibt (sonst gewinnt diese Regel per Quell-
+       Reihenfolge gegen den Basis-Fokus und würde den Halo überschreiben). */
+    [data-theme="light"] .vd-field-input:not(:focus),
+    [data-theme="light"] .vd-field-select:not(:focus),
+    [data-theme="light"] .vd-field-textarea:not(:focus) {
+      box-shadow: inset 0 1px 1.5px rgba(28, 33, 38, 0.04);
+    }
+
+    /* ------------------------------------------------------------------
+       FOKUS-AKZENT (Light) — genau der Rahmen aus dem Screenshot.
+       Greift KEINE eigene Regel, übernimmt der Basis-Fokus (~Z. 2811):
+       olivgrüner Border #668048 + weicher Halo. Diese Regel (Spezifität
+       0,3,0) überschreibt ihn gezielt für Light. Hier bestimmst du, wie
+       sich der Fokus anfühlen soll.  TODO(human) — siehe Learn by Doing. */
+    [data-theme="light"] .vd-field-input:focus,
+    [data-theme="light"] .vd-field-select:focus,
+    [data-theme="light"] .vd-field-textarea:focus {
+      /* TODO(human) */
+    }
 
     /* Karten dezent anheben → klare Trennung von der Base */
     [data-theme="light"] .vd-proj-card,
