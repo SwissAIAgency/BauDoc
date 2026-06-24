@@ -105,28 +105,41 @@
   --scrollbar-size-thin: 6px;
 }
 
-/* Light Theme (aus Logo abgeleitet) */
+/* ============================================================
+   Light Theme — überarbeitet für einen modernen, professionellen
+   Eindruck: ruhige, leicht warme Neutralen-Rampe (Marke), klare
+   Hierarchie zwischen Base / Panel / Raised und WEICHE, mehrlagige
+   Schatten statt der harten Dark-Mode-Schlagschatten.
+   ============================================================ */
 [data-theme="light"] {
-  --bg-base: #F7F8F5;
+  --bg-base: #F2F4EF;     /* leicht abgesetzt → weisse Panels heben sich klar ab */
   --bg-panel: #FFFFFF;
-  --bg-raised: #EDEFE9;
-  --bg-warm: #F2F4EE;
-  --border-default: #D9DCD3;
-  --border-subtle: rgba(31, 36, 41, 0.08);
-  --text-high: #1F2429;
-  --text-mid: #5A636C;
-  --text-low: #8B929B;
+  --bg-raised: #E9ECE4;   /* Hover / Chips / Sub-Flächen */
+  --bg-warm: #EEF0EA;
+  --border-default: #D7DBD0;
+  --border-strong: #C4C9BC; /* für Inputs/Buttons, die definierter wirken sollen */
+  --border-subtle: rgba(28, 33, 38, 0.07);
+  --text-high: #1B2025;
+  --text-mid: #565E67;
+  --text-low: #868D96;
   --status-info: #2C5BB8;
   --status-info-soft: rgba(44, 91, 184, 0.10);
   --status-warn: #8A6618;
   --status-warn-soft: rgba(138, 102, 24, 0.10);
-  --status-error: #A83333;
-  --status-error-soft: rgba(168, 51, 51, 0.10);
+  --status-error: #B23636;
+  --status-error-soft: rgba(178, 54, 54, 0.10);
+
+  /* Weiche, mehrlagige Schatten (ersetzen die Dark-Tokens aus :root).
+     Popover/Tooltip referenzieren diese Tokens direkt → wirken sofort. */
+  --shadow-dropdown: 0 12px 28px -10px rgba(24, 34, 48, 0.18), 0 3px 8px -3px rgba(24, 34, 48, 0.10);
+  --shadow-tooltip: 0 2px 10px rgba(24, 34, 48, 0.14);
+  --shadow-card: 0 1px 2px rgba(24, 34, 48, 0.05), 0 4px 12px -4px rgba(24, 34, 48, 0.07);
+  --shadow-modal: 0 28px 64px -18px rgba(24, 34, 48, 0.26), 0 8px 20px -10px rgba(24, 34, 48, 0.14);
 
   /* Scrollbar (VisiDoc-Style) – Light */
   --scrollbar-track: transparent;
-  --scrollbar-thumb: rgba(124, 132, 143, 0.32);
-  --scrollbar-thumb-hover: rgba(90, 99, 108, 0.55);
+  --scrollbar-thumb: rgba(86, 94, 103, 0.30);
+  --scrollbar-thumb-hover: rgba(60, 68, 77, 0.50);
   --scrollbar-thumb-active: var(--color-primary);
   --scrollbar-size: 10px;
   --scrollbar-size-thin: 6px;

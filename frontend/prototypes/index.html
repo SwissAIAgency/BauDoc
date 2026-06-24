@@ -5130,6 +5130,77 @@
         -webkit-tap-highlight-color: transparent;
       }
     }
+
+    /* ============================================================
+       LIGHT-MODE POLISH (themen-spezifisch, gilt auf allen Breiten)
+       ------------------------------------------------------------
+       Komponenten, die hartkodierte Dark-Schatten/-Füllungen tragen,
+       werden hier für [data-theme="light"] auf einen modernen,
+       professionellen Look gehoben: weisse, klar umrandete Felder,
+       angehobene Karten, weiche Modal-/Popover-Schatten, ruhigerer
+       Scrim. Dark-Mode bleibt unberührt.
+       ============================================================ */
+
+    /* Eingabefelder: knackiges Weiss mit definierter Kante statt grauer Füllung */
+    [data-theme="light"] .vd-field-input,
+    [data-theme="light"] .vd-field-select,
+    [data-theme="light"] .vd-field-textarea,
+    [data-theme="light"] .vd-proj-search input,
+    [data-theme="light"] .vd-search-input,
+    [data-theme="light"] .vd-popover-search input {
+      background: #FFFFFF;
+      border-color: var(--border-strong);
+    }
+    [data-theme="light"] .vd-field-input:hover:not(:focus),
+    [data-theme="light"] .vd-field-select:hover:not(:focus),
+    [data-theme="light"] .vd-field-textarea:hover:not(:focus),
+    [data-theme="light"] .vd-proj-search input:hover:not(:focus) {
+      border-color: #AEB4A6;
+    }
+    [data-theme="light"] .vd-field-select option { background: #FFFFFF; }
+
+    /* Karten dezent anheben → klare Trennung von der Base */
+    [data-theme="light"] .vd-proj-card,
+    [data-theme="light"] .vd-project-card {
+      box-shadow: var(--shadow-card);
+    }
+
+    /* Sekundär-/Ghost-Buttons & Filter-Pills bekommen eine sichtbare Kante */
+    [data-theme="light"] .vd-button--secondary,
+    [data-theme="light"] .vd-proj-pill,
+    [data-theme="light"] .vd-proj-tab-count {
+      border-color: var(--border-strong);
+    }
+
+    /* Modals: weicher, mehrlagiger Schatten + ruhigerer Scrim */
+    [data-theme="light"] .vd-modal {
+      box-shadow: var(--shadow-modal);
+      border-color: var(--border-default);
+    }
+    [data-theme="light"] .vd-modal-backdrop {
+      background: rgba(24, 34, 48, 0.38);
+      backdrop-filter: blur(3px);
+    }
+
+    /* Popover (Desktop-Dropdown) erbt --shadow-dropdown automatisch;
+       hier nur die Kante etwas klarer. */
+    [data-theme="light"] .vd-popover { border-color: var(--border-default); }
+
+    /* Mobile Bottom-Sheets: Dark-Schatten (rgba(0,0,0,.5)) gegen weiche
+       Light-Variante tauschen. Selektor-Präfix matcht die Spezifität der
+       Sheet-Regeln im Mobile-Block und gewinnt zusätzlich per Quellordnung. */
+    @media (max-width: 900px) {
+      [data-theme="light"] .vd-modal-backdrop[data-bind$="-modal"]:not([data-bind="media-modal"]):not([data-bind="wizard-modal"]) .vd-modal {
+        box-shadow: 0 -14px 44px -10px rgba(24, 34, 48, 0.22);
+      }
+      [data-theme="light"] .vd-popover[data-open="true"] {
+        box-shadow: 0 -12px 36px -8px rgba(24, 34, 48, 0.22);
+      }
+      [data-theme="light"] .vd-modal-backdrop[data-bind$="-modal"]:not([data-bind="media-modal"]):not([data-bind="wizard-modal"]) .vd-modal-head::before,
+      [data-theme="light"] .vd-popover[data-open="true"]::after {
+        background: var(--border-strong);
+      }
+    }
   </style>
 </head>
 <body data-active-screen="dashboard">
