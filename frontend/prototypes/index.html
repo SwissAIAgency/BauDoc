@@ -4988,6 +4988,14 @@
       .vd-proj-tab--active:active { transform: scale(0.96); }
 
       /* ---- FILTER-BAR: Projekt-Detail Mobile Fix ---- */
+      /* Kontext-Zeile: align-items:flex-start gibt natürliche Breite → Context wird 477px
+         statt 293px (Row-Breite). Fix: width:100% erzwingt korrekte Layout-Breite. */
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-context { width: 100%; min-width: 0; }
+      /* Status-Badges: flex-shrink:0 verhindert Schrumpfen → overflow.
+         flex-shrink:1 + flex-wrap erlaubt Schrumpfen und Umbruch bei Platzmangel. */
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-status { flex-shrink: 1; flex-wrap: wrap; row-gap: 4px; }
+      /* PRJ-ID-Badge zu lang für Mobile — ausblenden */
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-pill-id { display: none; }
       /* Tabs: horizontal scrollbar statt Überlauf (selbes max-width-Muster wie Galerie) */
       .vd-screen[data-screen="projekt-detail"] .vd-proj-tabs {
         overflow-x: auto;
@@ -4995,10 +5003,10 @@
         max-width: 100%;
         flex-shrink: 1;
         scrollbar-width: none;
-        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 22px), transparent 100%);
-        mask-image: linear-gradient(to right, #000 calc(100% - 22px), transparent 100%);
       }
       .vd-screen[data-screen="projekt-detail"] .vd-proj-tabs::-webkit-scrollbar { display: none; }
+      /* "38 Treffer"-Zeile auf Mobile ausblenden (Platz sparen, Info redundant) */
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-count { display: none; }
       /* Pills: max-width:100% damit overflow-x:auto korrekt greift */
       .vd-screen[data-screen="projekt-detail"] .vd-proj-pills { max-width: 100%; }
       .vd-screen[data-screen="projekt-detail"] .vd-proj-filters { margin-left: 0; margin-right: 0; }
