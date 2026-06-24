@@ -2249,6 +2249,8 @@
       display: flex;
       flex-direction: column;
       min-width: 0;
+      min-height: 0;   /* grid-child darf nicht über max-height des Containers wachsen */
+      overflow: hidden;
     }
     .vd-modal-head {
       display: flex;
