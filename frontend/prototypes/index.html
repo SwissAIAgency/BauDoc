@@ -5140,9 +5140,39 @@
       .vd-screen[data-screen="projekt-detail"] .vd-proj-tabs::-webkit-scrollbar { display: none; }
       /* "38 Treffer"-Zeile auf Mobile ausblenden (Platz sparen, Info redundant) */
       .vd-screen[data-screen="projekt-detail"] .vd-proj-count { display: none; }
-      /* Pills: max-width:100% damit overflow-x:auto korrekt greift */
-      .vd-screen[data-screen="projekt-detail"] .vd-proj-pills { max-width: 100%; min-width: 0; width: 100%; }
-      .vd-screen[data-screen="projekt-detail"] .vd-proj-filters { margin-left: 0; margin-right: 0; flex-direction: row; align-items: stretch; width: 100%; min-width: 0; }
+      /* Pills: kompakt wie Galerie — Labels ausblenden, Scroll + Mask-Fade */
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-filters {
+        margin: 0;
+        padding: 0;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        min-width: 0;
+        overflow: hidden;
+      }
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-pills {
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+        mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+        padding: 4px 0;
+        gap: 6px;
+      }
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-pills::-webkit-scrollbar { display: none; }
+      /* Label ausblenden: zeigt nur "Alle ∨" statt "Planposition: Alle ∨" */
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-pill-label { display: none; }
+      /* Pills kompakter auf Mobile */
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-pill {
+        min-height: 36px;
+        padding: 0 8px 0 10px;
+        font-size: 12px;
+        flex-shrink: 0;
+      }
       .vd-screen[data-screen="projekt-detail"] .vd-proj-tools { display: none !important; }
 
       /* ---- 2) UPLOAD-BUTTONS: 2×2 Grid, 52px, Icon 20px, Text 14px ---- */
