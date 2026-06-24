@@ -4854,24 +4854,24 @@
       }
 
       /* Monats-Gruppe + Header */
-      .vd-galm-group { margin-bottom: 20px; }
-      /* Datums-Header: ruhiger Eyebrow (Versalien) + Zähler-Badge,
-         darunter eine Hairline als Section-Divider. */
+      .vd-galm-group { margin-bottom: 14px; }
+      /* Datums-Header bewusst zurückhaltend: kleine, ruhige Caption ohne
+         Box, Badge oder Trennlinie → maximaler Fokus auf die Bilder.
+         Zähler nur als dezenter „· 4"-Zusatz. */
       .vd-galm-h {
-        display: flex; align-items: center; gap: 9px;
-        font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
-        text-transform: uppercase; color: var(--text-mid);
-        margin: 2px 0 12px; padding: 8px 0;
-        border-bottom: 1px solid var(--border-subtle);
+        display: flex; align-items: baseline; gap: 5px;
+        font-size: 12px; font-weight: 600; letter-spacing: 0.01em;
+        text-transform: none; color: var(--text-low);
+        margin: 2px 0 8px; padding: 4px 0; border: none;
         position: sticky; top: 0; z-index: 2;
         background: var(--bg-base);
       }
       .vd-galm-h-count {
-        font-size: 11px; font-weight: 600; letter-spacing: 0;
-        color: var(--text-mid); text-transform: none;
-        background: var(--bg-raised); border: 1px solid var(--border-subtle);
-        padding: 1px 9px; border-radius: 999px;
+        font-size: 12px; font-weight: 400; letter-spacing: 0;
+        color: var(--text-low); text-transform: none;
+        background: none; border: none; padding: 0;
       }
+      .vd-galm-h-count::before { content: "· "; }
 
       /* 2-Spalten-Foto-Raster */
       .vd-galm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -5066,30 +5066,63 @@
       .vd-popover[data-open="true"] .vd-popover-option { padding: 12px 10px; font-size: 14px; }
       .vd-popover[data-open="true"] .vd-popover-search input { height: 44px; font-size: 16px; }
 
-      /* ---- 3) MODALS (Foto/Plan/Video/Datei/Export/Neu): Bottom-Sheet ---- */
-      .vd-modal-backdrop[data-bind="neues-projekt-modal"],
-      .vd-modal-backdrop[data-bind="foto-aufnahme-modal"],
-      .vd-modal-backdrop[data-bind="plan-upload-modal"],
-      .vd-modal-backdrop[data-bind="video-upload-modal"],
-      .vd-modal-backdrop[data-bind="datei-waehlen-modal"],
-      .vd-modal-backdrop[data-bind="export-modal"],
-      .vd-modal-backdrop[data-bind="media-lightbox-modal"] {
+      /* ============================================================
+         3) DEDIZIERTE MODALS → saubere Mobile-Bottom-Sheets
+         Sammelselektor: alle data-bind, die auf "-modal" enden, AUSSER den
+         beiden Bild-Viewern (media-modal, wizard-modal) — die bleiben
+         Vollbild-Lightbox. Spart 7-fache Selektor-Wiederholung.
+         ============================================================ */
+      /* Backdrop ÜBER Bottom-Nav (z60) + FAB heben; Scrim deckt beides ab.
+         Zusätzlich Nav + FAB ausblenden, solange ein Modal offen ist. */
+      .vd-modal-backdrop[data-bind$="-modal"]:not([data-bind="media-modal"]):not([data-bind="wizard-modal"]) {
         align-items: flex-end;
+        z-index: 70;
+        padding: 0;
       }
-      .vd-modal-backdrop[data-bind="neues-projekt-modal"] .vd-modal,
-      .vd-modal-backdrop[data-bind="foto-aufnahme-modal"] .vd-modal,
-      .vd-modal-backdrop[data-bind="plan-upload-modal"] .vd-modal,
-      .vd-modal-backdrop[data-bind="video-upload-modal"] .vd-modal,
-      .vd-modal-backdrop[data-bind="datei-waehlen-modal"] .vd-modal,
-      .vd-modal-backdrop[data-bind="export-modal"] .vd-modal,
-      .vd-modal-backdrop[data-bind="media-lightbox-modal"] .vd-modal {
+      body.is-modal-open .vd-bottomnav,
+      body.is-modal-open .vd-fab { display: none !important; }
+
+      .vd-modal-backdrop[data-bind$="-modal"]:not([data-bind="media-modal"]):not([data-bind="wizard-modal"]) .vd-modal {
         width: 100%;
         max-width: 100%;
-        max-height: 90dvh;
+        max-height: 92dvh;
         border: none;
         border-radius: 20px 20px 0 0;
-        animation: vd-sheet-up 220ms ease;
+        box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+        overflow: hidden;
+        animation: vd-sheet-up 240ms cubic-bezier(0.32, 0.72, 0, 1);
       }
+      /* KRITISCH: modal-main füllt das Sheet, der Body scrollt intern, der
+         Footer bleibt sichtbar. Ohne flex:1 + min-height:0 wächst der Inhalt
+         über das Sheet hinaus und schiebt den Footer (mit Primär-Button!)
+         unter den Viewport-Rand → Button unerreichbar. */
+      .vd-modal-backdrop[data-bind$="-modal"]:not([data-bind="media-modal"]):not([data-bind="wizard-modal"]) .vd-modal-main {
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+      /* Greif-Handle oben am Sheet (sitzt über dem Head) */
+      .vd-modal-backdrop[data-bind$="-modal"]:not([data-bind="media-modal"]):not([data-bind="wizard-modal"]) .vd-modal-head {
+        position: relative;
+        padding-top: 22px;
+        flex-shrink: 0;
+      }
+      .vd-modal-backdrop[data-bind$="-modal"]:not([data-bind="media-modal"]):not([data-bind="wizard-modal"]) .vd-modal-head::before {
+        content: "";
+        position: absolute;
+        top: 9px; left: 50%; transform: translateX(-50%);
+        width: 40px; height: 4px; border-radius: 999px;
+        background: var(--border-default);
+      }
+      /* Footer: sichere Bottom-Inset (iPhone Home-Indicator), Buttons gross */
+      .vd-modal-backdrop[data-bind$="-modal"]:not([data-bind="media-modal"]):not([data-bind="wizard-modal"]) .vd-modal-foot {
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+        gap: 8px;
+      }
+      .vd-modal-backdrop[data-bind$="-modal"]:not([data-bind="media-modal"]):not([data-bind="wizard-modal"]) .vd-modal-foot .vd-button {
+        min-height: 44px;
+      }
+      /* Formularfelder 16px → kein iOS-Auto-Zoom beim Fokussieren */
+      .vd-field-input, .vd-field-select, .vd-field-textarea { font-size: 16px; }
       /* Schliessen-Button: vollwertiges 44px-Touch-Target */
       .vd-modal-close {
         width: 44px;
