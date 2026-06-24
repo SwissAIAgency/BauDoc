@@ -4829,18 +4829,49 @@
                 mask-image: linear-gradient(to right, #000 calc(100% - 22px), transparent 100%);
       }
       .vd-screen[data-screen="galerie"] .vd-proj-pills::-webkit-scrollbar { display: none; }
-      .vd-screen[data-screen="galerie"] .vd-proj-filters { padding: 0 14px; margin: 0; min-width: 0; }
       .vd-screen[data-screen="galerie"] .vd-proj-tools { display: none; }
 
-      /* Monats-Gruppe + Header */
-      .vd-galm-group { margin-bottom: 22px; }
-      .vd-galm-h {
-        display: flex; align-items: baseline; gap: 8px;
-        font-size: 15px; font-weight: 600; color: var(--text-high);
-        margin: 6px 2px 12px; position: sticky; top: 0; z-index: 2;
-        background: var(--bg-base); padding: 6px 0;
+      /* ---- KOMPAKTE FILTERLEISTE (Spacing straffen) ----
+         Trennlinie zwischen den Reihen raus, Treffer-Zähler neben die
+         Suche statt in eine dritte Zeile, Padding reduziert. Pills und
+         Suche teilen dasselbe Card-Padding → bündige Kante. */
+      .vd-screen[data-screen="galerie"] > .vd-proj-card { padding: 10px 12px; }
+      .vd-screen[data-screen="galerie"] .vd-proj-filters {
+        padding: 0; margin: 0; min-width: 0;
       }
-      .vd-galm-h-count { font-size: 13px; font-weight: 500; color: var(--color-primary); }
+      .vd-screen[data-screen="galerie"] .vd-proj-row + .vd-proj-row {
+        margin-top: 8px; padding-top: 0; border-top: none;
+      }
+      /* Such-Zeile: wieder horizontal (überschreibt die Spalten-Basis 1287)
+         → Suchfeld + „X Treffer" in einer kompakten Reihe. */
+      .vd-screen[data-screen="galerie"] .vd-proj-row:not(.vd-proj-filters) {
+        flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 10px;
+      }
+      .vd-screen[data-screen="galerie"] .vd-proj-search { flex: 1 1 auto; min-width: 0; }
+      .vd-screen[data-screen="galerie"] .vd-proj-count {
+        flex: 0 0 auto; margin: 0; font-size: 12px;
+        color: var(--text-low); white-space: nowrap;
+      }
+
+      /* Monats-Gruppe + Header */
+      .vd-galm-group { margin-bottom: 20px; }
+      /* Datums-Header: ruhiger Eyebrow (Versalien) + Zähler-Badge,
+         darunter eine Hairline als Section-Divider. */
+      .vd-galm-h {
+        display: flex; align-items: center; gap: 9px;
+        font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+        text-transform: uppercase; color: var(--text-mid);
+        margin: 2px 0 12px; padding: 8px 0;
+        border-bottom: 1px solid var(--border-subtle);
+        position: sticky; top: 0; z-index: 2;
+        background: var(--bg-base);
+      }
+      .vd-galm-h-count {
+        font-size: 11px; font-weight: 600; letter-spacing: 0;
+        color: var(--text-mid); text-transform: none;
+        background: var(--bg-raised); border: 1px solid var(--border-subtle);
+        padding: 1px 9px; border-radius: 999px;
+      }
 
       /* 2-Spalten-Foto-Raster */
       .vd-galm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -4940,9 +4971,19 @@
       }
       .vd-proj-tab-count { font-size: 11px; }
 
-      /* TODO(human): Tap-/Aktiv-Feedback für .vd-proj-pill:active und
-         .vd-proj-tab:active (nicht der bereits aktive Tab --active, sondern
-         der gedrückte Zustand beim Antippen). 2-6 Zeilen CSS. */
+      /* Tap-/Aktiv-Feedback: spürbarer Press-State unter dem Daumen.
+         Scope :not(--active) am Tab, damit der gefüllte Aktiv-Tab nicht
+         seine Primary-Fläche verliert. */
+      .vd-proj-pill:active {
+        transform: scale(0.96);
+        background: var(--bg-raised);
+        border-color: var(--border-default);
+      }
+      .vd-proj-tab:not(.vd-proj-tab--active):active {
+        transform: scale(0.96);
+        background: var(--bg-raised);
+      }
+      .vd-proj-tab--active:active { transform: scale(0.96); }
 
       /* ---- FILTER-BAR: Projekt-Detail Tabs-Content ---- */
       .vd-screen[data-screen="projekt-detail"] .vd-proj-filters { margin-left: 0; margin-right: 0; }
