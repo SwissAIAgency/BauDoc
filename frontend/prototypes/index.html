@@ -408,7 +408,7 @@
     .vd-kpi {
       background: var(--surface-1);
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 14px 14px 14px 18px;
       display: flex; flex-direction: column; gap: 6px;
       position: relative; overflow: hidden;
@@ -2618,7 +2618,7 @@
       padding: 0 12px;
       background: var(--bg-panel);
       border: 1px solid var(--border-default);
-      border-radius: var(--radius-small);
+      border-radius: var(--radius-container);
       color: var(--text-high);
       font-family: inherit;
       font-size: 12.5px;
@@ -3235,8 +3235,8 @@
     .vd-settings-subnav-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: var(--radius-default); font-size: 13px; font-weight: 450; color: var(--text-mid); text-decoration: none; transition: background 120ms, color 120ms; }
     .vd-settings-subnav-item svg { width: 15px; height: 15px; flex-shrink: 0; opacity: .65; }
     .vd-settings-subnav-item:hover { background: var(--bg-raised); color: var(--text-high); }
-    .vd-settings-subnav-item--active { background: rgba(255,255,255,.07); color: var(--text-high); font-weight: 500; }
-    .vd-settings-subnav-item--active svg { opacity: 1; }
+    .vd-settings-subnav-item--active { background: var(--color-primary-soft); color: var(--color-primary); font-weight: 600; }
+    .vd-settings-subnav-item--active svg { opacity: 1; color: var(--color-primary); }
     .vd-settings-content { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
 
     .vd-profile-header { display: flex; align-items: flex-start; gap: var(--space-5); padding: var(--space-5) var(--space-6); background: var(--bg-panel); border: 1px solid var(--border-default); border-radius: var(--radius-default); }
@@ -5140,6 +5140,28 @@
        angehobene Karten, weiche Modal-/Popover-Schatten, ruhigerer
        Scrim. Dark-Mode bleibt unberührt.
        ============================================================ */
+
+    /* Dashboard-Surfaces: die lokal dunkel definierten Tiers (--surface-1/-2,
+       --separator-*) für Light auf helle Werte heben. Sonst bleiben Hero +
+       KPI-Karten dunkel und die dunklen KPI-Werte sind auf dunklem Grund
+       praktisch unsichtbar. */
+    [data-theme="light"] body[data-active-screen="dashboard"] {
+      --surface-1: #FFFFFF;
+      --surface-2: #EEF0EA;
+      --separator-soft: rgba(28, 33, 38, 0.08);
+      --separator-strong: rgba(28, 33, 38, 0.12);
+    }
+    /* Hero + KPI-Karten: weiche, angehobene Karte statt dunkler Fläche */
+    [data-theme="light"] .vd-dash-hero,
+    [data-theme="light"] .vd-kpi {
+      box-shadow: 0 0 0 1px var(--separator-soft), var(--shadow-card);
+    }
+
+    /* Einstellungen: Profil-Header + Form-Karte dezent anheben */
+    [data-theme="light"] .vd-profile-header,
+    [data-theme="light"] .vd-form-card {
+      box-shadow: var(--shadow-card);
+    }
 
     /* Eingabefelder: knackiges Weiss mit definierter Kante statt grauer Füllung */
     [data-theme="light"] .vd-field-input,

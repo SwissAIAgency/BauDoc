@@ -24,6 +24,7 @@
   --radius-container: 10px;
   --radius-small: 8px;
   --radius-preview: 12px;
+  --radius-default: 12px;   /* Standard-Karten/Listen-Radius (war undefiniert → 0px/eckig) */
   --radius-pill: 999px;
 
   --space-1: 4px;
@@ -644,7 +645,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   gap: var(--space-2);
   height: 36px;
   padding: 0 var(--space-4);
-  border-radius: var(--radius-small);
+  border-radius: var(--radius-container);
   border: 1px solid transparent;
   font-family: inherit;
   font-size: 14px;
@@ -677,7 +678,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   justify-content: center;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--radius-small);
+  border-radius: var(--radius-container);
   color: var(--text-mid);
   touch-action: manipulation;
   transition: background 120ms ease, color 120ms ease;
