@@ -4813,15 +4813,23 @@
       #vd-gal-rows { display: none !important; }
       .vd-gal-mobile { display: block; flex: 1; overflow-y: auto; padding: 4px 14px 0; }
 
-      /* Filter-Pills als kompakte, scrollbare Chip-Reihe */
+      /* Filter-Pills als kompakte, scrollbare Chip-Reihe.
+         max-width:100% kappt den Flex-Child hart auf die Row-Breite —
+         flex-shrink greift hier nicht (verschachtelter overflow-x-Scroll-
+         Container), sonst läuft die Pill-Reihe über die Card hinaus. */
       .vd-screen[data-screen="galerie"] .vd-proj-pills {
         flex-wrap: nowrap;
+        min-width: 0;
+        max-width: 100%;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
+        /* dezenter Fade rechts → signalisiert „scrollbar" */
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 22px), transparent 100%);
+                mask-image: linear-gradient(to right, #000 calc(100% - 22px), transparent 100%);
       }
       .vd-screen[data-screen="galerie"] .vd-proj-pills::-webkit-scrollbar { display: none; }
-      .vd-screen[data-screen="galerie"] .vd-proj-filters { padding: 0 14px; margin: 0; }
+      .vd-screen[data-screen="galerie"] .vd-proj-filters { padding: 0 14px; margin: 0; min-width: 0; }
       .vd-screen[data-screen="galerie"] .vd-proj-tools { display: none; }
 
       /* Monats-Gruppe + Header */
@@ -4891,39 +4899,162 @@
         margin: var(--space-3) var(--space-3) 0;
       }
 
-      /* ---- FILTER PILLS: Überall grössere Touch-Targets ---- */
-      .vd-proj-pill {
-        min-height: 36px;
-        padding: 0 10px 0 12px;
-        font-size: 12.5px;
-        -webkit-tap-highlight-color: transparent;
+      /* ============================================================
+         MOBILE-UX KOMPLETTÜBERARBEITUNG
+         Touch-Targets ≥44px, Bottom-Sheets für Popover + Modals.
+         Sheet-Einblend-Animation wird durch den reduced-motion-Block
+         weiter oben automatisch entschärft.
+         ============================================================ */
+      @keyframes vd-sheet-up {
+        from { transform: translateY(100%); }
+        to   { transform: translateY(0); }
       }
-      .vd-proj-pill:active { background: var(--bg-raised); }
-      .vd-proj-pills { padding: 4px 0; }
+
+      /* ---- 1) FILTER-PILLS: 44px Touch-Target, voller Tap-Bereich ---- */
+      .vd-proj-pill {
+        min-height: 44px;
+        padding: 0 12px 0 14px;
+        font-size: 13px;
+        border-radius: 12px;
+        -webkit-tap-highlight-color: transparent;
+        transition: transform 90ms ease, background 120ms ease, border-color 120ms ease;
+      }
+      .vd-proj-pill-chev { width: 16px; height: 16px; }
+      .vd-proj-pills { padding: 6px 0; gap: 8px; }
+      .vd-proj-pill-clear { min-height: 44px; }
+
+      /* ---- 4) TAB-PILLS: grösser, aktiver Tab klar hervorgehoben ---- */
+      .vd-proj-tabs {
+        gap: 6px;
+        padding-right: 0;
+        border-right: none;
+        margin-right: 0;
+      }
+      .vd-proj-tab {
+        min-height: 40px;
+        height: auto;
+        padding: 0 14px;
+        font-size: 14px;
+        -webkit-tap-highlight-color: transparent;
+        transition: transform 90ms ease, background 120ms ease, color 120ms ease;
+      }
+      .vd-proj-tab-count { font-size: 11px; }
+
+      /* TODO(human): Tap-/Aktiv-Feedback für .vd-proj-pill:active und
+         .vd-proj-tab:active (nicht der bereits aktive Tab --active, sondern
+         der gedrückte Zustand beim Antippen). 2-6 Zeilen CSS. */
 
       /* ---- FILTER-BAR: Projekt-Detail Tabs-Content ---- */
       .vd-screen[data-screen="projekt-detail"] .vd-proj-filters { margin-left: 0; margin-right: 0; }
       .vd-screen[data-screen="projekt-detail"] .vd-proj-tools { display: none !important; }
 
-      /* ---- UPLOAD-BUTTONS: 2×2 Touch-Grid im Projekt-Detail ---- */
+      /* ---- 2) UPLOAD-BUTTONS: 2×2 Grid, 52px, Icon 20px, Text 14px ---- */
       .vd-proj-actions {
         display: grid !important;
         grid-template-columns: 1fr 1fr;
-        gap: var(--space-2);
+        gap: 10px;
         width: 100%;
       }
       .vd-proj-actions .vd-button {
         width: 100%;
-        min-height: 44px;
+        min-height: 52px;
+        gap: 10px;
         justify-content: flex-start;
-        font-size: 12.5px;
+        font-size: 14px;
+        border-radius: 12px;
+        -webkit-tap-highlight-color: transparent;
+        transition: transform 90ms ease, background 120ms ease;
+      }
+      .vd-proj-actions .vd-button:active { transform: scale(0.97); }
+      .vd-proj-actions .vd-button svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+      /* ---- 6) SUCHE: 44px, 16px (kein iOS-Auto-Zoom), radius 12 ---- */
+      .vd-proj-search { width: 100%; flex: 1 1 auto; }
+      .vd-proj-search input {
+        height: 44px;
+        font-size: 16px;
+        border-radius: 12px;
+        padding-left: 38px;
+      }
+      .vd-proj-search-icon { width: 16px; height: 16px; }
+
+      /* ---- 5) POPOVER (Filter-Dropdowns): Bottom-Sheet + Scrim ----
+         openPopover() setzt top/left inline → mit !important neutralisiert.
+         Das ::before dimmt den ganzen Viewport, ist aber pointer-events:none,
+         d.h. Taps oberhalb des Sheets erreichen die Seite und der bestehende
+         Outside-Click-Handler (closePopovers) schliesst das Sheet. */
+      .vd-popover[data-open="true"] {
+        position: fixed !important;
+        top: auto !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        max-height: 60vh;
+        border: 1px solid var(--border-default);
+        border-bottom: none;
+        border-radius: 20px 20px 0 0;
+        padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+        box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        animation: vd-sheet-up 200ms ease;
+      }
+      .vd-popover[data-open="true"]::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: -1;
+        pointer-events: none;
+      }
+      /* Greif-Handle oben am Sheet */
+      .vd-popover[data-open="true"]::after {
+        content: "";
+        position: sticky;
+        top: 0;
+        display: block;
+        width: 40px; height: 4px;
+        margin: -6px auto 12px;
+        border-radius: 999px;
+        background: var(--border-default);
+      }
+      .vd-popover[data-open="true"] .vd-popover-list { max-height: none; }
+      .vd-popover[data-open="true"] .vd-popover-option { padding: 12px 10px; font-size: 14px; }
+      .vd-popover[data-open="true"] .vd-popover-search input { height: 44px; font-size: 16px; }
+
+      /* ---- 3) MODALS (Foto/Plan/Video/Datei/Export/Neu): Bottom-Sheet ---- */
+      .vd-modal-backdrop[data-bind="neues-projekt-modal"],
+      .vd-modal-backdrop[data-bind="foto-aufnahme-modal"],
+      .vd-modal-backdrop[data-bind="plan-upload-modal"],
+      .vd-modal-backdrop[data-bind="video-upload-modal"],
+      .vd-modal-backdrop[data-bind="datei-waehlen-modal"],
+      .vd-modal-backdrop[data-bind="export-modal"],
+      .vd-modal-backdrop[data-bind="media-lightbox-modal"] {
+        align-items: flex-end;
+      }
+      .vd-modal-backdrop[data-bind="neues-projekt-modal"] .vd-modal,
+      .vd-modal-backdrop[data-bind="foto-aufnahme-modal"] .vd-modal,
+      .vd-modal-backdrop[data-bind="plan-upload-modal"] .vd-modal,
+      .vd-modal-backdrop[data-bind="video-upload-modal"] .vd-modal,
+      .vd-modal-backdrop[data-bind="datei-waehlen-modal"] .vd-modal,
+      .vd-modal-backdrop[data-bind="export-modal"] .vd-modal,
+      .vd-modal-backdrop[data-bind="media-lightbox-modal"] .vd-modal {
+        width: 100%;
+        max-width: 100%;
+        max-height: 90dvh;
+        border: none;
+        border-radius: 20px 20px 0 0;
+        animation: vd-sheet-up 220ms ease;
+      }
+      /* Schliessen-Button: vollwertiges 44px-Touch-Target */
+      .vd-modal-close {
+        width: 44px;
+        height: 44px;
         -webkit-tap-highlight-color: transparent;
       }
-      .vd-proj-actions .vd-button svg { width: 15px; height: 15px; }
-
-      /* ---- SUCHE: Vollbreite auf Mobile ---- */
-      .vd-proj-search { width: 100%; flex: 1 1 auto; }
-      .vd-proj-search input { height: 38px; font-size: 14px; }
     }
   </style>
 </head>
