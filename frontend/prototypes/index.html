@@ -4722,6 +4722,93 @@
     .vd-lb-status-pill--ok   { background: var(--color-primary-soft); color: var(--color-primary); }
     .vd-lb-status-pill--warn { background: rgba(245, 199, 104, 0.16); color: var(--status-warn); }
 
+    /* ── Lightbox: Datum-Scrubber ── */
+    .vd-lb-date-scrubber {
+      flex-shrink: 0;
+      height: 36px;
+      background: var(--bg-base);
+      border-top: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 0 var(--space-4);
+    }
+    .vd-lb-date-scrubber::-webkit-scrollbar { display: none; }
+    .vd-lb-ds-track {
+      display: flex;
+      align-items: center;
+      min-width: max-content;
+      position: relative;
+      height: 24px;
+    }
+    .vd-lb-ds-track::before {
+      content: '';
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      left: 0; right: 0;
+      height: 1px;
+      background: var(--border-default);
+      pointer-events: none;
+    }
+    .vd-lb-ds-stop {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 14px;
+      cursor: pointer;
+      position: relative;
+      height: 24px;
+      justify-content: center;
+    }
+    .vd-lb-ds-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border-strong);
+      background: var(--bg-base);
+      transition: border-color 120ms, background 120ms, box-shadow 120ms;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+    .vd-lb-ds-stop.vd-lb-ds-active .vd-lb-ds-dot {
+      border-color: var(--color-primary);
+      background: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-primary-soft);
+    }
+    .vd-lb-ds-stop:hover .vd-lb-ds-dot { border-color: var(--color-primary); }
+    .vd-lb-ds-date {
+      position: absolute;
+      top: -13px;
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      color: var(--text-low);
+      white-space: nowrap;
+      letter-spacing: 0.2px;
+      pointer-events: none;
+    }
+    .vd-lb-ds-stop.vd-lb-ds-active .vd-lb-ds-date { color: var(--color-primary); font-weight: 500; }
+
+    /* ── Lightbox: Wetter-Zeile ── */
+    .vd-lb-wetter-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--text-mid);
+      min-height: 22px;
+    }
+    .vd-lb-wetter-icon { font-size: 15px; line-height: 1; flex-shrink: 0; }
+
+    /* ── Lightbox: Planposition-Minimap ── */
+    .vd-lb-planmap {
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-small);
+      overflow: hidden;
+      background: #0b0e11;
+      aspect-ratio: 4/3;
+    }
+    .vd-lb-planmap svg { width: 100%; height: 100%; display: block; }
+
     .vd-lb-hint {
       display: flex;
       align-items: center;
@@ -6146,6 +6233,9 @@
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           </div>
+          <div class="vd-lb-date-scrubber" aria-hidden="true">
+            <div class="vd-lb-ds-track" data-lb-ds-track></div>
+          </div>
           <div class="vd-lb-picker" data-lb-strip aria-label="Medien-Streifen"></div>
         </div>
         <aside class="vd-lb-side">
@@ -6173,6 +6263,31 @@
               <div class="vd-modal-section-label">Metadaten</div>
               <div class="vd-modal-meta-grid" data-lb-meta>
                 <div class="vd-modal-meta-row"><span class="vd-modal-meta-label">—</span><span class="vd-modal-meta-value">—</span></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="vd-modal-section-label">Wetter</div>
+              <div class="vd-lb-wetter-row" data-lb-wetter>
+                <span class="vd-lb-wetter-icon">⛅</span><span>—</span>
+              </div>
+            </div>
+
+            <div>
+              <div class="vd-modal-section-label">Planposition</div>
+              <div class="vd-lb-planmap">
+                <svg viewBox="0 0 220 160" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="12" y="10" width="196" height="138" fill="none" stroke="#3A4248" stroke-width="1.5" rx="2"/>
+                  <line x1="90" y1="10" x2="90" y2="90" stroke="#2A3038" stroke-width="1"/>
+                  <line x1="135" y1="10" x2="135" y2="90" stroke="#2A3038" stroke-width="1"/>
+                  <line x1="12" y1="90" x2="208" y2="90" stroke="#2A3038" stroke-width="1"/>
+                  <line x1="90" y1="90" x2="90" y2="148" stroke="#2A3038" stroke-width="1"/>
+                  <line x1="135" y1="90" x2="135" y2="148" stroke="#2A3038" stroke-width="1"/>
+                  <path d="M90 65 A22 22 0 0 0 68 90" fill="none" stroke="#3A4248" stroke-width="0.8" stroke-dasharray="3,2"/>
+                  <path d="M90 110 A14 14 0 0 0 104 96" fill="none" stroke="#3A4248" stroke-width="0.8" stroke-dasharray="3,2"/>
+                  <circle data-lb-planmap-ring cx="50" cy="45" r="9" fill="none" stroke="#F26B6B" stroke-width="1" opacity="0.4"/>
+                  <circle data-lb-planmap-marker cx="50" cy="45" r="5" fill="#F26B6B" opacity="0.9"/>
+                </svg>
               </div>
             </div>
 
@@ -7099,6 +7214,11 @@
       { initials: 'LB', name: 'Lukas Bösiger', role: 'Bauleiter' }
     ];
 
+    const WETTER = [
+      '8 °C, Schneefall', '11 °C, bedeckt', '14 °C, Regen', '16 °C, teilbewölkt',
+      '18 °C, bewölkt', '20 °C, heiter', '22 °C, sonnig', '26 °C, sonnig',
+      '28 °C, Gewitter', '12 °C, neblig'
+    ];
     const STATUS = ['Freigegeben', 'In Prüfung', 'Neu', 'Hinweis', 'Abgelehnt'];
 
     const TAGS = [
@@ -7219,7 +7339,8 @@
           tags: tags,
           status: status,
           groesse: `${(0.4 + rng() * 6.2).toFixed(1)} MB`,
-          notiz: ''
+          notiz: '',
+          wetter: pick(rng, WETTER)
         };
         if (typ === 'foto') {
           out.push(Object.assign({}, base, {
@@ -11934,7 +12055,37 @@
       const notesEl = bd.querySelector('[data-lb-notes]');
       if (notesEl && notesEl.tagName === 'TEXTAREA') notesEl.value = m.notiz || '';
 
+      // Wetter
+      const wetterEl = bd.querySelector('[data-lb-wetter]');
+      if (wetterEl) {
+        const w = m.wetter || '—';
+        let icon = '⛅';
+        if (w.indexOf('sonnig') >= 0) icon = '☀️';
+        else if (w.indexOf('heiter') >= 0) icon = '🌤️';
+        else if (w.indexOf('Regen') >= 0) icon = '🌧️';
+        else if (w.indexOf('Schneefall') >= 0) icon = '❄️';
+        else if (w.indexOf('Gewitter') >= 0) icon = '⛈️';
+        else if (w.indexOf('neblig') >= 0) icon = '🌫️';
+        else if (w.indexOf('bedeckt') >= 0 || w.indexOf('bewölkt') >= 0) icon = '☁️';
+        wetterEl.innerHTML = '<span class="vd-lb-wetter-icon">' + icon + '</span><span>' + escapeHtml(w) + '</span>';
+      }
+      // Planposition-Marker aktualisieren
+      const PLAN_XY = {
+        'EG-01':[50,45],'EG-02':[35,72],'EG-03':[162,45],
+        'OG1-01':[45,35],'OG1-02':[118,35],'OG1-03':[168,100],
+        'OG2-01':[50,100],'OG2-02':[152,100],'OG3-01':[100,25],
+        'UG-01':[80,130],'UG-02':[152,130],
+        'A-01':[100,10],'A-02':[100,145],'A-03':[185,80]
+      };
+      const planId = m.planposition && m.planposition.id ? m.planposition.id : '';
+      const pos = PLAN_XY[planId] || [110, 79];
+      const mkEl = bd.querySelector('[data-lb-planmap-marker]');
+      const rkEl = bd.querySelector('[data-lb-planmap-ring]');
+      if (mkEl) { mkEl.setAttribute('cx', pos[0]); mkEl.setAttribute('cy', pos[1]); }
+      if (rkEl) { rkEl.setAttribute('cx', pos[0]); rkEl.setAttribute('cy', pos[1]); }
+
       lbRenderStrip();
+      lbRenderDateScrubber();
     }
 
     function lbRenderStrip() {
@@ -11956,6 +12107,25 @@
       });
       const active = strip.querySelector('[data-lb-strip-active="true"]');
       if (active) active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+    }
+
+    function lbRenderDateScrubber() {
+      const bd = backdropEl();
+      const track = bd && bd.querySelector('[data-lb-ds-track]');
+      if (!track) return;
+      track.innerHTML = lb.list.map(function(m, i) {
+        const isActive = i === lb.idx;
+        const dateStr = (m.datum || '').split(',')[0] || '—';
+        return '<div class="vd-lb-ds-stop' + (isActive ? ' vd-lb-ds-active' : '') + '" data-lb-ds-i="' + i + '">' +
+          '<span class="vd-lb-ds-date">' + escapeHtml(dateStr) + '</span>' +
+          '<div class="vd-lb-ds-dot"></div>' +
+        '</div>';
+      }).join('');
+      track.querySelectorAll('[data-lb-ds-i]').forEach(function(stop) {
+        stop.addEventListener('click', function() { lbJump(parseInt(stop.getAttribute('data-lb-ds-i'), 10)); });
+      });
+      const activeStop = track.querySelector('.vd-lb-ds-active');
+      if (activeStop) activeStop.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
     }
 
     // 1) Klick auf .vd-media-card / .vd-pd-card / .vd-gal-cell -> Lightbox
