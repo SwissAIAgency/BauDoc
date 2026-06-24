@@ -3236,22 +3236,62 @@
        EINSTELLUNG / PROFIL
        ============================================================ */
     .vd-settings-layout { display: grid; grid-template-columns: 200px 1fr; gap: var(--space-8); align-items: start; padding-top: var(--space-2); }
-    .vd-settings-subnav { position: sticky; top: var(--space-6); display: flex; flex-direction: column; gap: 2px; }
-    .vd-settings-subnav-label { font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-low); padding: 6px 10px 4px; margin-top: 6px; }
-    .vd-settings-subnav-label:first-child { margin-top: 0; }
-    .vd-settings-subnav-divider { height: 1px; background: var(--border-subtle); margin: 8px 0; }
-    .vd-settings-subnav-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: var(--radius-default); font-size: 13px; font-weight: 450; color: var(--text-mid); text-decoration: none; transition: background 120ms, color 120ms; }
-    .vd-settings-subnav-item svg { width: 15px; height: 15px; flex-shrink: 0; opacity: .65; }
+    .vd-settings-subnav {
+      position: sticky; top: var(--space-6);
+      display: flex; flex-direction: column; gap: 1px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-container);
+      padding: 8px;
+    }
+    .vd-settings-subnav-label {
+      font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+      color: var(--text-low); padding: 10px 8px 3px; margin-top: 2px;
+    }
+    .vd-settings-subnav-label:first-child { margin-top: 0; padding-top: 3px; }
+    .vd-settings-subnav-divider { height: 1px; background: var(--border-default); margin: 6px 0; }
+    .vd-settings-subnav-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 10px;
+      border-radius: var(--radius-small);
+      font-size: 13px; font-weight: 450; color: var(--text-mid);
+      text-decoration: none;
+      transition: background 120ms, color 120ms, box-shadow 120ms;
+    }
+    .vd-settings-subnav-item svg { width: 15px; height: 15px; flex-shrink: 0; opacity: .55; transition: opacity 120ms; }
     .vd-settings-subnav-item:hover { background: var(--bg-raised); color: var(--text-high); }
-    .vd-settings-subnav-item--active { background: var(--color-primary-soft); color: var(--color-primary); font-weight: 600; }
-    .vd-settings-subnav-item--active svg { opacity: 1; color: var(--color-primary); }
+    .vd-settings-subnav-item:hover svg { opacity: .85; }
+    .vd-settings-subnav-item--active {
+      background: var(--color-primary-soft); color: var(--color-primary); font-weight: 600;
+      box-shadow: inset 2.5px 0 0 var(--color-primary);
+    }
+    .vd-settings-subnav-item--active svg { opacity: 1; }
     .vd-settings-content { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
 
-    .vd-profile-header { display: flex; align-items: flex-start; gap: var(--space-5); padding: var(--space-5) var(--space-6); background: var(--bg-panel); border: 1px solid var(--border-default); border-radius: var(--radius-default); }
-    .vd-profile-avatar { flex-shrink: 0; width: 64px; height: 64px; border-radius: 50%; background: rgba(100, 180, 120, .18); color: var(--color-primary); font-size: 22px; font-weight: 600; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border-default); }
+    .vd-profile-header {
+      display: flex; align-items: flex-start; gap: var(--space-5);
+      padding: var(--space-5) var(--space-6);
+      background: var(--bg-panel);
+      border: 1px solid var(--border-default);
+      border-top: 3px solid var(--color-primary);
+      border-radius: var(--radius-default);
+    }
+    .vd-profile-avatar {
+      flex-shrink: 0; width: 72px; height: 72px; border-radius: 50%;
+      background: var(--color-primary-soft);
+      color: var(--color-primary); font-size: 24px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      border: 2.5px solid var(--color-primary);
+      box-shadow: 0 0 0 4px var(--color-primary-soft);
+    }
     .vd-profile-identity { flex: 1; min-width: 0; }
-    .vd-profile-eyebrow { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-low); }
-    .vd-profile-name { font-size: 20px; font-weight: 600; color: var(--text-high); margin: 4px 0 2px; }
+    .vd-profile-eyebrow {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em;
+      color: var(--color-primary); background: var(--color-primary-soft);
+      padding: 2px 8px; border-radius: var(--radius-pill);
+    }
+    .vd-profile-name { font-size: 20px; font-weight: 600; color: var(--text-high); margin: 6px 0 2px; }
     .vd-profile-role { font-size: 13px; color: var(--text-mid); margin-bottom: 10px; }
     .vd-profile-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; }
     .vd-profile-meta-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-low); }
