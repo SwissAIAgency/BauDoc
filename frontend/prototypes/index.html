@@ -5065,6 +5065,25 @@
         margin: var(--space-3) var(--space-3) 0;
       }
 
+      /* ---- LIGHT MODE MOBILE: Filter-Cards als nahtlose Streifen ---- */
+      /* In Dark Mode ist der Card-Rahmen kaum sichtbar; im Light Mode
+         kontrastiert er stark → Card-Look durch flachen Streifen ersetzen. */
+      [data-theme="light"] body[data-active-screen="galerie"] .vd-screen[data-screen="galerie"] > .vd-proj-card,
+      [data-theme="light"] .vd-screen.vd-proj-card[data-screen="projekt-detail"] {
+        background: var(--bg-base);
+        border: none;
+        border-bottom: 1px solid var(--border-subtle);
+        border-radius: 0;
+        box-shadow: none;
+        margin-left: 0;
+        margin-right: 0;
+      }
+      /* Pills: im Light Mode auf Mobile weichere Kante statt --border-strong */
+      [data-theme="light"] .vd-screen[data-screen="galerie"] .vd-proj-pill,
+      [data-theme="light"] .vd-screen[data-screen="projekt-detail"] .vd-proj-pill {
+        border-color: var(--border-default);
+      }
+
       /* ============================================================
          MOBILE-UX KOMPLETTÜBERARBEITUNG
          Touch-Targets ≥44px, Bottom-Sheets für Popover + Modals.
