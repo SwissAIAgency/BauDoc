@@ -5140,7 +5140,7 @@
       .vd-screen[data-screen="projekt-detail"] .vd-proj-tabs::-webkit-scrollbar { display: none; }
       /* "38 Treffer"-Zeile auf Mobile ausblenden (Platz sparen, Info redundant) */
       .vd-screen[data-screen="projekt-detail"] .vd-proj-count { display: none; }
-      /* Pills: kompakt wie Galerie — Labels ausblenden, Scroll + Mask-Fade */
+      /* Pills: superkompakt — abgekürzte Labels via ::before, 28px Höhe */
       .vd-screen[data-screen="projekt-detail"] .vd-proj-filters {
         margin: 0;
         padding: 0;
@@ -5158,21 +5158,39 @@
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
-        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
-        mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
-        padding: 4px 0;
-        gap: 6px;
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+        mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+        padding: 3px 0;
+        gap: 4px;
       }
       .vd-screen[data-screen="projekt-detail"] .vd-proj-pills::-webkit-scrollbar { display: none; }
-      /* Label ausblenden: zeigt nur "Alle ∨" statt "Planposition: Alle ∨" */
+      /* HTML-Label ausblenden — abgekürzte via ::before ersetzen */
       .vd-screen[data-screen="projekt-detail"] .vd-proj-pill-label { display: none; }
-      /* Pills kompakter auf Mobile */
+      /* Pills: 28px, kompakte Padding, kein Schrumpfen */
       .vd-screen[data-screen="projekt-detail"] .vd-proj-pill {
-        min-height: 36px;
-        padding: 0 8px 0 10px;
-        font-size: 12px;
+        min-height: 28px;
+        height: 28px;
+        padding: 0 6px 0 8px;
+        font-size: 11px;
+        border-radius: 8px;
+        gap: 3px;
         flex-shrink: 0;
       }
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-pill .vd-proj-pill-chev {
+        width: 12px; height: 12px;
+      }
+      /* Abgekürzte Labels per Attribut-Selektor */
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-pill[data-pill]::before {
+        font-size: 10px;
+        font-weight: 500;
+        opacity: 0.6;
+        margin-right: 1px;
+      }
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-pill[data-pill="planposition"]::before { content: "Plan"; }
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-pill[data-pill="status"]::before       { content: "Stat"; }
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-pill[data-pill="zeitraum"]::before     { content: "Zeit"; }
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-pill[data-pill="ersteller"]::before    { content: "Erst"; }
+      .vd-screen[data-screen="projekt-detail"] .vd-proj-pill[data-pill="tags"]::before         { content: "Tags"; }
       .vd-screen[data-screen="projekt-detail"] .vd-proj-tools { display: none !important; }
 
       /* ---- 2) UPLOAD-BUTTONS: 2×2 Grid, 52px, Icon 20px, Text 14px ---- */
