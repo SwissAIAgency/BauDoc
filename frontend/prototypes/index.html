@@ -213,6 +213,11 @@
     }
     /* Gewerke-Filter sitzt links in den Topbar-Actions, dezent abgesetzt. */
     body[data-active-screen="projekt-detail"] .vd-topbar .vd-topbar-gat { margin-right: 4px; }
+    /* LEAK-FIX: Picker + Gewerke-Filter wurden per JS dauerhaft in die
+       geteilte Topbar gehoben — sie dürfen NUR auf projekt-detail erscheinen,
+       sonst bluten sie in Dashboard/Projekte/Einstellung durch. */
+    body:not([data-active-screen="projekt-detail"]) .vd-topbar-proj,
+    body:not([data-active-screen="projekt-detail"]) .vd-topbar-gat { display: none !important; }
 
     body[data-active-screen="projekt-detail"] .vd-subtopbar {
       position: sticky;
