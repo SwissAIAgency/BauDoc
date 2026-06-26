@@ -8526,6 +8526,13 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
     });
     window.VISIDOC_THUMBS.setGeneratedMap(generated);
 
+    // Die alte Projekt-Detail-Workspace (Tabs/Filter-Sidebar/Picker/Detail-Panel)
+    // wurde durch das neue .vdg-Galerie-Modul ersetzt. Diese Render-/Event-Logik
+    // greift auf nicht mehr vorhandenes Markup zu. Sentinel: [data-bind="projekt-sub"]
+    // existiert nur im alten Markup — fehlt es, ist nichts mehr zu tun.
+    // (Die Bild-Registrierung oben bleibt aktiv, sie wird von Galerie/Dashboard genutzt.)
+    if (!document.querySelector('[data-bind="projekt-sub"]')) return;
+
     // ---- 2) Store + Render ----
     var store = window.VISIDOC_STORE.createStore();
     var $ = function (sel, root) { return (root || document).querySelector(sel); };
