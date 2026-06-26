@@ -178,11 +178,36 @@
        SCREEN-LAYOUT MODES (Option A: App-Layout pro Screen)
        - Vollseiten (dashboard, projekte, galerie, archiv, einstellung)
          behalten globale Topbar + Sidebar.
-       - Detail-Screens (projekt-detail) blenden globale Topbar +
-         Sidebar aus, die lokale Sub-Topbar mit Breadcrumb ist der
-         alleinige Header. Kein doppelter Header mehr.
+       - Detail-Screens (projekt-detail) nutzen JETZT dieselbe globale
+         Topbar wie alle anderen Screens. Der VDG-eigene Header entfällt;
+         Projekt-Umschalter + Gewerke-Filter werden per JS in die Topbar
+         gehoben (siehe liftHeaderControlsIntoTopbar()). Single-Header.
        ============================================================ */
-    body[data-active-screen="projekt-detail"] .vd-topbar { display: none !important; }
+    /* VDG-eigener Header raus, globale Topbar übernimmt. Header-Grid-Zeile
+       auf 0 kollabieren, damit kein Leerraum bleibt. */
+    body[data-active-screen="projekt-detail"] .vdg-screen > .app > .header { display: none !important; }
+    body[data-active-screen="projekt-detail"] .vdg-screen > .app { grid-template-rows: 0 auto minmax(0, 1fr); }
+
+    /* Token-Brücke: die verschobenen Controls (.crumb-proj/.crumb-gat/.pop)
+       beziehen ihre Tokens sonst nur vom projekt-detail-Screen. Dieselben
+       Mappings auf der Topbar spiegeln, damit sie dort identisch aussehen. */
+    body[data-active-screen="projekt-detail"] .vd-topbar {
+      --teal: var(--color-primary); --teal-hover: var(--color-primary-hover);
+      --panel: var(--bg-panel); --panel-soft: var(--bg-raised);
+      --line: var(--border-default); --line-strong: var(--border-strong, var(--border-default));
+      --r-sm: 9px; --r-md: 12px; --r-pill: 999px;
+      --shadow-pop: 0 10px 30px rgba(15,30,40,.28);
+    }
+    /* Projekt-Umschalter ersetzt den Topbar-Titel → Titel/Subtitle aus,
+       Titel-Container horizontal für die Pille. */
+    body[data-active-screen="projekt-detail"] .vd-topbar .vd-topbar-title,
+    body[data-active-screen="projekt-detail"] .vd-topbar .vd-topbar-subtitle { display: none; }
+    body[data-active-screen="projekt-detail"] .vd-topbar .vd-topbar-titles {
+      flex-direction: row; align-items: center; gap: 12px; flex: 0 0 auto;
+    }
+    /* Gewerke-Filter sitzt links in den Topbar-Actions, dezent abgesetzt. */
+    body[data-active-screen="projekt-detail"] .vd-topbar .vd-topbar-gat { margin-right: 4px; }
+
     body[data-active-screen="projekt-detail"] .vd-subtopbar {
       position: sticky;
       top: 0;
@@ -300,9 +325,9 @@
       overflow-x: hidden;
     }
 
-    /* projekt-detail: Topbar weg, Sub-Topbar oben, Workspace scrollt */
-    body[data-active-screen="projekt-detail"] .vd-topbar { display: none !important; }
-    body[data-active-screen="projekt-detail"] .vd-app-body { grid-template-rows: auto var(--subtopbar-height, 48px) 1fr; }
+    /* projekt-detail: Single-Header — dieselbe globale Topbar wie alle
+       Screens (NICHT mehr ausgeblendet). Standard-2-Zeilen-Grid (Topbar +
+       Scroll) gilt; kein Sub-Topbar-Override mehr. */
     body[data-active-screen="projekt-detail"] .vd-workspace-scroll {
       min-height: 0;
       overflow-y: auto;
@@ -13455,6 +13480,39 @@ setView('kachel');
       try { render(); } catch(e){}
     }
   };
+
+  /* ============================================================ SINGLE-HEADER
+     Projekt-Umschalter + Gewerke-Filter aus dem (ausgeblendeten) VDG-Header
+     in die globale Topbar heben. Die Klick-/Popover-Handler hängen per
+     Element-Referenz bzw. an [aria-haspopup]/.pop — sie überleben den Umzug,
+     es muss nichts neu verdrahtet werden. */
+  function liftHeaderControlsIntoTopbar(){
+    var titles  = document.querySelector('.vd-topbar .vd-topbar-titles');
+    var actions = document.querySelector('.vd-topbar .vd-topbar-actions');
+    var projBtn = document.getElementById('proj-btn');
+    var gatBtn  = document.getElementById('gat-btn');
+    if (!titles || !actions || !projBtn || !gatBtn) return;
+    var projWrap = projBtn.parentNode;   // div.position:relative (Button + Popover)
+    var gatWrap  = gatBtn.parentNode;
+    if (projWrap.dataset.lifted) return; // idempotent
+    projWrap.dataset.lifted = '1';
+    projWrap.classList.add('vd-topbar-proj');
+    gatWrap.classList.add('vd-topbar-gat');
+    titles.appendChild(projWrap);                       // ersetzt den Titel
+    actions.insertBefore(gatWrap, actions.firstChild);  // links in den Actions
+  }
+  liftHeaderControlsIntoTopbar();
+
+  /* Single-Header-Konsequenz: Die globale Topbar-Suche steuert jetzt die
+     Projektgalerie (der VDG-eigene Suchschlitz ist mit dem Header weg). */
+  var topbarSearch = document.querySelector('.vd-topbar .vd-search-input');
+  if (topbarSearch) {
+    topbarSearch.addEventListener('input', function (e) {
+      if (document.body.getAttribute('data-active-screen') !== 'projekt-detail') return;
+      state.query = e.target.value;
+      render();
+    });
+  }
 })();
 </script>
 
