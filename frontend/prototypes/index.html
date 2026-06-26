@@ -197,6 +197,12 @@
       --line: var(--border-default); --line-strong: var(--border-strong, var(--border-default));
       --r-sm: 9px; --r-md: 12px; --r-pill: 999px;
       --shadow-pop: 0 10px 30px rgba(15,30,40,.28);
+      /* Eigener Stacking-Context über dem Galerie-Inhalt: das Picker-/
+         Gewerke-Popover ragt unter die 64px-Topbar und muss IMMER über
+         dem .aside (z-index:20) liegen. Topbar war position:static, ihr
+         z-index war dadurch wirkungslos. */
+      position: relative;
+      z-index: 100;
     }
     /* Projekt-Umschalter ersetzt den Topbar-Titel → Titel/Subtitle aus,
        Titel-Container horizontal für die Pille. */
@@ -6323,19 +6329,9 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
            SCREEN 3: PROJEKT-ANSICHT (eigene Seite, kein Tab)
            Pläne + Galerie + vertikale Timeline-Sidebar + Filter-V2
            ============================================================ -->
-      <!-- ============================================================
-           SUB-TOPBAR
-           ============================================================ -->
-      <div class="vd-subtopbar">
-        <nav class="vd-breadcrumb" aria-label="Breadcrumb">
-          <a href="#" data-nav="dashboard">Dashboard</a>
-          <span class="vd-breadcrumb-sep" aria-hidden="true">/</span>
-          <a href="#" data-nav="projekte">Projekte</a>
-          <span class="vd-breadcrumb-sep" aria-hidden="true">/</span>
-          <span class="vd-breadcrumb-current" data-bind="projekt-titel">Neubau Bahnhofstrasse 12</span>
-        </nav>
-      </div>
-
+      <!-- Breadcrumb-Sub-Topbar entfernt: Projektname steht jetzt im
+           Header-Picker, Navigation in der Sidebar — der Streifen war
+           redundant (Single-Header). -->
 
       <!-- ===== PROJEKT-DETAIL: Galerie-Fokus (VDG) ===== -->
 <section class="vd-screen vdg-screen" data-screen="projekt-detail" data-vdg-view="kachel" data-vdg-left="expanded" aria-label="Projektgalerie">
