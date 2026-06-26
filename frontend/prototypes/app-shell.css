@@ -113,12 +113,15 @@
    Schatten statt der harten Dark-Mode-Schlagschatten.
    ============================================================ */
 [data-theme="light"] {
-  --bg-base: #F2F4EF;     /* leicht abgesetzt → weisse Panels heben sich klar ab */
-  --bg-panel: #FFFFFF;
-  --bg-raised: #E9ECE4;   /* Hover / Chips / Sub-Flächen */
-  --bg-warm: #EEF0EA;
-  --border-default: #D7DBD0;
-  --border-strong: #C4C9BC; /* für Inputs/Buttons, die definierter wirken sollen */
+  /* Vereinheitlichter Canvas: Sidebar + Content teilen denselben neutralen
+     Ton (--bg-base). Nur Cards/Panels (--bg-panel) sind weiss und heben sich
+     dadurch sauber ab. Grünstich raus → ruhige, neutral-kühle Rampe. */
+  --bg-base: #F7F8F9;     /* Canvas: Content UND Sidebar */
+  --bg-panel: #FFFFFF;    /* Cards / Panels — die einzigen weissen Flächen */
+  --bg-raised: #EDEFF2;   /* Hover / Chips / Sub-Flächen (neutral) */
+  --bg-warm: #F1F3F5;
+  --border-default: #E3E6EA;
+  --border-strong: #CDD2D9; /* für Inputs/Buttons, die definierter wirken sollen */
   --border-subtle: rgba(28, 33, 38, 0.07);
   --text-high: #1B2025;
   --text-mid: #565E67;
@@ -189,6 +192,8 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   width: var(--sidebar-width);
   flex-shrink: 0;
   background: var(--bg-panel);
+  /* Light-Mode: Sidebar teilt den Canvas-Ton mit dem Content (vereinheitlicht).
+     Trennung nur noch über die border-right unten. Dark-Mode unverändert. */
   /* Sidebar sitzt jetzt UNTER dem Header (im Grid: Zeile 2, Spalte 1).
      Damit ist die Trennung Sidebar ↔ Topbar natuerlich oben (durch
      die Topbar-Border-Bottom), die Trennung Sidebar ↔ Body rechts
@@ -203,6 +208,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   height: 100%;
   min-height: 0;
 }
+[data-theme="light"] .vd-sidebar { background: var(--bg-base); }
 
 /* Brand-Block (Logo + Wortmarke) — am oberen Rand der Sidebar.
    Quelle: PNG-Asset visidoc-logo.png (Querformat, Bildschirm +
@@ -555,6 +561,10 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   gap: var(--space-4);
   padding: 0 var(--space-5);
 }
+/* Light-Mode: Topbar teilt den Canvas-Ton mit Sidebar + Content
+   (vereinheitlicht). Die border-bottom grenzt den fixen Header dezent
+   vom scrollenden Inhalt ab. Dark-Mode unverändert. */
+[data-theme="light"] .vd-topbar { background: var(--bg-base); }
 /* Markenblock (Logo + Wortmarke) — links in der Topbar */
 .vd-topbar-brand {
   display: inline-flex;
