@@ -13298,7 +13298,10 @@ function toggleFav(m, btn) { if (state.favs.has(m.file)) state.favs.delete(m.fil
 function setView(v) {
   state.view = v; VDG_SCREEN.setAttribute('data-vdg-view', v);
   document.querySelectorAll('.viewtab').forEach(t => t.setAttribute('aria-selected', t.dataset.view === v ? 'true':'false'));
-  document.getElementById('sort-wrap').style.visibility = v === 'liste' ? 'visible' : 'hidden';
+  // Sortieren in ALLEN Ansichten sichtbar lassen → identische, stabile
+  // Toolbar. Vorher nur in 'liste' sichtbar (sonst visibility:hidden), was
+  // beim View-Wechsel als leere Lücke ↔ Button erschien (wirkte wie ein Sprung).
+  document.getElementById('sort-wrap').style.visibility = 'visible';
   render();
 }
 document.querySelectorAll('.viewtab').forEach(t => t.addEventListener('click', () => setView(t.dataset.view)));
