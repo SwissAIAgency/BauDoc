@@ -2753,6 +2753,31 @@
       scrollbar-width: thin;
       scrollbar-color: var(--border-default) transparent;
     }
+    /* ---- Upload-Portal (Typ-Auswahl Foto/Video/Plan) ---- */
+    .vd-portal-title { font-size: 18px; font-weight: 650; letter-spacing: -.01em; color: var(--text-high); margin-bottom: 4px; }
+    .vd-portal-sub { font-size: 13px; color: var(--text-mid); margin-bottom: var(--space-5); }
+    .vd-portal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+    .vd-portal-card {
+      display: flex; flex-direction: column; align-items: center; gap: 7px;
+      padding: 22px 12px 18px; border: 1px solid var(--border-default);
+      border-radius: 12px; background: var(--bg-base); cursor: pointer; text-align: center;
+      transition: border-color .15s, background .15s, transform .12s, box-shadow .15s;
+    }
+    .vd-portal-card:hover {
+      border-color: var(--color-primary); background: var(--bg-panel);
+      transform: translateY(-2px); box-shadow: var(--shadow-card);
+    }
+    .vd-portal-card-ico {
+      width: 48px; height: 48px; border-radius: 50%; margin-bottom: 2px;
+      display: grid; place-items: center; background: var(--bg-raised); color: var(--text-mid);
+      transition: background .15s, color .15s;
+    }
+    .vd-portal-card:hover .vd-portal-card-ico { background: var(--color-primary-soft); color: var(--color-primary); }
+    .vd-portal-card-ico svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    .vd-portal-card-title { font-size: 14px; font-weight: 600; color: var(--text-high); }
+    .vd-portal-card-sub { font-size: 11px; color: var(--text-low); }
+    @media (max-width: 560px) { .vd-portal-grid { grid-template-columns: 1fr; } .vd-portal-card { flex-direction: row; justify-content: flex-start; gap: 14px; padding: 14px; } .vd-portal-card-ico { margin-bottom: 0; } }
+
     .vd-modal-backdrop[data-bind="neues-projekt-modal"] .vd-modal-foot,
     .vd-modal-backdrop[data-bind="foto-aufnahme-modal"] .vd-modal-foot,
     .vd-modal-backdrop[data-bind="plan-upload-modal"] .vd-modal-foot,
@@ -9492,7 +9517,7 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
     const ctas = {
       dashboard: 'Neues Projekt',
       projekte: 'Neues Projekt',
-      'projekt-detail': 'Datei wählen',
+      'projekt-detail': 'Hochladen',
       galerie: 'Hochladen',
       einstellung: 'Speichern',
     };
@@ -9503,8 +9528,8 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
     const ctaOpens = {
       dashboard: 'neues-projekt-modal',
       projekte: 'neues-projekt-modal',
-      'projekt-detail': 'datei-waehlen-modal',
-      galerie: 'foto-aufnahme-modal',
+      'projekt-detail': 'upload-portal-modal',
+      galerie: 'upload-portal-modal',
       einstellung: null,
     };
     const targetModal = (ctaOpens[target] !== undefined) ? ctaOpens[target] : 'neues-projekt-modal';
@@ -10837,6 +10862,46 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
   <!-- ============================================================
        MODAL 2 — FOTO AUFNEHMEN (Upload-Button primary)
        ============================================================ -->
+  <!-- ============================================================
+       UPLOAD-PORTAL — Typ-Auswahl (Foto / Video / Plan)
+       Öffnet via Topbar-CTA "Hochladen". Jede Karte routet per data-open
+       in den passenden geführten Wizard; openModal() schliesst das Portal
+       dabei automatisch. Kein Extra-JS nötig (Event-Delegation).
+       ============================================================ -->
+  <div class="vd-modal-backdrop" data-bind="upload-portal-modal" role="dialog" aria-modal="true" aria-label="Hochladen" hidden>
+    <div class="vd-modal" style="grid-template-columns: 1fr; max-width: 560px;">
+      <div class="vd-modal-main">
+        <div class="vd-modal-head">
+          <span style="font-family:inherit;font-size:13.5px;color:var(--text-high);font-weight:500;">Hochladen</span>
+          <button class="vd-modal-close" type="button" data-modal-close aria-label="Schliessen">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="vd-modal-body" style="display:block; padding: var(--space-5); background: var(--bg-panel);">
+          <div class="vd-portal-title">Was möchtest du hochladen?</div>
+          <div class="vd-portal-sub">Wähle den Typ — wir führen dich Schritt für Schritt durch.</div>
+          <div class="vd-portal-grid">
+            <button class="vd-portal-card" type="button" data-open="foto-aufnahme-modal">
+              <span class="vd-portal-card-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+              <span class="vd-portal-card-title">Foto</span>
+              <span class="vd-portal-card-sub">JPG, PNG</span>
+            </button>
+            <button class="vd-portal-card" type="button" data-open="video-upload-modal">
+              <span class="vd-portal-card-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="13" height="12" rx="2"/><path d="M15 10l6-3v10l-6-3z"/></svg></span>
+              <span class="vd-portal-card-title">Video</span>
+              <span class="vd-portal-card-sub">MP4</span>
+            </button>
+            <button class="vd-portal-card" type="button" data-open="plan-upload-modal">
+              <span class="vd-portal-card-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="9 2 9 8 4 8" transform="translate(11 0) scale(-1 1)"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span>
+              <span class="vd-portal-card-title">Plan</span>
+              <span class="vd-portal-card-sub">PDF, DWG</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="vd-modal-backdrop" data-bind="foto-aufnahme-modal" role="dialog" aria-modal="true" aria-label="Foto aufnehmen" hidden>
     <div class="vd-modal">
       <div class="vd-modal-main">
