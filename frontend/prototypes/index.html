@@ -303,6 +303,10 @@
     .vd-app-body {
       display: grid;
       grid-template-rows: var(--topbar-height, 56px) 1fr;
+      /* Explizite Spalte: ohne sie ist die implizite Spalte 'auto' (= max-content)
+         und dehnt sich auf die Inhaltsbreite → Mobile-Overflow. minmax(0,1fr)
+         bindet die Spalte an die Container-Breite. */
+      grid-template-columns: minmax(0, 1fr);
       min-width: 0;
       min-height: 0;
       height: 100vh;
@@ -354,6 +358,9 @@
        und Sub-Topbar plus Workspace). Inhalt scrollt hier intern. */
     .vd-app-scroll {
       min-height: 0;
+      /* min-width:0 verhindert, dass dieser Grid-Item auf die min-content-Breite
+         seines Inhalts aufgeht (sonst Mobile-Overflow, z.B. Projektdetail-Galerie). */
+      min-width: 0;
       overflow-y: auto;
       overflow-x: hidden;
     }
@@ -2876,6 +2883,11 @@
 
     /* Form fields (die meisten gibt's schon, hier nur Lücken schließen) */
     .vd-field-input, .vd-field-select, .vd-field-textarea {
+      /* Volle Container-Breite + schrumpffähig: ohne dies nehmen Felder
+         (v.a. textarea) ihre intrinsische Breite → Mobile-Overflow. */
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
       padding: 9px 12px;
       line-height: 1.4;
       background: var(--bg-raised);
@@ -2886,6 +2898,7 @@
       font-size: 13px;
       transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
     }
+    .vd-field-textarea { resize: vertical; }
     .vd-field-input::placeholder, .vd-field-textarea::placeholder {
       color: var(--text-low);
       opacity: 1;
@@ -5766,10 +5779,13 @@
 /* Toolbar bleibt beim Scrollen sichtbar */
 .toolbar {
   display: flex; align-items: center; gap: 12px; padding: 4px 16px 10px;
+  flex-wrap: wrap; row-gap: 8px;   /* bei knapper Breite (Tablet) umbrechen statt rechts abschneiden */
   position: sticky; top: 0; z-index: 15;
   background: linear-gradient(to bottom, var(--canvas) 0 70%, rgba(239,241,243,.92) 100%);
   backdrop-filter: blur(4px);
 }
+/* Wenn die Toolbar umbricht, soll der Flex-Spacer keine leere Zeile erzeugen. */
+.toolbar .tool-spacer { min-width: 0; }
 /* Fade am unteren Rand des Scroll-Bereichs (Hinweis: mehr Inhalt) */
 .main::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 28px;
@@ -5818,7 +5834,7 @@
 .grid { display: none; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 12px; padding-bottom: 28px; }
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="kachel"] .grid { display: grid; }
 .tile {
-  position: relative; border-radius: var(--r-md); overflow: hidden; height: 132px;
+  position: relative; border-radius: var(--r-md); overflow: hidden; height: 132px; min-width: 0;
   border: 2px solid transparent; background: var(--panel-soft); cursor: pointer;
   box-shadow: var(--shadow-card); transition: transform .25s, box-shadow .25s, border-color .2s;
 }
@@ -5968,7 +5984,10 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
 }
 /* Mobile (<768): eine Spalte; linkes Detail-Panel wird Bottom-Sheet */
 @media (max-width: 768px) {
-  .app, .vd-screen[data-screen="projekt-detail"][data-vdg-view] .app { grid-template-columns: 1fr !important; grid-template-areas: "header" "hero" "main" !important; }
+  .app, .vd-screen[data-screen="projekt-detail"][data-vdg-view] .app { grid-template-columns: minmax(0, 1fr) !important; grid-template-areas: "header" "hero" "main" !important; min-width: 0; }
+  /* Container-Kette darf nicht auf min-content aufgehen → kein Mobile-Overflow */
+  .vd-screen[data-screen="projekt-detail"] { min-width: 0; }
+  .vd-screen[data-screen="projekt-detail"] .main, .vd-screen[data-screen="projekt-detail"] .main-scroll { min-width: 0; max-width: 100%; }
   .collapse-handle { display: none; }
   .header-center { justify-content: flex-start; }
   .header-center .crumb-gat { display: none; }
@@ -5983,7 +6002,7 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
   }
   .vd-screen[data-screen="projekt-detail"][data-vdg-sheet="detail"] .aside { transform: none; }
   .hero { height: clamp(230px, 36vh, 340px); margin: 10px 8px 6px; }
-  .grid { grid-template-columns: repeat(2, 1fr); }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }   /* minmax(0,..) → Spalten dürfen unter Bild-Mindestbreite schrumpfen (kein Mobile-Overflow) */
   .desktop-filter { display: none !important; }
   .mobile-only { display: inline-flex !important; }
   .viewtabs { flex: 1; justify-content: center; }
