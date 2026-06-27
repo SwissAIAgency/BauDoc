@@ -186,7 +186,7 @@
     /* VDG-eigener Header raus, globale Topbar übernimmt. Header-Grid-Zeile
        auf 0 kollabieren, damit kein Leerraum bleibt. */
     body[data-active-screen="projekt-detail"] .vdg-screen > .app > .header { display: none !important; }
-    body[data-active-screen="projekt-detail"] .vdg-screen > .app { grid-template-rows: 0 auto minmax(0, 1fr); }
+    body[data-active-screen="projekt-detail"] .vdg-screen > .app { grid-template-rows: 0 var(--hero-h) minmax(0, 1fr); }
 
     /* Token-Brücke: die verschobenen Controls (.crumb-proj/.crumb-gat/.pop)
        beziehen ihre Tokens sonst nur vom projekt-detail-Screen. Dieselben
@@ -324,24 +324,18 @@
        line-height: 1.2;
      }
      .vd-topbar-title {
-       font-size: 14px;
-       font-weight: 600;
+       font-size: 19px;          /* grösser, wie der Dashboard-Hero-Titel */
+       font-weight: 650;
+       letter-spacing: -0.01em;
        color: var(--text-high);
        white-space: nowrap;
        overflow: hidden;
        text-overflow: ellipsis;
        min-width: 0;   /* erlaubt Schrumpfen im Flex-Container statt Überlauf */
      }
-     .vd-topbar-subtitle {
-       font-size: 11.5px;
-       color: var(--text-mid);
-       white-space: nowrap;
-       overflow: hidden;
-       text-overflow: ellipsis;
-       max-width: 60vw;
-       font-family: var(--font-mono);
-     }
-     .vd-topbar-subtitle:empty { display: none; }
+     /* Subtitle-Zeile (Datum bzw. Stats-Summary) komplett raus — wirkte mit
+        Monospace-Font datiert und war nicht nötig. Der Titel allein trägt. */
+     .vd-topbar-subtitle { display: none !important; }
      .vd-topbar-spacer { flex: 1; }
 
      /* ≤480px: Primär-CTA wird Icon-Only (das Plus-Icon bleibt), damit der
@@ -5546,15 +5540,19 @@
   --shadow-pop: 0 10px 30px rgba(15,30,40,.28);
   --r-lg:16px; --r-md:12px; --r-sm:9px; --r-pill:999px;
   --g-rohbau: var(--color-primary); --g-ausbau:#E0A52E; --g-fertig:#43A971; --g-technik:#4B86D8; --g-innen:#9B6BD8; --g-aussen:#6F9E3F;
-  --hero-h: clamp(320px, 44vh, 460px); --left:232px; --right:288px;
+  --hero-h: 470px; --left:232px; --right:288px;   /* FESTE Höhe: Bild immer
+     identisch gross, Toolbar (Kachel/Timeline/Liste) springt nicht mehr je
+     nach Viewport. Linkes Panel + Bild + Meta enden bündig auf dieser Höhe. */
 }
 /* Embedding: v4-Grid im normalen Seitenfluss (kein 100vh, kein doppelter Scroll).
    Hero behält Fixpunkt-Höhe; Inhalt scrollt mit der App-Scrollfläche. */
 .vd-screen[data-screen="projekt-detail"] .app { height: auto; min-height: 0; }
 .vd-screen[data-screen="projekt-detail"] .main { min-height: 0; }
 .vd-screen[data-screen="projekt-detail"] .main-scroll { overflow: visible; min-height: 0; }
+/* Aside + Meta füllen die feste Hero-Reihe und enden bündig mit dem Bild
+   auf EINER horizontalen Linie. Interner Scroll, falls Inhalt höher als Bild. */
 .vd-screen[data-screen="projekt-detail"] .aside,
-.vd-screen[data-screen="projekt-detail"] .meta { overflow: visible; align-self: start; }
+.vd-screen[data-screen="projekt-detail"] .meta { height: 100%; min-height: 0; align-self: stretch; overflow-y: auto; }
 .vd-screen[data-screen="projekt-detail"] .toolbar { position: static; backdrop-filter: none; }
 /* v4-Header zur schlanken Steuerleiste trimmen: Wortmarke/Teilen/Kebab/Such-Toggle aus, Suche dauerhaft sichtbar */
 .vd-screen[data-screen="projekt-detail"] .header .brand,
@@ -5584,13 +5582,13 @@
   grid-template-areas:
     "header header header"
     "aside  hero   meta"
-    "aside  main   main";
+    "main   main   main";
   transition: grid-template-columns .25s ease;
 }
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="timeline"] .app { grid-template-areas:
   "header header header"
   "aside  hero   hero"
-  "aside  main   main"; }
+  "main   main   main"; }
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="timeline"] .meta { display: none; }
 .vd-screen[data-screen="projekt-detail"][data-vdg-left="collapsed"] .app { grid-template-columns: 0 1fr var(--right); }
 .vd-screen[data-screen="projekt-detail"][data-vdg-left="collapsed"][data-view="timeline"] .app { grid-template-columns: 0 1fr 0; }
@@ -5659,17 +5657,17 @@
 }
 .back-btn:hover { background: var(--panel-soft); border-color: var(--text-low); }
 .back-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.field { margin-bottom: 13px; }
+.field { margin-bottom: 9px; }
 .field .k { font-size: 11.5px; color: var(--text-mid); margin-bottom: 2px; }
 .field .v { font-size: 13.5px; font-weight: 500; line-height: 1.35; }
-.back-btn { height: 36px; font-size: 13px; margin-bottom: 14px; }
+.back-btn { height: 36px; font-size: 13px; margin-bottom: 10px; }
 .gat-line { display: inline-flex; align-items: center; gap: 8px; }
 .gat-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 /* Planposition Mini-Map */
-.pp-label { font-size: 12.5px; color: var(--text-mid); margin: 18px 0 7px; }
+.pp-label { font-size: 12.5px; color: var(--text-mid); margin: 10px 0 6px; }
 .pp-canvas {
   position: relative; border: 1px solid var(--line-strong); border-radius: var(--r-sm);
-  background: var(--panel-soft); aspect-ratio: 16/10; overflow: hidden;
+  background: var(--panel-soft); aspect-ratio: 16/9; overflow: hidden;
 }
 .pp-svg { width: 100%; height: 100%; display: block; }
 .pp-svg .wall { fill: none; stroke: #98A2AC; }
@@ -5700,9 +5698,9 @@
    Fixpunkt: identische Höhe + Margin in ALLEN drei Ansichten, damit
    das Bild beim Wechsel von Kachel/Timeline/Liste nicht springt.    */
 .hero {
-  grid-area: hero; position: relative; margin: 14px 10px 8px; border-radius: var(--r-lg);
+  grid-area: hero; position: relative; margin: 0 10px; border-radius: var(--r-lg);
   overflow: hidden; background: #0c1316; box-shadow: var(--shadow-card);
-  height: var(--hero-h, clamp(380px, 50vh, 480px)); min-width: 0;
+  height: 100%; min-width: 0;   /* füllt die feste Hero-Reihe exakt aus */
 }
 .hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .hero-label {
@@ -6479,16 +6477,18 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
         </button>
         <div class="pop" id="period-pop" role="menu" style="left:0;top:44px"></div>
       </div>
-      <div class="tool-spacer"></div>
       <div class="tool-right">
         <div style="position:relative" class="desktop-filter">
           <button class="tool-btn" id="media-btn" aria-expanded="false" aria-haspopup="true">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>
             <span id="media-val">Fotos</span><svg class="chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
-          <div class="pop" id="media-pop" role="menu" style="right:0;top:44px"></div>
+          <div class="pop" id="media-pop" role="menu" style="left:0;top:44px"></div>
         </div>
       </div>
+      <!-- Spacer ans Ende: alle Controls (inkl. Fotos) gruppieren links,
+           statt Fotos ganz nach rechts zu drücken. -->
+      <div class="tool-spacer"></div>
     </div>
 
     <div class="main-scroll scroll" id="main-scroll">
