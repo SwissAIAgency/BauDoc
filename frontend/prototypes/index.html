@@ -6115,7 +6115,10 @@ body[data-gallery-mode="zeitachse"] .zeitachse { display: block; max-width: none
 body[data-galerie-mode="zeitachse"] .vd-screen[data-screen="galerie"] .vd-gal-rows,
 body[data-galerie-mode="zeitachse"] .vd-screen[data-screen="galerie"] .vd-gal-mobile { display: none !important; }
 body[data-galerie-mode="zeitachse"] .vd-galz { display: block; }
-.vd-galz-inner { position: relative; max-width: 1100px; margin: 0 auto; }
+.vd-galz-inner { position: relative; max-width: 1320px; margin: 0 auto; }
+/* Galerie-Zeitachse: grössere Karten als im Projekt-Detail (mehr Platz,
+   bessere Lesbarkeit). Override nur hier — .za-card global bleibt 420px. */
+.vd-galz .za-card { width: min(620px, 100%); }
 .vd-galz-inner::before {
   content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
   background: linear-gradient(180deg, transparent 0, var(--line-strong) 24px, var(--line-strong) calc(100% - 24px), transparent 100%);
@@ -10596,6 +10599,7 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
             <div class="za-img-wrap">
               ${galzThumbHTML(m)}
               <span class="za-datepill">${galShortDate(m.date)} · ${m.time || ''}</span>
+              ${(m.type === 'photo' && m.src) ? `<button class="za-fsbtn" type="button" aria-label="Vollbild öffnen" title="Vollbild"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>` : ''}
             </div>
             <div class="za-head">
               <span class="gat-dot" style="background: var(--color-primary)"></span>
@@ -10622,7 +10626,10 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
     root.querySelectorAll('.za-row').forEach(row => {
       const card = row.querySelector('.za-card');
       const el = row.querySelector('.za-img');
+      const m = MEDIA.find(x => x.id === row.getAttribute('data-media-id'));
       card.querySelector('.za-head').addEventListener('click', () => card.classList.toggle('open'));
+      const fsBtn = card.querySelector('.za-fsbtn');
+      if (fsBtn && m) fsBtn.addEventListener('click', (e) => { e.stopPropagation(); openGalzViewer(m); });
       if (el) {
         el.addEventListener('click', () => {
           root.querySelectorAll('.za-card[aria-selected="true"]').forEach(c => c.setAttribute('aria-selected', 'false'));
@@ -10633,6 +10640,77 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
         new ResizeObserver(setTop).observe(el);
       }
     });
+  }
+
+  // ============================================================
+  // GALERIE-ZEITACHSE — VOLLBILD-VIEWER (eigenständig, eigener Zoom)
+  // Reused .viewer*-Styles; kompakte Zoom/Pan-Engine (pinch, wheel, drag).
+  // Lazy-Init beim ersten Öffnen → Markup ist dann sicher im DOM.
+  // ============================================================
+  let galzZoom = null, galzWired = false, galzList = [], galzIdx = -1;
+  function setupGalzZoom() {
+    const stage = document.getElementById('galz-v-stage');
+    const img = document.getElementById('galz-v-img');
+    if (!stage || !img) return null;
+    let scale = 1, tx = 0, ty = 0; const min = 1, max = 8;
+    const pts = new Map(); let startDist = 0, startScale = 1, startMid = { x: 0, y: 0 }, panStart = null;
+    function clamp() { const w = stage.clientWidth, h = stage.clientHeight; const mx = Math.max(0, (w * (scale - 1)) / 2), my = Math.max(0, (h * (scale - 1)) / 2); tx = Math.max(-mx, Math.min(mx, tx)); ty = Math.max(-my, Math.min(my, ty)); }
+    function apply() { clamp(); img.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`; stage.classList.toggle('zoomed', scale > 1); const zl = document.getElementById('galz-v-zlevel'); if (zl) zl.textContent = Math.round(scale * 100) + '%'; }
+    function zoomAt(ns, cxAbs, cyAbs) { ns = Math.max(min, Math.min(max, ns)); const r = stage.getBoundingClientRect(); const cx = cxAbs == null ? 0 : cxAbs - (r.left + r.width / 2); const cy = cyAbs == null ? 0 : cyAbs - (r.top + r.height / 2); const ratio = ns / scale; tx = cx - (cx - tx) * ratio; ty = cy - (cy - ty) * ratio; scale = ns; if (scale <= 1) { scale = 1; tx = 0; ty = 0; } apply(); }
+    stage.addEventListener('wheel', e => { e.preventDefault(); zoomAt(scale * (e.deltaY < 0 ? 1.18 : 1 / 1.18), e.clientX, e.clientY); }, { passive: false });
+    stage.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; stage.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); if (pts.size === 2) { const a = [...pts.values()]; startDist = Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y); startScale = scale; startMid = { x: (a[0].x + a[1].x) / 2, y: (a[0].y + a[1].y) / 2 }; panStart = null; } else if (scale > 1) { panStart = { x: e.clientX, y: e.clientY, tx, ty }; stage.classList.add('grabbing'); } });
+    stage.addEventListener('pointermove', e => { if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); if (pts.size === 2) { const a = [...pts.values()]; const d = Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y); if (startDist > 0) zoomAt(startScale * (d / startDist), startMid.x, startMid.y); } else if (panStart) { tx = panStart.tx + (e.clientX - panStart.x); ty = panStart.ty + (e.clientY - panStart.y); apply(); } });
+    function up(e) { pts.delete(e.pointerId); stage.classList.remove('grabbing'); if (pts.size < 2) startDist = 0; if (pts.size === 0) panStart = null; }
+    stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
+    return { reset() { scale = 1; tx = 0; ty = 0; apply(); }, zoomIn() { zoomAt(scale * 1.4); }, zoomOut() { zoomAt(scale / 1.4); } };
+  }
+  function galzSetImage(m) {
+    document.getElementById('galz-v-img').src = m.src;
+    document.getElementById('galz-v-img').alt = m.name || '';
+    document.getElementById('galz-v-title').textContent = m.name || m.code || '';
+    document.getElementById('galz-v-sub').textContent = `${galShortDate(m.date)} · ${m.time || ''} Uhr · ${m.planposition || ''}`;
+    if (galzZoom) galzZoom.reset();
+  }
+  function galzStep(dir) { if (!galzList.length) return; galzIdx = (galzIdx + dir + galzList.length) % galzList.length; galzSetImage(galzList[galzIdx]); }
+  function closeGalzViewer() {
+    const v = document.getElementById('galz-viewer');
+    v.classList.remove('open'); v.setAttribute('aria-hidden', 'true');
+    if (document.fullscreenElement) { try { document.exitFullscreen(); } catch (e) {} }
+    if (galzZoom) galzZoom.reset();
+  }
+  function wireGalzViewerControls() {
+    if (galzWired) return; galzWired = true;
+    const byId = id => document.getElementById(id);
+    byId('galz-v-close').addEventListener('click', closeGalzViewer);
+    byId('galz-v-prev').addEventListener('click', () => galzStep(-1));
+    byId('galz-v-next').addEventListener('click', () => galzStep(1));
+    byId('galz-v-zoom-in').addEventListener('click', () => galzZoom && galzZoom.zoomIn());
+    byId('galz-v-zoom-out').addEventListener('click', () => galzZoom && galzZoom.zoomOut());
+    byId('galz-v-fs').addEventListener('click', () => {
+      const v = byId('galz-viewer');
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (v.requestFullscreen) v.requestFullscreen();
+    });
+    document.addEventListener('keydown', e => {
+      if (!byId('galz-viewer').classList.contains('open')) return;
+      if (e.key === 'Escape') closeGalzViewer();
+      else if (e.key === 'ArrowLeft') galzStep(-1);
+      else if (e.key === 'ArrowRight') galzStep(1);
+    });
+  }
+  function openGalzViewer(m) {
+    if (!m || m.type !== 'photo' || !m.src) return;
+    if (!galzZoom) { galzZoom = setupGalzZoom(); wireGalzViewerControls(); }
+    // Navigationsliste = aktuell sichtbare Fotos in Zeitachsen-Reihenfolge.
+    galzList = galSorted(MEDIA.filter(galMatches)).filter(x => x.type === 'photo' && x.src)
+      .sort((a, b) => galDateVal(b.date).localeCompare(galDateVal(a.date)) || (b.time || '').localeCompare(a.time || ''));
+    galzIdx = galzList.findIndex(x => x.id === m.id);
+    if (galzIdx < 0) { galzList = [m]; galzIdx = 0; }
+    galzSetImage(galzList[galzIdx]);
+    const v = document.getElementById('galz-viewer');
+    v.classList.add('open'); v.setAttribute('aria-hidden', 'false');
+    const rfs = v.requestFullscreen || v.webkitRequestFullscreen;
+    if (rfs) { try { rfs.call(v); } catch (e) {} }
   }
 
   // ============================================================
@@ -10746,6 +10824,9 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
         } else {
           updateSerpentinePath();
         }
+        // Zeitachsen-Modus: Bildhöhen ändern sich mit der Fensterbreite →
+        // Node/Connector neu auf Bildmitte setzen, damit die Punkte sitzen.
+        if (document.body.getAttribute('data-galerie-mode') === 'zeitachse') refreshGalzNodeTops();
       });
     });
   });
@@ -13602,6 +13683,25 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
     <button id="v-fs" aria-label="Browser-Vollbild umschalten"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
   </div>
   <div class="viewer-film scroll" id="v-film" role="listbox" aria-label="Filmstreifen"></div>
+</div>
+
+<!-- VOLLBILD-VIEWER (Standalone-Galerie / Zeitachse) — eigenständig vom
+     Projekt-Detail-Viewer, eigener Zoom. Reused .viewer* Styles. -->
+<div class="viewer" id="galz-viewer" aria-hidden="true" role="dialog" aria-label="Bild-Vollbild">
+  <div class="viewer-top">
+    <div><div class="viewer-title" id="galz-v-title">—</div><div class="viewer-sub" id="galz-v-sub">—</div></div>
+    <div class="spacer"></div>
+    <button class="viewer-icon" id="galz-v-close" aria-label="Schliessen"><svg viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+  </div>
+  <div class="viewer-stage" id="galz-v-stage"><img id="galz-v-img" alt="" draggable="false"></div>
+  <button class="viewer-nav prev" id="galz-v-prev" aria-label="Vorheriges Bild"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+  <button class="viewer-nav next" id="galz-v-next" aria-label="Nächstes Bild"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+  <div class="viewer-tools">
+    <button id="galz-v-zoom-out" aria-label="Verkleinern"><svg viewBox="0 0 24 24"><line x1="6" y1="12" x2="18" y2="12"/></svg></button>
+    <span class="zlevel" id="galz-v-zlevel">100%</span>
+    <button id="galz-v-zoom-in" aria-label="Vergrössern"><svg viewBox="0 0 24 24"><line x1="12" y1="6" x2="12" y2="18"/><line x1="6" y1="12" x2="18" y2="12"/></svg></button>
+    <button id="galz-v-fs" aria-label="Browser-Vollbild umschalten"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
+  </div>
 </div>
 
 <!-- MOBILE FILTER-SHEET -->
