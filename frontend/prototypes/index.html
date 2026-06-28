@@ -433,11 +433,64 @@
     .vd-dash-hero-stat-value { font-size: 18px; font-weight: 600; color: var(--text-high); font-family: var(--font-mono); line-height: 1; }
     .vd-dash-hero-stat-label { font-size: 11px; color: var(--text-low); margin-top: 2px; }
 
+    /* 4 statt 6 primäre KPIs — mehr Atemraum, klarere Hierarchie.
+       Bricht responsive auf 2 Spalten ab 900px, 1 Spalte unter 540px. */
     .vd-kpi-grid {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: var(--space-3);
-      margin: var(--space-4) 0;
+      margin: var(--space-4) 0 var(--space-3);
+    }
+    @media (max-width: 900px) { .vd-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 540px) { .vd-kpi-grid { grid-template-columns: 1fr; } }
+
+    /* Sekundär-Strip: flacher horizontaler Stats-Streifen unter dem
+       Haupt-KPI-Grid. Zwei Items, durch eine vertikale Linie getrennt,
+       eines mit Progress-Bar. Visuelles Gewicht ≈ 40 % einer KPI-Card. */
+    .vd-kpi-strip {
+      display: grid;
+      grid-template-columns: 1fr auto 2fr;
+      align-items: center;
+      gap: var(--space-4);
+      padding: 12px 18px;
+      background: var(--surface-1);
+      border-radius: 12px;
+      box-shadow:
+        0 0 0 1px var(--separator-soft),
+        0 1px 0 rgba(255,255,255,0.04) inset;
+      margin-bottom: var(--space-4);
+    }
+    @media (max-width: 720px) {
+      .vd-kpi-strip { grid-template-columns: 1fr; }
+      .vd-kpi-strip-divider { display: none; }
+    }
+    .vd-kpi-strip-item { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .vd-kpi-strip-item--progress { gap: 8px; }
+    .vd-kpi-strip-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+    .vd-kpi-strip-divider { width: 1px; height: 32px; background: var(--separator-soft); }
+    .vd-kpi-strip-label {
+      font-size: 11px; color: var(--text-low);
+      text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500;
+    }
+    .vd-kpi-strip-value {
+      font-size: 18px; font-weight: 600; color: var(--text-high);
+      font-family: var(--font-mono); line-height: 1;
+    }
+    .vd-kpi-strip-meta { font-size: 11px; color: var(--text-mid); }
+    .vd-kpi-strip-meta--mono { font-family: var(--font-mono); color: var(--text-mid); }
+
+    /* Storage-Progress: dezent, theme-aware. Bei >85 % wechselt der
+       Balken auf warn (CSS-Variable), aber Demo-Wert ist 68 %. */
+    .vd-progress {
+      height: 6px; width: 100%;
+      background: var(--bg-raised);
+      border-radius: 999px; overflow: hidden;
+    }
+    .vd-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-primary), color-mix(in oklab, var(--color-primary) 70%, var(--status-info)));
+      border-radius: inherit;
+      transition: width 240ms ease;
     }
 
     /* Fotos nach Gewerk (Dashboard) — bild-geführte Kategorie-Kacheln */
@@ -446,10 +499,23 @@
       margin: var(--space-5) 0 var(--space-3);
     }
     .vd-dash-gewerke-title { font-size: 16px; font-weight: 600; color: var(--text-high); }
+    /* Gewerke-Grid: feste 4 Spalten Desktop = 8 Tiles in 2 sauberen
+       Reihen. Restliche Tiles bleiben im DOM (für "Alle Fotos →"-Link
+       relevant), werden aber ab Position 9 ausgeblendet — keine
+       verwaiste Einzelkachel mehr in einer dritten Reihe. */
     .vd-dash-gewerke {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      grid-template-columns: repeat(4, 1fr);
       gap: var(--space-3);
+    }
+    .vd-dash-gewerke > .vd-gewerk-tile:nth-child(n+9) { display: none; }
+    @media (max-width: 1100px) {
+      .vd-dash-gewerke { grid-template-columns: repeat(3, 1fr); }
+      .vd-dash-gewerke > .vd-gewerk-tile:nth-child(n+7) { display: none; }
+    }
+    @media (max-width: 720px) {
+      .vd-dash-gewerke { grid-template-columns: repeat(2, 1fr); }
+      .vd-dash-gewerke > .vd-gewerk-tile:nth-child(n+5) { display: none; }
     }
     .vd-gewerk-tile {
       display: flex; flex-direction: column;
@@ -6304,57 +6370,67 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
                 <div class="vd-dash-hero-stat-label">QS-Score</div>
               </div>
             </div>
-<button class="vd-button vd-button--secondary" type="button" data-open="export-modal">
+            <!-- "Neues Projekt" entfällt hier — bereits in der Topbar als
+                 primäre Aktion. Nur Export bleibt als Hero-Sekundär-CTA. -->
+            <button class="vd-button vd-button--secondary" type="button" data-open="export-modal">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
               </svg>
               Export
             </button>
-            <button class="vd-button vd-button--primary" type="button" data-open="neues-projekt-modal">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-              Neues Projekt
-            </button>
           </div>
         </div>
 
+        <!-- 4 primäre KPIs — größer, mit Sparklines die Trend zeigen.
+             "Pläne gesamt" + "Speicherverbrauch" sind in die schmale
+             Sekundär-Leiste darunter gewandert (Hierarchie statt
+             6 gleich gewichteter Cards). -->
         <div class="vd-kpi-grid">
           <div class="vd-kpi">
             <span class="vd-kpi-label">Aktive Projekte</span>
             <span class="vd-kpi-value" id="vd-count-kpi-projekte" data-demo-counts="true" title="Aus window.VISIDOC_DEMO (deterministisch)">—</span>
             <span class="vd-kpi-delta vd-kpi-delta--up">+2 seit letztem Monat</span>
-            <div class="vd-kpi-spark"><svg viewBox="0 0 80 24" preserveAspectRatio="none"><path d="M 0.0,24.0 L 13.3,18.0 L 26.7,12.0 L 40.0,12.0 L 53.3,6.0 L 66.7,0.0 L 80.0,0.0" fill="none" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="vd-kpi-spark"><svg viewBox="0 0 80 24" preserveAspectRatio="none"><path d="M 0.0,24.0 L 13.3,18.0 L 26.7,12.0 L 40.0,12.0 L 53.3,6.0 L 66.7,0.0 L 80.0,0.0" fill="none" stroke="var(--color-primary)" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/></svg></div>
           </div>
           <div class="vd-kpi">
             <span class="vd-kpi-label">Medien (gesamt)</span>
             <span class="vd-kpi-value" id="vd-count-kpi-medien" data-demo-counts="true" title="Aus window.VISIDOC_DEMO (deterministisch)">—</span>
             <span class="vd-kpi-delta vd-kpi-delta--up">+148 diese Woche</span>
-            <div class="vd-kpi-spark"><svg viewBox="0 0 80 24" preserveAspectRatio="none"><path d="M 0.0,24.0 L 13.3,20.4 L 26.7,17.3 L 40.0,13.7 L 53.3,9.5 L 66.7,4.3 L 80.0,0.0" fill="none" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          </div>
-          <div class="vd-kpi vd-kpi--info">
-            <span class="vd-kpi-label">Pläne gesamt</span>
-            <span class="vd-kpi-value" id="vd-count-kpi-plaene" data-demo-counts="true" title="Aus window.VISIDOC_DEMO (deterministisch)">—</span>
-            <span class="vd-kpi-delta">17 im aktiven Projekt</span>
-            <div class="vd-kpi-spark"><svg viewBox="0 0 80 24" preserveAspectRatio="none"><path d="M 0.0,24.0 L 13.3,18.5 L 26.7,15.3 L 40.0,10.9 L 53.3,7.6 L 66.7,2.2 L 80.0,0.0" fill="none" stroke="var(--status-info)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="vd-kpi-spark"><svg viewBox="0 0 80 24" preserveAspectRatio="none"><path d="M 0.0,24.0 L 13.3,20.4 L 26.7,17.3 L 40.0,13.7 L 53.3,9.5 L 66.7,4.3 L 80.0,0.0" fill="none" stroke="var(--color-primary)" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/></svg></div>
           </div>
           <div class="vd-kpi vd-kpi--warn">
             <span class="vd-kpi-label">Offene Pläne</span>
             <span class="vd-kpi-value">17</span>
             <span class="vd-kpi-delta vd-kpi-delta--down">3 seit 7+ Tagen überfällig</span>
-            <div class="vd-kpi-spark"><svg viewBox="0 0 80 24" preserveAspectRatio="none"><path d="M 0.0,24.0 L 13.3,14.4 L 26.7,9.6 L 40.0,4.8 L 53.3,0.0 L 66.7,0.0 L 80.0,0.0" fill="none" stroke="var(--status-warn)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="vd-kpi-spark"><svg viewBox="0 0 80 24" preserveAspectRatio="none"><path d="M 0.0,24.0 L 13.3,14.4 L 26.7,9.6 L 40.0,4.8 L 53.3,0.0 L 66.7,0.0 L 80.0,0.0" fill="none" stroke="var(--status-warn)" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/></svg></div>
           </div>
           <div class="vd-kpi vd-kpi--error">
             <span class="vd-kpi-label">Ungelesene Kommentare</span>
             <span class="vd-kpi-value">8</span>
             <span class="vd-kpi-delta vd-kpi-delta--down">4 überfällig</span>
-            <div class="vd-kpi-spark"><svg viewBox="0 0 80 24" preserveAspectRatio="none"><path d="M 0.0,24.0 L 13.3,19.2 L 26.7,14.4 L 40.0,9.6 L 53.3,4.8 L 66.7,0.0 L 80.0,0.0" fill="none" stroke="var(--status-error)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="vd-kpi-spark"><svg viewBox="0 0 80 24" preserveAspectRatio="none"><path d="M 0.0,24.0 L 13.3,19.2 L 26.7,14.4 L 40.0,9.6 L 53.3,4.8 L 66.7,0.0 L 80.0,0.0" fill="none" stroke="var(--status-error)" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/></svg></div>
           </div>
-          <div class="vd-kpi vd-kpi--muted">
-            <span class="vd-kpi-label">Speicherverbrauch</span>
-            <span class="vd-kpi-value">68%</span>
-            <span class="vd-kpi-delta">2.7 GB von 4 GB</span>
-            <div class="vd-kpi-spark"><svg viewBox="0 0 80 24" preserveAspectRatio="none"><path d="M 0.0,24.0 L 13.3,18.5 L 26.7,14.8 L 40.0,9.2 L 53.3,5.5 L 66.7,1.8 L 80.0,0.0" fill="none" stroke="var(--text-low)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </div>
+
+        <!-- Sekundäre Stats: kompakter Rail mit zwei Metadaten, die als
+             eigene KPI-Cards visuelles Gewicht beanspruchten ohne es zu
+             verdienen. Speicher wird zur echten Progress-Bar — semantisch
+             korrekt (mehr Füllung = mehr verbraucht). -->
+        <div class="vd-kpi-strip">
+          <div class="vd-kpi-strip-item">
+            <span class="vd-kpi-strip-label">Pläne gesamt</span>
+            <span class="vd-kpi-strip-value" id="vd-count-kpi-plaene" data-demo-counts="true" title="Aus window.VISIDOC_DEMO (deterministisch)">—</span>
+            <span class="vd-kpi-strip-meta">17 im aktiven Projekt</span>
+          </div>
+          <div class="vd-kpi-strip-divider" aria-hidden="true"></div>
+          <div class="vd-kpi-strip-item vd-kpi-strip-item--progress">
+            <div class="vd-kpi-strip-row">
+              <span class="vd-kpi-strip-label">Speicherverbrauch</span>
+              <span class="vd-kpi-strip-meta vd-kpi-strip-meta--mono">2.7 / 4.0 GB</span>
+            </div>
+            <div class="vd-progress" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100" aria-label="Speicherverbrauch 68 Prozent">
+              <div class="vd-progress-bar" style="width: 68%;"></div>
+            </div>
           </div>
         </div>
 
