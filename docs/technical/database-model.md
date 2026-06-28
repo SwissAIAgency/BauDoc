@@ -42,6 +42,18 @@ external_project_mappings
 integration_logs
 ```
 
+Panorama / 360° (Phase 5, Konzept: `docs/ux/concepts/panorama-360-spec.md`):
+
+```text
+panoramas              # projection_type, initial_view (yaw/pitch/fov), vantage_point_id
+panorama_hotspots      # Marker im Panorama (yaw/pitch) → photo_location / Info
+panorama_tour_links    # Knoten-Graph virtueller Rundgang (from/to + Blickrichtung)
+vantage_points         # "Standpunkt" für Zeitvergleich (project + opt. plan_version_id)
+```
+
+> Die Beziehung von `panoramas` zu `photos` (1:1-Erweiterung vs. eigenständige
+> Entität) ist in der Spec §3.3 zu entscheiden, bevor Migrationen entstehen.
+
 ## Zentrale Modellregeln
 
 - Jede fachliche Tabelle erhält Mandanten- oder Projektbezug, soweit relevant.
@@ -80,6 +92,10 @@ integration_logs
   - `audit_logs.user_id`
   - `audit_logs.project_id`
   - `audit_logs.created_at`
+  - `panoramas.vantage_point_id` (spätere Erweiterung)
+  - `vantage_points.project_id` (spätere Erweiterung)
+  - `vantage_points.plan_version_id` (spätere Erweiterung)
+  - `panorama_tour_links.from_panorama_id` (spätere Erweiterung)
 
 ## Audit-Felder
 

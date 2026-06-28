@@ -35,3 +35,8 @@ Kann berechtigte Projekte, Pläne, Fotos und Kommentare ansehen, aber nicht ver�
 - Ansicht und Download können getrennte Rechte sein.
 - Rollenänderungen sind auditrelevant.
 - Benutzer dürfen keine fremden Organisationen oder Projekte sehen.
+
+## Detaillierte Berechtigungs-Matrix
+
+Die verbindliche granulare Permission-Matrix je Rolle (inkl. Freigabe-Recht, Ansicht ≠ Download, Gewerk-Scope und
+Agent-Rechteprofile) ist in `docs/specs/02-rbac-permissions.md` dokumentiert (Entscheidungen D-041, D-042, D-040).

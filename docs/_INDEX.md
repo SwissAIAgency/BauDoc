@@ -1,6 +1,6 @@
 # Dokumentations-Index
 
-**Letzte Aktualisierung:** 2026-06-22  
+**Letzte Aktualisierung:** 2026-06-23  
 **Zweck:** Navigationsdatei — alle `docs/`-Inhalte auf einen Blick
 
 > Neue Dateien in `docs/` immer hier eintragen. Veraltete Einträge mit `[DEPRECATED]` markieren.  
@@ -21,6 +21,7 @@
 |---|---|---|---|
 | Systemarchitektur | `docs/architecture/overview.md` | APPROVED | Laravel + Vue + PostgreSQL, Systemübersicht, Datenflüsse |
 | OpenAPI-Spec | `docs/architecture/openapi.yaml` | APPROVED | API-Endpunkte, Schemas, Fehlerformate (Skeleton, ab BD-004 finalisieren) |
+| Technische Spezifikation (Komponenten) | `docs/specs/00-INDEX.md` | APPROVED | 33 Komponenten-Specs (RLS, RBAC, Rollenarchitektur, Audit, Medien, Pläne, Auto-Zuordnung, Planpositions-Verifikation, KI, Agent/MCP, Projektstruktur, Status-Workflow, Kommentare, Galerie/Suche, Dashboard, Foto-Felder-Katalog, Speicher-Quotas, Hosting/Infrastruktur, Speicher-Datenmodell, Export/Import, Betrieb …), je eigenständig mit Akzeptanzkriterien (Stand 2026-06-27) |
 | API-Verträge | `docs/technical/api-contracts.md` | DRAFT | Request/Response-Formate |
 | Datenbankmodell | `docs/technical/database-model.md` | DRAFT | Entity-Beziehungen |
 
