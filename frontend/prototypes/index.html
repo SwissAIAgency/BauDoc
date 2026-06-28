@@ -5567,7 +5567,10 @@
   
 
 /* ===== VDG (galerie-fokus-v4) Modul — Salbei-Tokens, Dark+Light ===== */
-.vd-screen[data-screen="projekt-detail"]{
+/* .sheet (mobiles Filter-Bottom-Sheet) liegt als direktes <body>-Kind AUSSERHALB
+   der projekt-detail-Section — bekommt hier dieselben VDG-Tokens, sonst ist
+   z.B. var(--panel) undefiniert → transparenter Sheet-Hintergrund. */
+.vd-screen[data-screen="projekt-detail"], .sheet{
   --teal: var(--color-primary); --teal-hover: var(--color-primary-hover);
   --teal-soft: var(--color-primary-soft); --teal-soft-2: var(--color-primary-soft);
   --marker: var(--status-error);
