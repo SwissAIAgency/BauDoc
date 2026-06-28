@@ -78,29 +78,60 @@
   --drawer-transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Dark Theme (Default) */
+/* ============================================================
+   Dark Theme (Default) — überarbeitet 2026-06:
+   Tieferer, leicht wärmerer Canvas (#0F1317) statt flachem Grau.
+   Klarere 3-Tier-Hierarchie: Base → Panel → Raised mit jeweils
+   ~5–7 % Luminanz-Abstand, damit Cards sichtbar abheben statt zu
+   verschmelzen. Borders moderat verstärkt (8 %) — sauber sichtbar,
+   ohne harte Kanten. Texte weicher (kein reines #F2F4F7-Weiss mehr),
+   das senkt die Augen-Belastung bei längerer Nutzung. Eigene
+   Dark-Mode-Shadows mit echter Tiefe + inset-Highlight für den
+   leichten "lifted glass"-Effekt auf Panels.
+   ============================================================ */
 :root,
 [data-theme="dark"] {
-  --bg-base: #14181B;
-  --bg-panel: #1F2429;
-  --bg-raised: #2A2F35;
-  --bg-warm: #1B2024;
-  --border-default: #2F353C;
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --text-high: #F2F4F7;
-  --text-mid: #A3ACB8;
-  --text-low: #7C848F;
-  --status-info: #5B8DEF;
-  --status-info-soft: rgba(91, 141, 239, 0.18);
+  --bg-base: #0F1317;       /* Canvas — tiefer, leicht wärmerer Ton */
+  --bg-panel: #181D23;      /* Cards/Panels — heben sich klar ab */
+  --bg-raised: #232932;     /* Hover/Chips/Sub-Flächen */
+  --bg-warm: #161B20;
+  --bg-elevated: #2A313B;   /* Modals, Popovers — höchstes Tier */
+  --border-default: #2E353E;
+  --border-strong: #3A424D; /* Inputs/Buttons mit definierterer Kante */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --text-high: #ECEEF2;     /* statt #F2F4F7 — weniger steriler "Bleach"-Weiss */
+  --text-mid: #A8B0BC;
+  --text-low: #767E8A;
+  --status-info: #6FA0FF;
+  --status-info-soft: rgba(111, 160, 255, 0.16);
   --status-warn: #F5C768;
-  --status-warn-soft: rgba(245, 199, 104, 0.18);
-  --status-error: #F26B6B;
-  --status-error-soft: rgba(242, 107, 107, 0.18);
+  --status-warn-soft: rgba(245, 199, 104, 0.16);
+  --status-error: #F47A7A;
+  --status-error-soft: rgba(244, 122, 122, 0.16);
+
+  /* Primary im Dark leicht heller für AA-Kontrast auf --bg-panel */
+  --color-primary: #7C9856;
+  --color-primary-hover: #8FAD66;
+  --color-primary-press: #6A8348;
+  --color-primary-soft: rgba(124, 152, 86, 0.18);
+
+  /* Echte Dark-Shadows mit Tiefe + subtiles Inset-Highlight ("lifted glass") */
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.03) inset,
+                 0 1px 2px rgba(0, 0, 0, 0.4),
+                 0 8px 24px -12px rgba(0, 0, 0, 0.55);
+  --shadow-dropdown: 0 16px 40px -12px rgba(0, 0, 0, 0.7),
+                     0 4px 12px -4px rgba(0, 0, 0, 0.45),
+                     0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-tooltip: 0 4px 14px rgba(0, 0, 0, 0.5),
+                    0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-modal: 0 32px 80px -20px rgba(0, 0, 0, 0.75),
+                  0 12px 28px -12px rgba(0, 0, 0, 0.5),
+                  0 0 0 1px rgba(255, 255, 255, 0.05);
 
   /* Scrollbar (VisiDoc-Style) – Dark */
   --scrollbar-track: transparent;
-  --scrollbar-thumb: rgba(124, 132, 143, 0.32);
-  --scrollbar-thumb-hover: rgba(163, 172, 184, 0.55);
+  --scrollbar-thumb: rgba(140, 150, 162, 0.28);
+  --scrollbar-thumb-hover: rgba(180, 190, 202, 0.55);
   --scrollbar-thumb-active: var(--color-primary);
   --scrollbar-size: 10px;
   --scrollbar-size-thin: 6px;
