@@ -6086,6 +6086,51 @@ body[data-gallery-mode="zeitachse"] .zeitachse { display: block; max-width: none
   .za-row .za-connector { left: 22px !important; right: auto !important; width: 20px !important; }
 }
 
+/* ----- STANDALONE-GALERIE: ZEITACHSEN-MODUS -----
+   Eigener Modus (orthogonal zur Sortierung) auf dem Galerie-Screen.
+   body[data-galerie-mode="zeitachse"] blendet Serpentine- + Mobile-Layout
+   aus und zeigt die vertikale Zeitachse. Wiederverwendung des bereits
+   theme-korrekten .za-* Karten-Systems mit Galerie-Datenmodell.
+   Unabhängig von projekt-detail (data-gallery-mode). */
+.vd-galmode-grp button svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.vd-galmode-grp button[aria-pressed="true"] { background: var(--color-primary); color: #fff; }
+.vd-galmode-grp button[aria-pressed="true"]:hover { color: #fff; }
+
+.vd-galz {
+  /* VDG-Token-Brücke: das wiederverwendete .za-* System bezieht --line/
+     --line-strong/--panel-soft/--shadow-pop/--r-* sonst nur vom projekt-
+     detail-Screen (Zeile ~5642). Hier scoped spiegeln (auf alle global
+     vorhandenen, theme-aware Tokens gemappt), damit Borders/Radien/Schatten
+     auch auf dem Galerie-Screen in Dark+Light korrekt aufgehen. */
+  --line: var(--border-default);
+  --line-strong: var(--border-strong, var(--border-default));
+  --panel-soft: var(--bg-raised);
+  --shadow-pop: 0 10px 30px rgba(15, 30, 40, .28);
+  --r-md: 12px; --r-pill: 999px;
+  display: none; flex: 1 1 auto; min-height: 0;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 28px clamp(16px, 5vw, 80px) 56px;
+  scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+body[data-galerie-mode="zeitachse"] .vd-screen[data-screen="galerie"] .vd-gal-rows,
+body[data-galerie-mode="zeitachse"] .vd-screen[data-screen="galerie"] .vd-gal-mobile { display: none !important; }
+body[data-galerie-mode="zeitachse"] .vd-galz { display: block; }
+.vd-galz-inner { position: relative; max-width: 1100px; margin: 0 auto; }
+.vd-galz-inner::before {
+  content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
+  background: linear-gradient(180deg, transparent 0, var(--line-strong) 24px, var(--line-strong) calc(100% - 24px), transparent 100%);
+  transform: translateX(-50%);
+}
+/* Plan/Video haben kein Bild → Platzhalter-Kachel mit Icon, gleiche
+   Bildhöhe (aspect-ratio von .za-img), damit Node mittig sitzt. */
+.za-img--ph { display: grid; place-items: center; gap: 6px; color: var(--text-low); }
+.za-img--ph svg { width: 34px; height: 34px; }
+.za-img-ph-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-mid); }
+@media (max-width: 820px) {
+  .vd-galz-inner::before { left: 22px; transform: none; }
+  .vd-galz { padding: 20px 14px 40px; }
+}
+
 /* ----- LISTE ----- */
 .listwrap { display: none; }
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="liste"] .listwrap { display: block; }
@@ -7177,6 +7222,16 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
               <button class="vd-proj-pill-clear" type="button" data-action="gal-reset" hidden>Filter zurücksetzen</button>
             </div>
             <div class="vd-proj-tools" role="toolbar" aria-label="Ansicht-Werkzeuge">
+              <div class="vd-proj-toolgrp vd-galmode-grp" role="group" aria-label="Galerie-Ansicht">
+                <button type="button" data-gal-mode="classic" aria-pressed="true" title="Klassische Galerie">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                  Galerie
+                </button>
+                <button type="button" data-gal-mode="zeitachse" aria-pressed="false" title="Zeitachsen-Ansicht">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="3" x2="12" y2="21"/><circle cx="12" cy="7" r="2"/><circle cx="12" cy="14" r="2"/><line x1="14" y1="7" x2="20" y2="7"/><line x1="4" y1="14" x2="10" y2="14"/></svg>
+                  Zeitachse
+                </button>
+              </div>
               <div class="vd-proj-toolgrp" role="group" aria-label="Sortieren">
                 <button type="button" data-action="gal-sort-toggle" aria-label="Sortieren" title="Sortieren">
                   <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -7214,6 +7269,14 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
              .vd-gal-cell + data-media-id → Lightbox oeffnet automatisch.
              ============================================================ -->
         <div class="vd-gal-mobile" id="vd-gal-mobile" aria-label="Fotos nach Monat"></div>
+
+        <!-- ============================================================
+             GALERIE – ZEITACHSEN-MODUS (vertikale Mittelachse, Karten
+             alternierend rechts/links, neueste oben). Wird per Toggle
+             (data-gal-mode) sichtbar geschaltet und von
+             renderGalerieZeitachse() befuellt.
+             ============================================================ -->
+        <div class="vd-galz" id="vd-galz" aria-label="Zeitachse"></div>
       </section>
 
       <!-- SCREEN 5 (ARCHIV) entfernt: Archiv ist in Projekte (Filter 'Abgeschlossen') integriert. -->
@@ -10490,6 +10553,86 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
     }
     // Mobile-Layout (≤900px) parallel rendern — gleiche gefilterte Liste.
     renderGalerieMobile(filtered);
+    // Zeitachsen-Modus parallel rendern — gleiche gefilterte Liste.
+    // CSS (body[data-galerie-mode]) entscheidet, welcher Container sichtbar ist.
+    renderGalerieZeitachse(filtered);
+  }
+
+  // ============================================================
+  // GALERIE ZEITACHSE — vertikale Mittelachse, Karten alternierend
+  // (neueste oben). Wiederverwendung des .za-* Karten-Systems mit
+  // dem Galerie-Datenmodell (m.id/src/name/creator/planposition/type).
+  // ============================================================
+  function galShortDate(d) {
+    const x = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(d || '');
+    return x ? `${x[1]}.${x[2]}.${x[3].slice(2)}` : (d || '');
+  }
+  function galzThumbHTML(m) {
+    if (m.type === 'photo' && m.src) {
+      return `<img class="za-img" src="${m.src}" alt="${m.name || ''}" loading="lazy">`;
+    }
+    if (m.type === 'plan') {
+      return '<div class="za-img za-img--ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 3v18"/></svg><span class="za-img-ph-label">' + (m.code || 'Plan') + '</span></div>';
+    }
+    if (m.type === 'video') {
+      return '<div class="za-img za-img--ph"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>' + (m.duration ? '<span class="za-img-ph-label">' + m.duration + '</span>' : '') + '</div>';
+    }
+    return '<div class="za-img za-img--ph"></div>';
+  }
+  function renderGalerieZeitachse(list) {
+    const root = document.getElementById('vd-galz');
+    if (!root) return;
+    if (!list || !list.length) { root.innerHTML = ''; return; }
+    // Neueste oben: nach echtem Datum (YYYYMMDD via galDateVal), bei
+    // Gleichstand nach Uhrzeit absteigend.
+    const ordered = list.slice().sort((a, b) =>
+      galDateVal(b.date).localeCompare(galDateVal(a.date)) || (b.time || '').localeCompare(a.time || ''));
+    root.innerHTML = '<div class="vd-galz-inner">' + ordered.map((m, i) => {
+      const side = i % 2 === 0 ? 'right' : 'left';   // Index 0 = rechts, dann alternierend
+      return `
+        <div class="za-row ${side}" data-media-id="${m.id}">
+          <div class="za-connector"></div>
+          <article class="za-card" data-media-id="${m.id}" aria-selected="false">
+            <div class="za-img-wrap">
+              ${galzThumbHTML(m)}
+              <span class="za-datepill">${galShortDate(m.date)} · ${m.time || ''}</span>
+            </div>
+            <div class="za-head">
+              <span class="gat-dot" style="background: var(--color-primary)"></span>
+              <div class="za-title">${m.name || m.code || ''}</div>
+              <span class="za-chev" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+            </div>
+            <div class="za-body-wrap"><div class="za-body-inner"><div class="za-body">
+              <div class="za-fields">
+                <div class="za-field"><div class="k">Wann</div><div class="v">${galShortDate(m.date)} · ${m.time || ''} Uhr</div></div>
+                <div class="za-field"><div class="k">Planposition</div><div class="v">${m.planposition || '—'}</div></div>
+                <div class="za-field"><div class="k">Ersteller</div><div class="v">${m.creator || '—'}</div></div>
+                <div class="za-field"><div class="k">Typ</div><div class="v">${m.type || '—'}</div></div>
+                <div class="za-field full"><div class="k">Tags</div><div class="v">${(m.tags || []).join(', ') || '—'}</div></div>
+                <div class="za-field full"><div class="k">Dateiname</div><div class="v mono">${m.code || ''}</div></div>
+              </div>
+            </div></div></div>
+            <div class="za-node"></div>
+          </article>
+        </div>`;
+    }).join('') + '</div>';
+    // Bindings: Head klappt Body, Bild-Klick selektiert (Node-Highlight).
+    // Node sitzt auf Bildmitte (--za-node-top), via ResizeObserver stabil
+    // auch wenn der Container beim Moduswechsel erst sichtbar wird.
+    root.querySelectorAll('.za-row').forEach(row => {
+      const card = row.querySelector('.za-card');
+      const el = row.querySelector('.za-img');
+      card.querySelector('.za-head').addEventListener('click', () => card.classList.toggle('open'));
+      if (el) {
+        el.addEventListener('click', () => {
+          root.querySelectorAll('.za-card[aria-selected="true"]').forEach(c => c.setAttribute('aria-selected', 'false'));
+          card.setAttribute('aria-selected', 'true');
+        });
+        const setTop = () => { const h = el.getBoundingClientRect().height; if (h) row.style.setProperty('--za-node-top', `${h / 2}px`); };
+        if (el.tagName === 'IMG' && !el.complete) el.addEventListener('load', setTop); else requestAnimationFrame(setTop);
+        new ResizeObserver(setTop).observe(el);
+      }
+    });
   }
 
   // ============================================================
@@ -10660,6 +10803,41 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
       renderGalerie();
     });
   }
+  // Galerie-Modus-Toggle (Klassisch <-> Zeitachse). Eigenes Body-Attribut
+  // data-galerie-mode + localStorage-Key (unabhängig von projekt-detail).
+  // #vd-galz wird bei jedem renderGalerie() mitgebaut → Umschalten ist
+  // reines Sichtbarschalten via CSS.
+  const GALERIE_MODE_KEY = 'vd-galerie-mode';
+  // Node sitzt auf Bildmitte. Beim Eintritt in den Modus war #vd-galz noch
+  // display:none → Bilder hatten 0 Höhe; der ResizeObserver feuert über den
+  // none→sichtbar-Übergang nicht zuverlässig. Darum hier nach einem Frame
+  // (Container jetzt sichtbar) explizit aus den echten Bildhöhen neu setzen.
+  function refreshGalzNodeTops() {
+    const galz = document.getElementById('vd-galz');
+    if (!galz) return;
+    galz.querySelectorAll('.za-row').forEach(row => {
+      const el = row.querySelector('.za-img');
+      if (el) { const h = el.getBoundingClientRect().height; if (h) row.style.setProperty('--za-node-top', `${h / 2}px`); }
+    });
+  }
+  function setGalerieMode(mode, persist) {
+    const m = mode === 'zeitachse' ? 'zeitachse' : 'classic';
+    document.body.setAttribute('data-galerie-mode', m);
+    document.querySelectorAll('[data-gal-mode]').forEach(b =>
+      b.setAttribute('aria-pressed', b.getAttribute('data-gal-mode') === m ? 'true' : 'false'));
+    if (persist) { try { localStorage.setItem(GALERIE_MODE_KEY, m); } catch (e) {} }
+    // Synchron sobald der Container sichtbar ist (deckt den Normalfall:
+    // Klick auf den Toggle, während die Galerie offen ist). Der rAF ist
+    // Backstop, falls das erste Layout noch nicht stand.
+    if (m === 'zeitachse') { refreshGalzNodeTops(); requestAnimationFrame(refreshGalzNodeTops); }
+  }
+  document.querySelectorAll('[data-gal-mode]').forEach(btn =>
+    btn.addEventListener('click', () => setGalerieMode(btn.getAttribute('data-gal-mode'), true)));
+  (function initGalerieMode(){
+    let saved = 'classic';
+    try { saved = localStorage.getItem(GALERIE_MODE_KEY) || 'classic'; } catch (e) {}
+    setGalerieMode(saved, false);
+  })();
   // 248 Medien über 18 Monate gruppiert; Klick auf Thumbnail
   // springt im Grid zur entsprechenden Karte + selektiert sie.
   // ============================================================
