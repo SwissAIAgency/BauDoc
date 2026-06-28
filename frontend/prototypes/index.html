@@ -5917,6 +5917,24 @@
 .viewtab:hover { color: var(--text-high); }
 .viewtab[aria-selected="true"] { background: var(--teal); color: #fff; box-shadow: 0 2px 7px rgba(28,151,168,.4); }
 
+/* ----- GALERIE-MODUS-TOGGLE (Klassisch ↔ Zeitachse) -----
+   Zeitachse ist ein Modus (orthogonal zur View), kein View-Tab mehr.
+   Gesteuert über body[data-gallery-mode], persistiert via localStorage.
+   Aktiv = gefüllter Salwei-State (wie .viewtab[aria-selected]). */
+.gallery-mode-toggle { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; }
+.gallery-mode-toggle svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.gallery-mode-toggle[aria-pressed="true"] { background: var(--color-primary); color: #fff; box-shadow: 0 2px 7px rgba(28,151,168,.4); }
+.gallery-mode-toggle[aria-pressed="true"]:hover { background: var(--color-primary-hover); }
+
+/* Zeitachsen-Modus: Klassik-UI ausblenden, Zeitachse übernimmt den Hauptbereich. */
+body[data-gallery-mode="zeitachse"] .hero,
+body[data-gallery-mode="zeitachse"] .meta,
+body[data-gallery-mode="zeitachse"] .viewtabs,
+body[data-gallery-mode="zeitachse"] .grid,
+body[data-gallery-mode="zeitachse"] .timeline,
+body[data-gallery-mode="zeitachse"] .listwrap { display: none !important; }
+body[data-gallery-mode="zeitachse"] .zeitachse { display: block; max-width: none; }
+
 /* Aktiver Filter-Button (Zeitraum/Medientyp != Default) */
 .tool-btn.on { color: var(--teal-hover); border-color: var(--teal); background: var(--teal-soft); }
 .tool-btn.on .k { color: var(--teal-hover); }
@@ -6001,10 +6019,15 @@
 }
 .za-img-wrap { position: relative; }
 .za-img { width: 100%; aspect-ratio: 16/10; object-fit: cover; display: block; background: var(--panel-soft); cursor: zoom-in; }
+/* Theme-aware Glass: color-mix mit --bg-panel gibt im Light-Mode weisses,
+   im Dark-Mode dunkles Glas — beide gut lesbar gegen var(--text-high).
+   KEINE hardcoded #fff / rgba(255,255,255,…) Backgrounds mehr. */
 .za-datepill {
   position: absolute; top: 10px; left: 10px; z-index: 2;
   display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(255,255,255,.94); color: #1B2025;
+  background: color-mix(in srgb, var(--bg-panel) 88%, transparent);
+  color: var(--text-high);
+  border: 1px solid var(--border-subtle);
   font-family: var(--font-mono); font-size: 11px; font-weight: 500;
   padding: 4px 9px; border-radius: var(--r-pill);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
@@ -6013,15 +6036,18 @@
 }
 .za-fsbtn {
   position: absolute; top: 8px; right: 8px; z-index: 2;
-  width: 32px; height: 32px; border-radius: 50%; border: 0;
-  background: rgba(255,255,255,.92); color: #1B2025;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-panel) 88%, transparent);
+  color: var(--text-high);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   display: grid; place-items: center; cursor: pointer;
   box-shadow: 0 1px 4px rgba(0,0,0,.2);
   opacity: 0; transform: scale(.94);
   transition: opacity .15s, transform .15s, background .15s;
 }
 .za-fsbtn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.za-fsbtn:hover { background: #fff; }
+.za-fsbtn:hover { background: var(--bg-panel); }
 .za-card:hover .za-fsbtn, .za-fsbtn:focus-visible { opacity: 1; transform: scale(1); }
 @media (hover: none) { .za-fsbtn { opacity: 1; transform: scale(1); } }
 
@@ -6735,11 +6761,14 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
           </button>
           <div class="pop" id="sort-pop" role="menu" style="left:0;top:44px"></div>
         </div>
+        <button class="vd-button vd-button--ghost gallery-mode-toggle" id="gallery-mode-btn" type="button" aria-pressed="false" title="Zeitachsen-Ansicht ein-/ausschalten">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="21"/><circle cx="12" cy="7" r="2"/><circle cx="12" cy="14" r="2"/><line x1="14" y1="7" x2="20" y2="7"/><line x1="4" y1="14" x2="10" y2="14"/></svg>
+          Zeitachse
+        </button>
       </div>
       <div class="viewtabs" role="tablist" aria-label="Ansicht">
         <button class="viewtab" role="tab" data-view="kachel" aria-selected="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Kachel</button>
         <button class="viewtab" role="tab" data-view="timeline" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="11" rx="1.5"/><rect x="4" y="18" width="4" height="3" rx=".5"/><rect x="10" y="18" width="4" height="3" rx=".5"/><rect x="16" y="18" width="4" height="3" rx=".5"/></svg>Timeline</button>
-        <button class="viewtab" role="tab" data-view="zeitachse" aria-selected="false"><svg viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="21"/><circle cx="12" cy="7" r="2"/><circle cx="12" cy="14" r="2"/><line x1="14" y1="7" x2="20" y2="7"/><line x1="4" y1="14" x2="10" y2="14"/></svg>Zeitachse</button>
         <button class="viewtab" role="tab" data-view="liste" aria-selected="false"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Liste</button>
       </div>
       <div style="position:relative" class="desktop-filter">
@@ -13738,6 +13767,28 @@ function setView(v) {
   render();
 }
 document.querySelectorAll('.viewtab').forEach(t => t.addEventListener('click', () => setView(t.dataset.view)));
+
+/* ============================================================ GALERIE-MODUS (Klassisch ↔ Zeitachse)
+   Zeitachse ist ein Modus, kein View. Das Body-Attribut data-gallery-mode steuert
+   per CSS, was sichtbar ist; der Wert wird in localStorage persistiert. */
+const GALLERY_MODE_KEY = 'vd-gallery-mode';
+const galleryModeBtn = document.getElementById('gallery-mode-btn');
+function setGalleryMode(mode, persist) {
+  const m = mode === 'zeitachse' ? 'zeitachse' : 'classic';
+  document.body.setAttribute('data-gallery-mode', m);
+  if (galleryModeBtn) galleryModeBtn.setAttribute('aria-pressed', m === 'zeitachse' ? 'true' : 'false');
+  if (persist) { try { localStorage.setItem(GALLERY_MODE_KEY, m); } catch (e) {} }
+}
+(function initGalleryMode(){
+  let saved = 'classic';
+  try { saved = localStorage.getItem(GALLERY_MODE_KEY) || 'classic'; } catch (e) {}
+  setGalleryMode(saved, false);
+})();
+if (galleryModeBtn) galleryModeBtn.addEventListener('click', () => {
+  const next = document.body.getAttribute('data-gallery-mode') === 'zeitachse' ? 'classic' : 'zeitachse';
+  setGalleryMode(next, true);
+  render();
+});
 
 function step(dir) {
   const list = getVisible(); if (!list.length) return;
