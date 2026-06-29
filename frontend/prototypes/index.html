@@ -10304,12 +10304,20 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
     const path = document.getElementById('vd-gal-serpentine-path');
     const container = svg ? svg.parentElement : null;
     if (!svg || !path || !container) return;
+    // Galerie noch nicht sichtbar / ungelayoutet? (Initial-Load rendert die
+    // Galerie einmal, während sie display:none ist; auch Screen-Switch und
+    // Zeitachsen-Modus liefern in dem Moment 0-Rects.) Dann kollabieren ALLE
+    // getBoundingClientRect() auf 0 und der Pfad würde zu "M 0 0 …" werden –
+    // genau der verirrte grüne Bogen oben-links. In diesem Fall den Pfad NICHT
+    // überschreiben, sondern beim nächsten sichtbaren Aufruf (rAF nach dem
+    // Screen-Switch) sauber neu zeichnen.
+    const containerRect = container.getBoundingClientRect();
+    if (containerRect.height === 0 || containerRect.width === 0) return;
     const innerRows = Array.from(container.querySelectorAll('.vd-gal-row'));
     if (!innerRows.length) {
       path.setAttribute('d', '');
       return;
     }
-    const containerRect = container.getBoundingClientRect();
 
     function dotPos(rowEl, childIdx) {
       const cell = rowEl.children[childIdx];
@@ -10340,7 +10348,9 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
         pathPoints.push(dotPos(row, firstCellIdx));
       }
     });
-    if (pathPoints.length < 2) return;
+    // Defensive: konnte ein Dot nicht gemessen werden (null), keinen Teil-
+    // Pfad bauen – sonst entstünde wieder eine degenerierte Geometrie.
+    if (pathPoints.length < 2 || pathPoints.some(p => !p)) return;
 
     // sideOffset DYNAMISCH: ab Dot-Mitte bis in die Padding-Zone NEBEN dem Bild.
     // Der Dot ist in der Zellmitte zentriert; die vertikale Linie muss aber
