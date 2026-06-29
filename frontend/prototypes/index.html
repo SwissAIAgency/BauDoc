@@ -10509,7 +10509,15 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
           }).join('')}
         </div>
       `;
-      // Serpentine-Pfad nach Layout-Commit berechnen
+      // Serpentine-Pfad zeichnen. SYNCHRON direkt nach dem innerHTML-Commit:
+      // updateSerpentinePath() liest getBoundingClientRect(), das ein Layout
+      // erzwingt – die Dot-Positionen stehen also sofort bereit, sofern die
+      // Galerie sichtbar ist (sonst greift der Visibility-Guard und es passiert
+      // nichts). Frueher hing das Zeichnen NUR an requestAnimationFrame; feuerte
+      // dieses rAF beim Sichtbar-Werden nicht sauber, blieb die Linie komplett
+      // aus (Dots + Labels da, aber keine Verbindungslinie). Der rAF bleibt als
+      // Safety-Net nach dem naechsten Paint erhalten.
+      updateSerpentinePath();
       requestAnimationFrame(updateSerpentinePath);
     }
     // Klick-Bindings: Foto -> Dot markieren
