@@ -10340,6 +10340,17 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
       if (!cells.length) return;
       const firstCellIdx = Array.from(row.children).indexOf(cells[0]);
       const lastCellIdx = Array.from(row.children).indexOf(cells[cells.length - 1]);
+      // Zeile mit nur EINER Zelle (nur die letzte, partielle Zeile kann das
+      // sein): genau EINEN Punkt pushen. Sonst landete derselbe Dot zweimal
+      // hintereinander im Pfad -> ein Null-Segment (P==P) am Pfad-Ende. Dessen
+      // Richtung ist undefiniert, daher fiele marker-end (orient="auto") auf
+      // 0deg zurueck und der End-Pfeil zeigte nach rechts statt entlang der
+      // Linie in den Dot. Mit nur einem Punkt endet der Pfad am realen
+      // Horizontal-Segment, das von rechts kommt -> Pfeil zeigt korrekt hinein.
+      if (firstCellIdx === lastCellIdx) {
+        pathPoints.push(dotPos(row, firstCellIdx));
+        return;
+      }
       if (rowIndex % 2 === 0) {
         pathPoints.push(dotPos(row, firstCellIdx));
         pathPoints.push(dotPos(row, lastCellIdx));
