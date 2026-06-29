@@ -102,10 +102,18 @@ uploaded_by
 - `photo_trade_assignments.trade_id`
 - `audit_logs.user_id`, `audit_logs.project_id`, `audit_logs.action`, `audit_logs.created_at`
 
+## Geklärte DB-Fragen
+
+Geklärt am 2026-06-23, Details in `docs/specs/` (Komponenten-Specs) und `docs/06_entscheidungen.md`.
+
+- Mandantenfähigkeit strikt über `organization_id` in allen fachlichen Tabellen? **Ja** — zusätzlich PostgreSQL-RLS
+  als Sicherheitsnetz (Defense-in-Depth, D-008).
+- Rechte über eigenes Permission-System oder Paket? **`spatie/laravel-permission`**, projekt-scoped über Teams
+  (`team_id = project_id`), D-009.
+- Aufbewahrung Audit-Logs? **24 Monate** (D-010).
+- IP/User-Agent im Audit? **Ja, aber gehasht/pseudonymisiert** (D-010). Audit ist append-only + Hash-Chain.
+
 ## Offene DB-Fragen
 
-- Soll Mandantenfähigkeit strikt über `organization_id` in allen fachlichen Tabellen laufen?
-- Werden Rechte über eigenes Permission-System oder Laravel Policies mit Rollenpaket umgesetzt?
-- Wie lange werden Audit-Logs aufbewahrt?
-- Werden IP-Adresse und User-Agent im Audit gespeichert?
 - Welche Metadaten sind für Panoramafotos nötig, obwohl der 360-Viewer nicht MVP ist?
+- Retention der Medien (separat von der Audit-Retention) festlegen.

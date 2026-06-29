@@ -81,7 +81,7 @@ Die Software soll Baufortschritte strukturiert erfassen, verorten, schützen, fi
 
 - Native Mobile App.
 - Offline-Synchronisation.
-- 360-Grad-Viewer im MVP.
+- 360-Grad-Viewer im MVP (für Phase 5 konzipiert: `docs/ux/concepts/panorama-360-spec.md`).
 - KI-Bildanalyse im MVP.
 - Semantische Suche im MVP.
 - Vollständiges Mängelmanagement.
@@ -185,3 +185,4 @@ Die Software soll Baufortschritte strukturiert erfassen, verorten, schützen, fi
 | Datum | Änderung | Autor |
 |---|---|---|
 | 2026-06-22 | Migriert nach `docs/project/definition.md` (kanonisch) | Restructuring |
+| 2026-06-23 | 360°-Viewer: Nicht-Ziel im MVP, Konzept für Phase 5 verlinkt | Architecture |
