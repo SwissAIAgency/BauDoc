@@ -7204,7 +7204,7 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
                 </button>
                 <div class="vd-lb-pano-hint" data-lb-pano-hint>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 5 12 9 18"/><polyline points="15 6 19 12 15 18"/></svg>
-                  Ziehen zum Umsehen · Scrollen zum Zoomen
+                  Ziehen zum Umsehen · Pinch/Scrollen zum Zoomen
                 </div>
               </div>
             </div>
@@ -13200,6 +13200,9 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
       panoDragging: false,
       panoLastX: 0,
       panoLastY: 0,
+      panoPinch: false,    // Zwei-Finger-Pinch aktiv?
+      panoPinchDist: 0,    // Fingerabstand bei Pinch-Start
+      panoPinchFov: 100,   // FOV bei Pinch-Start
     };
     const PANO_PITCH_LIMIT = 70;   // max. Nick nach oben/unten in Grad
 
@@ -13717,26 +13720,23 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
       // 9) 360°-Panorama: Ziehen/Touch zum Umsehen + Auto-Rotation-Toggle.
       const panoWrap = bd.querySelector('[data-lb-pano]');
       if (panoWrap) {
+        // ── Maus: Klick + Ziehen zum Umsehen ──
         const onDown = (e) => {
           if (!lb.panoActive) return;
-          // Klicks auf Bedien-Overlays (Auto-Button) keinen Drag auslösen.
           if (e.target.closest && e.target.closest('[data-lb-pano-auto]')) return;
           lb.panoDragging = true;
           panoSetAuto(false);
           panoMarkTouched();
-          const p = (e.touches && e.touches[0]) || e;
-          lb.panoLastX = p.clientX; lb.panoLastY = p.clientY;
+          lb.panoLastX = e.clientX; lb.panoLastY = e.clientY;
           panoWrap.setAttribute('data-lb-pano-grabbing', 'true');
         };
         const onMove = (e) => {
           if (!lb.panoDragging) return;
-          const p = (e.touches && e.touches[0]) || e;
-          const dx = p.clientX - lb.panoLastX;
-          const dy = p.clientY - lb.panoLastY;
-          lb.panoLastX = p.clientX; lb.panoLastY = p.clientY;
-          panoApplyDrag(dx, dy);   // aktualisiert Yaw/Pitch (Learn-by-Doing)
-          panoApply();             // zeichnet neu
-          if (e.cancelable) e.preventDefault();
+          const dx = e.clientX - lb.panoLastX;
+          const dy = e.clientY - lb.panoLastY;
+          lb.panoLastX = e.clientX; lb.panoLastY = e.clientY;
+          panoApplyDrag(dx, dy);
+          panoApply();
         };
         const onUp = () => {
           if (!lb.panoDragging) return;
@@ -13746,9 +13746,58 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
         panoWrap.addEventListener('mousedown', onDown);
         document.addEventListener('mousemove', onMove);
         document.addEventListener('mouseup', onUp);
-        panoWrap.addEventListener('touchstart', onDown, { passive: true });
-        panoWrap.addEventListener('touchmove', onMove, { passive: false });
-        panoWrap.addEventListener('touchend', onUp);
+
+        // ── Touch: 1 Finger = Schwenk, 2 Finger = Pinch-Zoom (FOV) ──
+        // touch-action:none (CSS) unterdrückt den Browser-eigenen Zoom/Scroll,
+        // damit beide Gesten ausschließlich den Viewer steuern.
+        const touchDist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+        const onTouchStart = (e) => {
+          if (!lb.panoActive) return;
+          if (e.target.closest && e.target.closest('[data-lb-pano-auto]')) return;
+          panoSetAuto(false); panoMarkTouched();
+          if (e.touches.length >= 2) {
+            lb.panoPinch = true; lb.panoDragging = false;
+            lb.panoPinchDist = touchDist(e.touches) || 1;
+            lb.panoPinchFov = lb.panoFov;
+          } else if (e.touches.length === 1) {
+            lb.panoPinch = false; lb.panoDragging = true;
+            lb.panoLastX = e.touches[0].clientX; lb.panoLastY = e.touches[0].clientY;
+            panoWrap.setAttribute('data-lb-pano-grabbing', 'true');
+          }
+        };
+        const onTouchMove = (e) => {
+          if (!lb.panoActive) return;
+          if (lb.panoPinch && e.touches.length >= 2) {
+            // Spreizen (Distanz größer) → kleineres FOV → Zoom in; und umgekehrt.
+            const d = touchDist(e.touches) || 1;
+            lb.panoFov = Math.max(50, Math.min(120, lb.panoPinchFov * (lb.panoPinchDist / d)));
+            panoApply();
+            if (e.cancelable) e.preventDefault();
+            return;
+          }
+          if (lb.panoDragging && e.touches.length === 1) {
+            const p = e.touches[0];
+            const dx = p.clientX - lb.panoLastX;
+            const dy = p.clientY - lb.panoLastY;
+            lb.panoLastX = p.clientX; lb.panoLastY = p.clientY;
+            panoApplyDrag(dx, dy); panoApply();
+            if (e.cancelable) e.preventDefault();
+          }
+        };
+        const onTouchEnd = (e) => {
+          if (e.touches.length === 0) {
+            lb.panoDragging = false; lb.panoPinch = false;
+            panoWrap.removeAttribute('data-lb-pano-grabbing');
+          } else if (e.touches.length === 1) {
+            // Vom Pinch auf einen Finger reduziert → nahtlos in Schwenk übergehen.
+            lb.panoPinch = false; lb.panoDragging = true;
+            lb.panoLastX = e.touches[0].clientX; lb.panoLastY = e.touches[0].clientY;
+          }
+        };
+        panoWrap.addEventListener('touchstart', onTouchStart, { passive: false });
+        panoWrap.addEventListener('touchmove', onTouchMove, { passive: false });
+        panoWrap.addEventListener('touchend', onTouchEnd);
+        panoWrap.addEventListener('touchcancel', onTouchEnd);
 
         const autoBtn = panoWrap.querySelector('[data-lb-pano-auto]');
         if (autoBtn) autoBtn.addEventListener('click', (e) => {
