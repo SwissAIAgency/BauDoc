@@ -5879,15 +5879,33 @@
   transition: grid-template-columns .25s ease;
 }
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="timeline"] .app,
-.vd-screen[data-screen="projekt-detail"][data-vdg-view="zeitachse"] .app { grid-template-areas:
+.vd-screen[data-screen="projekt-detail"][data-vdg-view="zeitachse"] .app,
+.vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .app { grid-template-areas:
   "header header header"
   "aside  hero   hero"
   "main   main   main"; }
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="timeline"] .meta,
-.vd-screen[data-screen="projekt-detail"][data-vdg-view="zeitachse"] .meta { display: none; }
+.vd-screen[data-screen="projekt-detail"][data-vdg-view="zeitachse"] .meta,
+.vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .meta { display: none; }
+/* Schlange + Zeitachse = vollflächige Galerie-Ansicht (Parität): Hero/Aside
+   weg, der Hauptbereich (Toolbar + Ansicht) füllt die ganze Höhe. */
+.vd-screen[data-screen="projekt-detail"][data-vdg-view="zeitachse"] .app,
+.vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .app {
+  grid-template-rows: 0 0 minmax(0, 1fr);
+}
+.vd-screen[data-screen="projekt-detail"][data-vdg-view="zeitachse"] .hero,
+.vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .hero,
+.vd-screen[data-screen="projekt-detail"][data-vdg-view="zeitachse"] .aside,
+.vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .aside { display: none; }
 .vd-screen[data-screen="projekt-detail"][data-vdg-left="collapsed"] .app { grid-template-columns: 0 1fr var(--right); }
-.vd-screen[data-screen="projekt-detail"][data-vdg-left="collapsed"][data-view="timeline"] .app { grid-template-columns: 0 1fr 0; }
+.vd-screen[data-screen="projekt-detail"][data-vdg-left="collapsed"][data-vdg-view="timeline"] .app,
+.vd-screen[data-screen="projekt-detail"][data-vdg-left="collapsed"][data-vdg-view="zeitachse"] .app,
+.vd-screen[data-screen="projekt-detail"][data-vdg-left="collapsed"][data-vdg-view="schlange"] .app { grid-template-columns: 0 1fr 0; }
 .vd-screen[data-screen="projekt-detail"][data-vdg-left="collapsed"] .aside { transform: translateX(-100%); opacity: 0; pointer-events: none; }
+/* Collapse-Handle in den Vollbreite-Ansichten ausblenden (kein Panel zum Klappen). */
+.vd-screen[data-screen="projekt-detail"][data-vdg-view="zeitachse"] .collapse-handle,
+.vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .collapse-handle,
+.vd-screen[data-screen="projekt-detail"][data-vdg-view="timeline"] .collapse-handle { display: none; }
 
 /* ============================================================ HEADER */
 .header {
@@ -6102,24 +6120,6 @@
 .viewtab:hover { color: var(--text-high); }
 .viewtab[aria-selected="true"] { background: var(--teal); color: #fff; box-shadow: 0 2px 7px rgba(28,151,168,.4); }
 
-/* ----- GALERIE-MODUS-TOGGLE (Klassisch ↔ Zeitachse) -----
-   Zeitachse ist ein Modus (orthogonal zur View), kein View-Tab mehr.
-   Gesteuert über body[data-gallery-mode], persistiert via localStorage.
-   Aktiv = gefüllter Salwei-State (wie .viewtab[aria-selected]). */
-.gallery-mode-toggle { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; }
-.gallery-mode-toggle svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.gallery-mode-toggle[aria-pressed="true"] { background: var(--color-primary); color: #fff; box-shadow: 0 2px 7px rgba(28,151,168,.4); }
-.gallery-mode-toggle[aria-pressed="true"]:hover { background: var(--color-primary-hover); }
-
-/* Zeitachsen-Modus: Klassik-UI ausblenden, Zeitachse übernimmt den Hauptbereich. */
-body[data-gallery-mode="zeitachse"] .hero,
-body[data-gallery-mode="zeitachse"] .meta,
-body[data-gallery-mode="zeitachse"] .viewtabs,
-body[data-gallery-mode="zeitachse"] .grid,
-body[data-gallery-mode="zeitachse"] .timeline,
-body[data-gallery-mode="zeitachse"] .listwrap { display: none !important; }
-body[data-gallery-mode="zeitachse"] .zeitachse { display: block; max-width: none; }
-
 /* Aktiver Filter-Button (Zeitraum/Medientyp != Default) */
 .tool-btn.on { color: var(--teal-hover); border-color: var(--teal); background: var(--teal-soft); }
 .tool-btn.on .k { color: var(--teal-hover); }
@@ -6171,6 +6171,10 @@ body[data-gallery-mode="zeitachse"] .zeitachse { display: block; max-width: none
    per [data-vdg-view="zeitachse"] sichtbar geschaltet. */
 .zeitachse { display: none; position: relative; padding: 28px 0 40px; max-width: 1100px; margin: 0 auto; }
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="zeitachse"] .zeitachse { display: block; }
+/* Schlange (Serpentine) — Container; Zellen/Pfad nutzen die globalen
+   .vd-gal-*-Klassen (Parität zur Galerie). Inhalt vom JS injiziert. */
+.schlange { display: none; position: relative; padding: 8px 0 40px; }
+.vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .schlange { display: block; }
 .zeitachse::before {
   content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
   background: linear-gradient(180deg, transparent 0, var(--line-strong) 24px, var(--line-strong) calc(100% - 24px), transparent 100%);
@@ -7004,13 +7008,11 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
           </button>
           <div class="pop" id="sort-pop" role="menu" style="left:0;top:44px"></div>
         </div>
-        <button class="vd-button vd-button--ghost gallery-mode-toggle" id="gallery-mode-btn" type="button" aria-pressed="false" title="Zeitachsen-Ansicht ein-/ausschalten">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="21"/><circle cx="12" cy="7" r="2"/><circle cx="12" cy="14" r="2"/><line x1="14" y1="7" x2="20" y2="7"/><line x1="4" y1="14" x2="10" y2="14"/></svg>
-          Zeitachse
-        </button>
       </div>
       <div class="viewtabs" role="tablist" aria-label="Ansicht">
         <button class="viewtab" role="tab" data-view="kachel" aria-selected="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Kachel</button>
+        <button class="viewtab" role="tab" data-view="schlange" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 7h10a4 4 0 0 1 0 8H8a4 4 0 0 0 0 8h12"/></svg>Schlange</button>
+        <button class="viewtab" role="tab" data-view="zeitachse" aria-selected="false"><svg viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="21"/><circle cx="12" cy="7" r="2"/><circle cx="12" cy="14" r="2"/><line x1="14" y1="7" x2="20" y2="7"/><line x1="4" y1="14" x2="10" y2="14"/></svg>Zeitachse</button>
         <button class="viewtab" role="tab" data-view="timeline" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="11" rx="1.5"/><rect x="4" y="18" width="4" height="3" rx=".5"/><rect x="10" y="18" width="4" height="3" rx=".5"/><rect x="16" y="18" width="4" height="3" rx=".5"/></svg>Timeline</button>
         <button class="viewtab" role="tab" data-view="liste" aria-selected="false"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Liste</button>
       </div>
@@ -7055,6 +7057,9 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
 
       <!-- ANSICHT: Zeitachse (vertikaler Mittelstrich, Karten alternierend) -->
       <div class="zeitachse" id="zeitachse"></div>
+
+      <!-- ANSICHT: Schlange (Serpentine — Parität mit Galerie; vom JS befüllt) -->
+      <div class="schlange" id="vdg-schlange"></div>
 
       <div class="empty" id="empty"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6"/></svg><h3>Keine Treffer</h3><p id="empty-text">Passe Filter oder Suche an.</p></div>
     </div>
@@ -14266,7 +14271,7 @@ function setMedia(v) {
   document.getElementById('media-val').textContent = v;
   document.getElementById('media-btn').classList.toggle('on', v !== 'Fotos');
   if (v !== 'Fotos') {
-    ['grid','timeline','listwrap'].forEach(id => document.getElementById(id).style.display = 'none');
+    ['grid','timeline','listwrap','zeitachse','vdg-schlange'].forEach(id => document.getElementById(id).style.display = 'none');
     const e = document.getElementById('empty'); e.classList.add('show');
     document.getElementById('empty-text').textContent = v + ' sind in diesem Prototyp nicht hinterlegt.';
   } else { document.getElementById('empty').classList.remove('show'); render(); }
@@ -14546,14 +14551,19 @@ function render() {
     new ResizeObserver(setNodeTop).observe(img);
   });
 
+  // SCHLANGE (Serpentine): Zellen + Linie aus derselben gefilterten Liste.
+  vdgRenderSchlange(list);
+
   document.getElementById('empty').classList.toggle('show', empty);
   document.getElementById('grid').style.display = empty ? 'none' : '';
   document.getElementById('timeline').style.display = empty ? 'none' : '';
   document.getElementById('listwrap').style.display = empty ? 'none' : '';
   document.getElementById('zeitachse').style.display = empty ? 'none' : '';
+  document.getElementById('vdg-schlange').style.display = empty ? 'none' : '';
 
   if (state.selected) selectItem(state.selected);
   if (state.view === 'timeline') requestAnimationFrame(centerActive);
+  if (state.view === 'schlange') requestAnimationFrame(vdgUpdateSerpentinePath);
 }
 function centerActive() { const a = document.querySelector('.tl-col.active'); if (a) a.scrollIntoView({ inline:'center', block:'nearest', behavior:'smooth' }); }
 function toggleFav(m, btn) { if (state.favs.has(m.file)) state.favs.delete(m.file); else state.favs.add(m.file); btn.setAttribute('aria-pressed', state.favs.has(m.file)); }
@@ -14567,30 +14577,219 @@ function setView(v) {
   // beim View-Wechsel als leere Lücke ↔ Button erschien (wirkte wie ein Sprung).
   document.getElementById('sort-wrap').style.visibility = 'visible';
   render();
+  // Serpentine wird im versteckten Container mit 0-Größe gezeichnet → der
+  // Visibility-Guard überspringt das Zeichnen. Nach dem Sichtbarwerden 1× neu.
+  if (v === 'schlange') requestAnimationFrame(vdgUpdateSerpentinePath);
 }
 document.querySelectorAll('.viewtab').forEach(t => t.addEventListener('click', () => setView(t.dataset.view)));
 
-/* ============================================================ GALERIE-MODUS (Klassisch ↔ Zeitachse)
-   Zeitachse ist ein Modus, kein View. Das Body-Attribut data-gallery-mode steuert
-   per CSS, was sichtbar ist; der Wert wird in localStorage persistiert. */
-const GALLERY_MODE_KEY = 'vd-gallery-mode';
-const galleryModeBtn = document.getElementById('gallery-mode-btn');
-function setGalleryMode(mode, persist) {
-  const m = mode === 'zeitachse' ? 'zeitachse' : 'classic';
-  document.body.setAttribute('data-gallery-mode', m);
-  if (galleryModeBtn) galleryModeBtn.setAttribute('aria-pressed', m === 'zeitachse' ? 'true' : 'false');
-  if (persist) { try { localStorage.setItem(GALLERY_MODE_KEY, m); } catch (e) {} }
+/* ============================================================ SCHLANGE (Serpentine)
+   Paritäts-Port der Galerie-Serpentine in den Projekt-Kontext. Eigene IDs
+   (vdg-*), eigene Spalten-/Pfad-Logik (Kopien der Galerie-Funktionen), damit
+   der Galerie-Screen unangetastet bleibt. Datenquelle: getVisible() (gleiche
+   Filter/Sort wie alle Projekt-Ansichten). Klassen .vd-gal-* werden geteilt. */
+// Adapter: Projekt-Medium → Zell-Objekt, das vdgCellHTML erwartet.
+function vdgToCell(m, i) {
+  return {
+    id:   m.lbId || ('vdg-' + i),     // Pano → 'm-360-1' (öffnet 360°-Lightbox); Fotos synthetisch
+    type: m.pano ? '360' : 'photo',
+    date: fmtDate(m.date),            // 'YYYY-MM-DD' → 'DD.MM.YYYY' (vdgCellHTML kürzt auf YY)
+    time: m.time,
+    src:  imgUrl(m.src),
+    name: m.cap,
+    code: m.plan || '',
+  };
 }
-(function initGalleryMode(){
-  let saved = 'classic';
-  try { saved = localStorage.getItem(GALLERY_MODE_KEY) || 'classic'; } catch (e) {}
-  setGalleryMode(saved, false);
+// Kopie von galCellHTML (Galerie-IIFE) — reine Funktion, liest nur Objekt-Props.
+function vdgCellHTML(m) {
+  if (m === null) return '<div class="vd-gal-cell vd-gal-cell--empty" aria-hidden="true"></div>';
+  let shortDate = '';
+  if (m.date && typeof m.date === 'string') {
+    const m1 = m.date.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    shortDate = m1 ? `${m1[1]}.${m1[2]}.${m1[3].slice(2)}` : m.date;
+  }
+  const shortTime = m.time || '';
+  let thumbInner = '', thumbStyle = '';
+  if (m.type === '360' && m.src) {
+    thumbStyle = ` style="background-image: url('${m.src}'); background-size: auto 150%;"`;
+    thumbInner =
+      '<span class="vd-gal-360-badge" aria-hidden="true">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M3 12c0 2.21 4.03 4 9 4s9-1.79 9-4-4.03-4-9-4-9 1.79-9 4Z"/>' +
+      '<path d="M8.5 9.5 6 12l2.5 2.5M15.5 9.5 18 12l-2.5 2.5"/></svg>360°</span>';
+  } else if (m.type === 'photo' && m.src) {
+    thumbStyle = ` style="background-image: url('${m.src}');"`;
+  }
+  return `
+    <div class="vd-gal-cell vd-gal-cell--${m.type}" data-media-id="${m.id}" data-type="${m.type}" data-date="${m.date}" title="${m.name || ''}">
+      <div class="vd-gal-cell-thumb" role="img" aria-label="${m.name || 'Baustellen-Medium'}"${thumbStyle}>
+        ${thumbInner}
+      </div>
+      <div class="vd-gal-cell-stamp" aria-label="Aufnahme ${shortDate} um ${shortTime}">
+        <span class="vd-gal-stamp-date">${shortDate}</span>
+        <span class="vd-gal-stamp-time">${shortTime}</span>
+        <span class="vd-gal-stamp-trendline" aria-hidden="true"></span>
+      </div>
+      <div class="vd-gal-cell-timeline">
+        <span class="vd-gal-stamp-dot" data-marker aria-label="Marker für ${shortDate} ${shortTime}"></span>
+      </div>
+    </div>`;
+}
+// Spaltenzahl (Kopie von calcGalCols, aber Breite aus #vdg-schlange).
+let VDG_SLOTS = 6, VDG_PER_ROW = 6;
+function vdgCalcCols() {
+  const el = document.getElementById('vdg-schlange');
+  if (!el || !el.clientWidth) return VDG_PER_ROW;
+  const PAD = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gal-curve-pad')) || 72;
+  const vw = window.innerWidth;
+  const GAP = vw <= 720 ? 16 : (vw <= 1100 ? 24 : 32);
+  const THUMB_MIN = 150;
+  const avail = el.clientWidth - 2 * PAD;
+  const cols = Math.floor((avail + GAP) / (THUMB_MIN + GAP));
+  return Math.max(2, Math.min(8, cols));
+}
+function vdgRows(list, perRow) {
+  perRow = perRow || VDG_PER_ROW;
+  const rows = [];
+  for (let i = 0; i < list.length; i += perRow) {
+    const photos = list.slice(i, i + perRow);
+    const isLast = (i + perRow) >= list.length;
+    const slots = photos.slice();
+    if (!isLast) { while (slots.length < VDG_SLOTS) slots.push(null); }
+    rows.push({ slots, isLast });
+  }
+  return rows;
+}
+// Kopie von updateSerpentinePath — nur die zwei Element-IDs sind vdg-*.
+function vdgUpdateSerpentinePath() {
+  const svg = document.getElementById('vdg-serpentine-svg');
+  const path = document.getElementById('vdg-serpentine-path');
+  const container = svg ? svg.parentElement : null;
+  if (!svg || !path || !container) return;
+  const containerRect = container.getBoundingClientRect();
+  if (containerRect.height === 0 || containerRect.width === 0) return;
+  const innerRows = Array.from(container.querySelectorAll('.vd-gal-row'));
+  if (!innerRows.length) { path.setAttribute('d', ''); return; }
+  function dotPos(rowEl, childIdx) {
+    const cell = rowEl.children[childIdx];
+    const dot = cell ? cell.querySelector('.vd-gal-stamp-dot') : null;
+    if (!dot) return null;
+    const r = dot.getBoundingClientRect();
+    return { x: r.left - containerRect.left + r.width / 2, y: r.top - containerRect.top + r.height / 2 };
+  }
+  const pathPoints = [];
+  innerRows.forEach((row, rowIndex) => {
+    const cells = Array.from(row.children).filter(c => !c.classList.contains('vd-gal-cell--empty'));
+    if (!cells.length) return;
+    const firstCellIdx = Array.from(row.children).indexOf(cells[0]);
+    const lastCellIdx = Array.from(row.children).indexOf(cells[cells.length - 1]);
+    if (firstCellIdx === lastCellIdx) { pathPoints.push(dotPos(row, firstCellIdx)); return; }
+    if (rowIndex % 2 === 0) { pathPoints.push(dotPos(row, firstCellIdx)); pathPoints.push(dotPos(row, lastCellIdx)); }
+    else { pathPoints.push(dotPos(row, lastCellIdx)); pathPoints.push(dotPos(row, firstCellIdx)); }
+  });
+  if (pathPoints.length < 2 || pathPoints.some(p => !p)) return;
+  const css = getComputedStyle(document.documentElement);
+  const radius = parseFloat(css.getPropertyValue('--preview-serpentine-curve-radius')) || 32;
+  let cellHalf = 80;
+  { const sampleCell = innerRows[0] && Array.from(innerRows[0].children).find(c => !c.classList.contains('vd-gal-cell--empty'));
+    if (sampleCell) cellHalf = sampleCell.getBoundingClientRect().width / 2; }
+  const sideOffset = cellHalf + 36;
+  const lastRow = innerRows[innerRows.length - 1];
+  const lastRect = lastRow.getBoundingClientRect();
+  const neededHeight = (lastRect.bottom - containerRect.top) + sideOffset + 200;
+  if (svg.getAttribute('height') !== String(neededHeight)) svg.setAttribute('height', String(neededHeight));
+  let d = `M ${pathPoints[0].x} ${pathPoints[0].y}`;
+  for (let i = 0; i < pathPoints.length - 1; i++) {
+    const curr = pathPoints[i], next = pathPoints[i + 1];
+    if (i % 2 === 0) { d += ` L ${next.x} ${next.y}`; }
+    else {
+      const isRight = (i % 4 === 1);
+      if (isRight) {
+        d += ` L ${curr.x + (sideOffset - radius)} ${curr.y}`;
+        d += ` Q ${curr.x + sideOffset} ${curr.y} ${curr.x + sideOffset} ${curr.y + radius}`;
+        d += ` L ${curr.x + sideOffset} ${next.y - radius}`;
+        d += ` Q ${curr.x + sideOffset} ${next.y} ${curr.x + (sideOffset - radius)} ${next.y}`;
+      } else {
+        d += ` L ${curr.x - (sideOffset - radius)} ${curr.y}`;
+        d += ` Q ${curr.x - sideOffset} ${curr.y} ${curr.x - sideOffset} ${curr.y + radius}`;
+        d += ` L ${curr.x - sideOffset} ${next.y - radius}`;
+        d += ` Q ${curr.x - sideOffset} ${next.y} ${curr.x - (sideOffset - radius)} ${next.y}`;
+      }
+      d += ` L ${next.x} ${next.y}`;
+    }
+  }
+  path.setAttribute('d', d);
+  svg.querySelectorAll('.vd-gal-path-node').forEach(n => n.remove());
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  innerRows.forEach((row) => {
+    Array.from(row.children).forEach((cell) => {
+      if (cell.classList.contains('vd-gal-cell--empty')) return;
+      const dot = cell.querySelector('.vd-gal-stamp-dot');
+      if (!dot) return;
+      const r = dot.getBoundingClientRect();
+      const circle = document.createElementNS(SVG_NS, 'circle');
+      circle.setAttribute('cx', r.left - containerRect.left + r.width / 2);
+      circle.setAttribute('cy', r.top - containerRect.top + r.height / 2);
+      circle.setAttribute('r', '5');
+      circle.setAttribute('class', 'vd-gal-path-node');
+      svg.appendChild(circle);
+    });
+  });
+}
+function vdgRenderSchlange(list) {
+  const root = document.getElementById('vdg-schlange');
+  if (!root) return;
+  list = list || getVisible();
+  const cols = vdgCalcCols();
+  if (cols !== VDG_PER_ROW) { VDG_PER_ROW = VDG_SLOTS = cols; }
+  // --gal-cols auf den Screen setzen (nicht :root) → isoliert vom Galerie-Screen.
+  VDG_SCREEN.style.setProperty('--gal-cols', String(cols));
+  if (!list.length) { root.innerHTML = ''; return; }
+  const cells = list.map((m, i) => vdgToCell(m, i));
+  const rows = vdgRows(cells, VDG_PER_ROW);
+  root.innerHTML = `
+    <div class="vd-gal-rows-inner">
+      <svg class="vd-gal-serpentine-svg" id="vdg-serpentine-svg" aria-hidden="true">
+        <defs>
+          <marker id="vdg-serpentine-arrow" markerWidth="8" markerHeight="8" refX="0" refY="4" orient="auto">
+            <path class="vd-gal-serpentine-arrow-head" d="M 0 0 L 8 4 L 0 8"></path>
+          </marker>
+        </defs>
+        <path class="vd-gal-serpentine-path" d="" id="vdg-serpentine-path" marker-start="url(#vdg-serpentine-arrow)" marker-end="url(#vdg-serpentine-arrow)"></path>
+      </svg>
+      ${rows.map((row, idx) => {
+        const rowCls = 'vd-gal-row' + (row.isLast ? ' vd-gal-row--last' : '');
+        return `<div class="${rowCls}" data-row-idx="${idx}" style="margin-bottom: var(--preview-serpentine-row-spacing);">${(row.slots || []).map(vdgCellHTML).join('')}</div>`;
+      }).join('')}
+    </div>`;
+  vdgUpdateSerpentinePath();
+  requestAnimationFrame(vdgUpdateSerpentinePath);
+  // Klick: Foto → selectItem (Hero synchron); Pano → globale 360°-Lightbox
+  // (Capture-Listener feuert vorher und stoppt die Propagation).
+  const cellEls = root.querySelectorAll('.vd-gal-cell:not(.vd-gal-cell--empty)');
+  cellEls.forEach((el, i) => {
+    el.addEventListener('click', () => {
+      cellEls.forEach(c => c.classList.remove('vd-gal-cell--selected'));
+      el.classList.add('vd-gal-cell--selected');
+      root.querySelectorAll('.vd-gal-stamp-dot').forEach(d => d.classList.remove('vd-gal-stamp-dot--active'));
+      const dot = el.querySelector('.vd-gal-stamp-dot');
+      if (dot) dot.classList.add('vd-gal-stamp-dot--active');
+      if (list[i]) selectItem(list[i]);
+    });
+  });
+}
+// Serpentine bei Größenänderung neu berechnen (nur wenn aktiv).
+(function(){
+  let raf1 = 0, raf2 = 0;
+  window.addEventListener('resize', () => {
+    if (state.view !== 'schlange') return;
+    cancelAnimationFrame(raf1); cancelAnimationFrame(raf2);
+    raf1 = requestAnimationFrame(() => { raf2 = requestAnimationFrame(() => {
+      const cols = vdgCalcCols();
+      if (cols !== VDG_PER_ROW) vdgRenderSchlange(); else vdgUpdateSerpentinePath();
+    }); });
+  });
 })();
-if (galleryModeBtn) galleryModeBtn.addEventListener('click', () => {
-  const next = document.body.getAttribute('data-gallery-mode') === 'zeitachse' ? 'classic' : 'zeitachse';
-  setGalleryMode(next, true);
-  render();
-});
 
 function step(dir) {
   const list = getVisible(); if (!list.length) return;
