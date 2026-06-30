@@ -5866,6 +5866,10 @@
 /* ============================================================ APP-GRID */
 .app {
   display: grid; height: 100vh;
+  /* Verankerung für den absolut positionierten .collapse-handle: ohne dies
+     ankert er am Viewport und ignoriert die App-Sidebar-Breite (verrutscht
+     beim Ein-/Ausklappen der Sidebar über den Content). */
+  position: relative;
   grid-template-columns: var(--left) 1fr var(--right);
   grid-template-rows: 60px auto minmax(0, 1fr);
   grid-template-areas:
@@ -5976,7 +5980,9 @@
 
 /* Collapse-Griff zwischen Aside und Hero */
 .collapse-handle {
-  position: absolute; left: calc(var(--left) - 14px); top: 96px; z-index: 25;
+  /* Mittig auf dem Aside/Hero-Rand (innerhalb der Hero-Reihe), klar unter
+     dem "Zurück zur Übersicht"-Button – verdeckt kein Element. */
+  position: absolute; left: calc(var(--left) - 14px); top: calc(var(--hero-h) / 2); transform: translateY(-50%); z-index: 25;
   width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line-strong);
   background: var(--panel); color: var(--text-mid); display: grid; place-items: center;
   box-shadow: var(--shadow-card); transition: left .25s ease;
