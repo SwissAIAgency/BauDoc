@@ -8396,7 +8396,7 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
     // ── 360°-Panoramen (gleiche IDs wie in MEDIA, siehe MEDIA_360) ──
     // Der Lightbox-Open liest diese Liste; nur wenn die ID hier vorhanden
     // ist, öffnet der Klick auf die Galerie-Kachel das richtige Panorama.
-    const PANO_360_SRC = 'assets/generated/pano-rohbau-360.svg';
+    const PANO_360_SRC = 'assets/generated/pano-rohbau-360.jpg';
     const mainPid = (PROJEKTE[0] && PROJEKTE[0].id) || 'PRJ-2024-014';
     MEDIEN.unshift(
       {
@@ -8948,7 +8948,7 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
       const size = opts.size || 'md';
       // 360°-Panorama: immer das equirektangulare Asset (kein generiertes JPG).
       if ((media.typ || media.type) === '360') {
-        return media.panoSrc || 'assets/generated/pano-rohbau-360.svg';
+        return media.panoSrc || 'assets/generated/pano-rohbau-360.jpg';
       }
       // Echtes Bild vorhanden? Dann eine der zwei Größen liefern (sm = 240×180, default = 800×600).
       const base = _generatedMap[media.id];
@@ -10368,7 +10368,7 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
   // Eigener Medientyp '360'. Dieselbe ID muss auch in VISIDOC_DEMO.medien
   // existieren (siehe dort), damit der Lightbox-Open (der die DEMO-Liste
   // nutzt) das passende Medium findet und den Pano-Viewer öffnet.
-  const PANO_360_SRC = 'assets/generated/pano-rohbau-360.svg';
+  const PANO_360_SRC = 'assets/generated/pano-rohbau-360.jpg';
   const MEDIA_360 = [
     {
       id: 'm-360-1', type: '360',
@@ -13177,7 +13177,7 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
     function lbImageFor(m) {
       if (!m) return 'assets/generated/betonwand-stahl-helm.jpg';
       const typ0 = (m.typ || m.type || '').toLowerCase();
-      if (typ0 === '360') return m.panoSrc || m.src || 'assets/generated/pano-rohbau-360.svg';
+      if (typ0 === '360') return m.panoSrc || m.src || 'assets/generated/pano-rohbau-360.jpg';
       if (window.VISIDOC_THUMBS && typeof window.VISIDOC_THUMBS.thumbSrc === 'function') {
         try { return window.VISIDOC_THUMBS.thumbSrc(m, { size: 'lg' }); } catch (e) { /* fall through */ }
       }
@@ -13368,19 +13368,20 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
       if (btn) btn.setAttribute('aria-pressed', on ? 'true' : 'false');
     }
 
-    // TODO(human): Ziehen → Blickrichtung.
-    // Wandle eine Zeiger-Bewegung (dx, dy = Pixel seit dem letzten Move) in
-    // eine Änderung von lb.panoYaw (horizontal, in Grad) und lb.panoPitch
-    // (vertikal, in Grad) um. Rufe danach NICHT panoApply() auf — das macht
-    // der Aufrufer bereits. Anhaltspunkte:
-    //   • Grad-pro-Pixel hängt vom Sichtfeld ab: lb.panoFov / Viewer-Breite.
-    //     Die Breite bekommst du z. B. über panoEls().wrap.clientWidth.
-    //   • Ziehen nach rechts soll die Szene nach rechts mitnehmen (der Blick
-    //     wandert nach links) — überlege dir das Vorzeichen für den Yaw.
-    //   • Den Nick (panoPitch) auf ±PANO_PITCH_LIMIT begrenzen, damit man
-    //     nicht über Decke/Boden hinausschaut (Math.max/Math.min).
+    // Ziehen → Blickrichtung. dx/dy = Pixel seit dem letzten Move. Aktualisiert
+    // nur den Zustand (Yaw/Pitch); das Neuzeichnen macht der Aufrufer via panoApply().
     function panoApplyDrag(dx, dy) {
-
+      const wrap = panoEls().wrap;
+      const width = (wrap && wrap.clientWidth) || 1000;
+      // Grad pro Pixel: ein Drag über die volle Viewer-Breite entspricht genau
+      // dem sichtbaren Sichtfeld → 1:1-Gefühl, bei engem Zoom (kleinem FOV) feiner.
+      const degPerPx = lb.panoFov / width;
+      // Nach rechts ziehen nimmt die Szene mit (Blick wandert nach links) → Yaw -.
+      lb.panoYaw -= dx * degPerPx;
+      // Nach unten ziehen hebt den Blick (Decke kommt ins Bild) → Pitch +.
+      lb.panoPitch += dy * degPerPx;
+      // Nick begrenzen, damit man nicht über Decke/Boden hinausschaut.
+      lb.panoPitch = Math.max(-PANO_PITCH_LIMIT, Math.min(PANO_PITCH_LIMIT, lb.panoPitch));
     }
     function lbProjectFor(m) {
       if (!m || !m.projektId) return 'Neubau Bahnhofstrasse 12';
@@ -14239,7 +14240,7 @@ const MEDIA = [
   // 360°-Panorama: bewusst als erstes Medium (Anforderung). pano:true steuert
   // Badge + den interaktiven Viewer. lbId koppelt an das Lightbox-Datenmodell
   // (VISIDOC_DEMO.medien), damit der Vollbild-Button den Pano-Viewer öffnet.
-  { src:'pano-rohbau-360.svg',            cap:'Rohbau Halle – 360°-Rundgang',    gat:'Rohbau',         plan:'Grundriss EG',    date:'2026-06-01', time:'10:24', desc:'360°-Panorama der Rohbau-Halle. Im Vollbild zum Umsehen ziehen.', file:'PANO_360_EG_Halle.jpg', by:'Marco Brunner',  w:'19 °C, heiter',  wi:'sun', pano:true, lbId:'m-360-1' },
+  { src:'pano-rohbau-360.jpg',            cap:'Rohbau Halle – 360°-Rundgang',    gat:'Rohbau',         plan:'Grundriss EG',    date:'2026-06-01', time:'10:24', desc:'360°-Panorama der Rohbau-Halle. Im Vollbild zum Umsehen ziehen.', file:'PANO_360_EG_Halle.jpg', by:'Marco Brunner',  w:'19 °C, heiter',  wi:'sun', pano:true, lbId:'m-360-1' },
   { src:'kran-sonnenuntergang.jpg',       cap:'Aushub',                          gat:'Rohbau',         plan:'Grundriss UG',    date:'2026-06-12', time:'10:00', desc:'Aushub und Baugrube fertiggestellt.',                  file:'20260612_1000_Aushub.jpg',           by:'Max Mustermann',  w:'19 °C, sonnig',  wi:'sun'  },
   { src:'betonwand-stahl-helm.jpg',       cap:'Rohbau – EG Außenwände',          gat:'Rohbau',         plan:'Grundriss EG',    date:'2026-06-19', time:'08:15', desc:'Außenwände EG – Schalung und Bewehrung abgeschlossen.', file:'20260619_0815_EG_Aussenwaende.jpg',  by:'Max Mustermann',  w:'18 °C, sonnig',  wi:'sun'  },
   { src:'mauerwerk-kelle.jpg',            cap:'Rohbau – EG Decke',               gat:'Rohbau',         plan:'Grundriss EG',    date:'2026-06-27', time:'16:45', desc:'Deckenarbeiten EG abgeschlossen.',                     file:'20260627_1645_EG_Decke.jpg',         by:'Max Mustermann',  w:'21 °C, sonnig',  wi:'sun'  },
