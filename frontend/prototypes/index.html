@@ -5887,15 +5887,13 @@
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="timeline"] .meta,
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="zeitachse"] .meta,
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .meta { display: none; }
-/* Schlange + Zeitachse = vollflächige Galerie-Ansicht (Parität): Hero/Aside
-   weg, der Hauptbereich (Toolbar + Ansicht) füllt die ganze Höhe. */
-.vd-screen[data-screen="projekt-detail"][data-vdg-view="zeitachse"] .app,
+/* Schlange = vollflächige Galerie-Ansicht (Parität): Hero/Aside weg, der
+   Hauptbereich füllt die ganze Höhe. Zeitachse NICHT mehr hier — sie behält
+   Sidebar + Hero wie Timeline/Liste, damit der Ansichtswechsel nicht springt. */
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .app {
   grid-template-rows: 0 0 minmax(0, 1fr);
 }
-.vd-screen[data-screen="projekt-detail"][data-vdg-view="zeitachse"] .hero,
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .hero,
-.vd-screen[data-screen="projekt-detail"][data-vdg-view="zeitachse"] .aside,
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .aside { display: none; }
 .vd-screen[data-screen="projekt-detail"][data-vdg-left="collapsed"] .app { grid-template-columns: 0 1fr var(--right); }
 .vd-screen[data-screen="projekt-detail"][data-vdg-left="collapsed"][data-vdg-view="timeline"] .app,
@@ -6432,7 +6430,7 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
 /* Footer-Hinweis */
 .hint { display: none; align-items: center; justify-content: center; gap: 9px; padding: 16px; color: var(--text-mid); font-size: 13px; }
 .hint svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; }
-.vd-screen[data-screen="projekt-detail"][data-vdg-view="timeline"] .hint.tl, .vd-screen[data-screen="projekt-detail"][data-vdg-view="liste"] .hint.li { display: flex; }
+.vd-screen[data-screen="projekt-detail"][data-vdg-view="liste"] .hint.li { display: flex; }
 
 /* Empty */
 .empty { display: none; flex-direction: column; align-items: center; gap: 10px; padding: 60px 20px; text-align: center; color: var(--text-mid); }
