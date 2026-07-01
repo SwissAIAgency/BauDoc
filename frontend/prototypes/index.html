@@ -11008,6 +11008,14 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
        Punkt (von Dot1 zu Dot6 derselben Zeile)
      - Iteration ungerade (i % 2 === 1): U-Turn-Bogen nach rechts aussen,
        runter und nach links innen zum Anfang der naechsten Zeile.
+
+     ┌── VERBINDLICHER VERTRAG — docs/ux/concepts/galerie-timeline-spec.md §5.5/§5.6 ──┐
+     │ Diese Linie ist mehrfach verschwunden. Beim Aendern ALLE Punkte erhalten:      │
+     │  1. Visibility-Guard: bei 0-Rects abbrechen, Pfad NICHT ueberschreiben.        │
+     │  2. renderGalerie() zeichnet SYNCHRON nach innerHTML (nicht nur rAF).           │
+     │  3. ResizeObserver auf .vd-gal-rows zeichnet beim Sichtbar-Werden nach.         │
+     │  4. Einzel-Dot-Zeile: nur EIN pathPoint (kein Null-Segment -> End-Pfeil OK).    │
+     └────────────────────────────────────────────────────────────────────────────────┘
      ============================================================ */
   function updateSerpentinePath() {
     const svg = document.getElementById('vd-gal-serpentine-svg');
@@ -11569,6 +11577,25 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
       });
     });
   });
+
+  // Serpentine-Pfad robust zeichnen, sobald die Galerie tatsaechlich
+  // Layout-Maße bekommt. updateSerpentinePath() bricht bei 0-Rects ab
+  // (Galerie initial display:none gerendert) und wurde danach nur per
+  // Screen-Switch / Window-Resize erneut versucht. Faellt der Reflow-
+  // Zeitpunkt unguenstig (Layout im rAF-Backup noch nicht fertig), blieb
+  // die Linie dauerhaft leer -> Galerie ohne Timeline, Seitenpolster wirken
+  // wie leerer Rand. Der ResizeObserver zeichnet verlaesslich beim ersten
+  // Sichtbarwerden (0 -> Breite) und bei jeder spaeteren Breitenaenderung.
+  if (typeof ResizeObserver === 'function') {
+    const _galRowsEl = document.getElementById('vd-gal-rows');
+    if (_galRowsEl) {
+      // Synchron zeichnen: updateSerpentinePath() mutiert nur ein absolut
+      // positioniertes SVG (kein Einfluss auf die Container-Größe) -> keine
+      // ResizeObserver-Schleife, und unabhaengig vom rAF-/Paint-Timing.
+      const _galRO = new ResizeObserver(() => { updateSerpentinePath(); });
+      _galRO.observe(_galRowsEl);
+    }
+  }
 
   const GAL_PILL_CYCLE = {
     typ:          ['Alle', 'Foto', 'Plan', 'Video'],

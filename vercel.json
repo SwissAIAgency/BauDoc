@@ -3,6 +3,23 @@
   "outputDirectory": "frontend/prototypes",
   "framework": null,
   "cleanUrls": true,
+  "headers": [
+    {
+      "comment": "HTML immer frisch ausliefern: Vercel-CDN-Cache-Control zwingt die Edge, bei jedem Abruf gegen den Origin zu revalidieren, statt eine alte Kopie (X-Vercel-Cache: HIT, Age) auszuliefern. Ohne diese Regel blieb die Galerie-Serpentine trotz Deploy scheinbar kaputt, weil der Browser eine >12h alte HTML bekam. Bilder/CSS/JS behalten ihren Standard-Cache (schnell).",
+      "source": "/",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-cache" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-cache" }
+      ]
+    }
+  ],
   "git": {
     "deploymentEnabled": {
       "dev": true,
