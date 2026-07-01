@@ -6321,6 +6321,29 @@ body[data-galerie-mode="zeitachse"] .vd-galz { display: block; }
 /* Galerie-Zeitachse: grössere Karten als im Projekt-Detail (mehr Platz,
    bessere Lesbarkeit). Override nur hier — .za-card global bleibt 420px. */
 .vd-galz .za-card { width: min(620px, 100%); }
+/* ----- Galerie-Zeitachse: ZENTRIERTE Achse + alternierende Karten -----
+   Nur fuer .vd-galz. Das geteilte .za-row-System bleibt fuer die
+   projekt-detail .zeitachse (Links-Achse) unveraendert. Die Mittellinie
+   (.vd-galz-inner::before) liegt bereits bei 50 %; Grid + Karten + Node
+   ziehen hier nach: links | Achsen-Gutter | rechts. */
+.vd-galz .za-row { grid-template-columns: 1fr 52px 1fr; }
+.vd-galz .za-row.left  .za-card { grid-column: 1; justify-self: end; }
+.vd-galz .za-row.right .za-card { grid-column: 3; justify-self: start; }
+.vd-galz .za-row .za-node { left: 50%; }
+/* Connector: kurzer Stub von der Mittelachse (left:50%) zur jeweiligen
+   Kartenkante — spiegelbildlich je Seite, fuellt den halben Gutter (26px). */
+.vd-galz .za-row.left  .za-connector { left: auto; right: 50%; width: 26px; }
+.vd-galz .za-row.right .za-connector { left: 50%;  right: auto; width: 26px; }
+
+@media (max-width: 820px) {
+  /* Schmal: zurueck auf einspaltige Links-Achse (wie projekt-detail) */
+  .vd-galz .za-row { grid-template-columns: 44px 1fr; }
+  .vd-galz .za-row.left  .za-card,
+  .vd-galz .za-row.right .za-card { grid-column: 2; justify-self: stretch; }
+  .vd-galz .za-row .za-node { left: 22px; }
+  .vd-galz .za-row.left  .za-connector,
+  .vd-galz .za-row.right .za-connector { left: 22px; right: auto; width: 26px; }
+}
 .vd-galz-inner::before {
   content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
   background: linear-gradient(180deg, transparent 0, var(--line-strong) 24px, var(--line-strong) calc(100% - 24px), transparent 100%);
