@@ -5878,13 +5878,13 @@
     "main   main   main";
   transition: grid-template-columns .25s ease;
 }
-.vd-screen[data-screen="projekt-detail"][data-vdg-view="timeline"] .app,
+/* Schlange/Zeitachse: Meta-Spalte in Hero aufgehen lassen. Timeline NICHT mehr
+   hier — sie zeigt jetzt das volle Detail-/Meta-Panel wie Kachel und Liste. */
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="zeitachse"] .app,
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .app { grid-template-areas:
   "header header header"
   "aside  hero   hero"
   "main   main   main"; }
-.vd-screen[data-screen="projekt-detail"][data-vdg-view="timeline"] .meta,
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="zeitachse"] .meta,
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .meta { display: none; }
 /* Schlange = vollflächige Galerie-Ansicht (Parität): Hero/Aside weg, der
@@ -5896,14 +5896,12 @@
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .hero,
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .aside { display: none; }
 .vd-screen[data-screen="projekt-detail"][data-vdg-left="collapsed"] .app { grid-template-columns: 0 1fr var(--right); }
-.vd-screen[data-screen="projekt-detail"][data-vdg-left="collapsed"][data-vdg-view="timeline"] .app,
 .vd-screen[data-screen="projekt-detail"][data-vdg-left="collapsed"][data-vdg-view="zeitachse"] .app,
 .vd-screen[data-screen="projekt-detail"][data-vdg-left="collapsed"][data-vdg-view="schlange"] .app { grid-template-columns: 0 1fr 0; }
 .vd-screen[data-screen="projekt-detail"][data-vdg-left="collapsed"] .aside { transform: translateX(-100%); opacity: 0; pointer-events: none; }
 /* Collapse-Handle in den Vollbreite-Ansichten ausblenden (kein Panel zum Klappen). */
 .vd-screen[data-screen="projekt-detail"][data-vdg-view="zeitachse"] .collapse-handle,
-.vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .collapse-handle,
-.vd-screen[data-screen="projekt-detail"][data-vdg-view="timeline"] .collapse-handle { display: none; }
+.vd-screen[data-screen="projekt-detail"][data-vdg-view="schlange"] .collapse-handle { display: none; }
 
 /* ============================================================ HEADER */
 .header {
