@@ -159,6 +159,15 @@ entprellt):
 2. Wenn sich die Spaltenzahl ändert → `--gal-cols` setzen + `renderGalerie()`.
 3. Sonst nur `updateSerpentinePath()` (Pfad an neue Pixel-Positionen).
 
+**Zuverlässige Erst-Zeichnung.** Zusätzlich beobachtet ein `ResizeObserver` auf
+`.vd-gal-rows` den Container und ruft `updateSerpentinePath()` **synchron** auf,
+sobald er echte Maße bekommt (Übergang `display:none` → sichtbar beim
+Screen-Wechsel). Damit wird die Serpentine-Linie auch dann gezeichnet, wenn der
+synchrone Aufruf in `renderGalerie()` bzw. der `rAF`-Backup zu früh feuert
+(Layout noch nicht fertig → 0-Rects → Abbruch). Ohne diese Absicherung kann die
+Galerie ohne Linie erscheinen; die reservierten Seitenpolster wirken dann wie
+leerer Rand.
+
 ---
 
 ## 7. Responsive Breakpoints

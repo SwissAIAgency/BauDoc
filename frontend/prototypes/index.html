@@ -6321,6 +6321,30 @@ body[data-galerie-mode="zeitachse"] .vd-galz { display: block; }
 /* Galerie-Zeitachse: grössere Karten als im Projekt-Detail (mehr Platz,
    bessere Lesbarkeit). Override nur hier — .za-card global bleibt 420px. */
 .vd-galz .za-card { width: min(620px, 100%); }
+/* ----- Galerie-Zeitachse: ZENTRIERTE Achse + alternierende Karten -----
+   Nur fuer .vd-galz. Das geteilte .za-row-System bleibt fuer die
+   projekt-detail .zeitachse (Links-Achse) unveraendert. Die Mittellinie
+   (.vd-galz-inner::before) liegt bereits bei 50 %; Grid + Karten + Node
+   ziehen hier nach: links | Achsen-Gutter | rechts. */
+.vd-galz .za-row { grid-template-columns: 1fr 52px 1fr; }
+.vd-galz .za-row.left  .za-card { grid-column: 1; justify-self: end; }
+.vd-galz .za-row.right .za-card { grid-column: 3; justify-self: start; }
+.vd-galz .za-row .za-node { left: 50%; }
+
+/* Connector: kurzer Stub von der Mittelachse (left:50%) zur jeweiligen
+   Kartenkante — spiegelbildlich je Seite, fuellt den halben Gutter (26px). */
+.vd-galz .za-row.left  .za-connector { left: auto; right: 50%; width: 26px; }
+.vd-galz .za-row.right .za-connector { left: 50%;  right: auto; width: 26px; }
+
+@media (max-width: 820px) {
+  /* Schmal: zurueck auf einspaltige Links-Achse (wie projekt-detail) */
+  .vd-galz .za-row { grid-template-columns: 44px 1fr; }
+  .vd-galz .za-row.left  .za-card,
+  .vd-galz .za-row.right .za-card { grid-column: 2; justify-self: stretch; }
+  .vd-galz .za-row .za-node { left: 22px; }
+  .vd-galz .za-row.left  .za-connector,
+  .vd-galz .za-row.right .za-connector { left: 22px; right: auto; width: 26px; }
+}
 .vd-galz-inner::before {
   content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
   background: linear-gradient(180deg, transparent 0, var(--line-strong) 24px, var(--line-strong) calc(100% - 24px), transparent 100%);
@@ -11546,6 +11570,25 @@ table.tbl td.tcell { padding: 6px 8px 6px 14px; width: 64px; }
       });
     });
   });
+
+  // Serpentine-Pfad robust zeichnen, sobald die Galerie tatsaechlich
+  // Layout-Maße bekommt. updateSerpentinePath() bricht bei 0-Rects ab
+  // (Galerie initial display:none gerendert) und wurde danach nur per
+  // Screen-Switch / Window-Resize erneut versucht. Faellt der Reflow-
+  // Zeitpunkt unguenstig (Layout im rAF-Backup noch nicht fertig), blieb
+  // die Linie dauerhaft leer -> Galerie ohne Timeline, Seitenpolster wirken
+  // wie leerer Rand. Der ResizeObserver zeichnet verlaesslich beim ersten
+  // Sichtbarwerden (0 -> Breite) und bei jeder spaeteren Breitenaenderung.
+  if (typeof ResizeObserver === 'function') {
+    const _galRowsEl = document.getElementById('vd-gal-rows');
+    if (_galRowsEl) {
+      // Synchron zeichnen: updateSerpentinePath() mutiert nur ein absolut
+      // positioniertes SVG (kein Einfluss auf die Container-Größe) -> keine
+      // ResizeObserver-Schleife, und unabhaengig vom rAF-/Paint-Timing.
+      const _galRO = new ResizeObserver(() => { updateSerpentinePath(); });
+      _galRO.observe(_galRowsEl);
+    }
+  }
 
   const GAL_PILL_CYCLE = {
     typ:          ['Alle', 'Foto', 'Plan', 'Video'],
