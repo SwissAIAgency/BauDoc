@@ -149,6 +149,50 @@ sonst würde der Bogen abgeschnitten.
 - An jedem Dot wird ein kleiner Kreis (`.vd-gal-path-node`, r = 5) gerendert,
   durch den die Linie läuft.
 
+### 5.5 Letzte (partielle) Zeile & End-Pfeil
+
+Die letzte Zeile kann weniger als eine volle Reihe Bilder enthalten. Enthält
+sie **genau eine** Zelle (`firstCellIdx === lastCellIdx`), darf **nur EIN**
+Ankerpunkt in `pathPoints` landen — **kein doppelter** (`P == P`).
+
+> **Warum verbindlich:** Ein doppelter End-Punkt erzeugt ein **Null-Segment**
+> am Pfad-Ende. Dessen Richtung ist undefiniert → `marker-end` (`orient="auto"`)
+> fällt auf 0° zurück und der End-Pfeil zeigt **nach rechts** statt in
+> Laufrichtung in den Dot. Mit nur einem Punkt endet der Pfad am realen
+> Horizontal-Segment (kommt von rechts) → der Pfeil zeigt korrekt hinein.
+
+### 5.6 Rendering-Robustheit — VERBINDLICH (nicht regressieren)
+
+> ⚠️ **Diese Regeln haben die Linie mehrfach zum Verschwinden gebracht. Wer
+> `updateSerpentinePath()` / `renderGalerie()` anfasst, muss ALLE vier Punkte
+> erhalten. Vor dem Commit gegen §8-QA prüfen.**
+
+1. **Visibility-Guard.** `updateSerpentinePath()` bricht **ohne** den Pfad zu
+   überschreiben ab, wenn der Container 0-Maße hat
+   (`containerRect.height === 0 || containerRect.width === 0`). Die Galerie
+   wird beim Initial-Load **einmal `display:none` gerendert** — dann liefern
+   alle `getBoundingClientRect()` 0. Ohne Guard entstünde `M 0 0 …` (ein
+   verirrter Bogen oben-links) statt einer sauberen Linie.
+2. **Synchrones Zeichnen.** `renderGalerie()` ruft `updateSerpentinePath()`
+   **synchron direkt nach dem `innerHTML`-Commit** auf (nicht nur via `rAF`).
+   `getBoundingClientRect()` erzwingt ohnehin ein Layout, daher stehen die
+   Dot-Positionen sofort bereit. **Kein `rAF`-only** — feuert das `rAF` beim
+   Sichtbar-Werden nicht sauber, bleibt die Linie sonst dauerhaft leer.
+3. **ResizeObserver-Sicherung.** Ein `ResizeObserver` auf `.vd-gal-rows`
+   ruft `updateSerpentinePath()` synchron auf, sobald der Container echte
+   Maße bekommt (Übergang `display:none` → sichtbar). Fängt den Fall ab, dass
+   der synchrone Aufruf/`rAF`-Backup zu früh feuert.
+4. **Null-Punkt-Guard.** Konnte ein Dot nicht gemessen werden (`dotPos`
+   liefert `null`), wird **kein** Teil-Pfad gebaut
+   (`pathPoints.some(p => !p)` → Abbruch).
+
+**Auslieferung.** Die Linie wird rein clientseitig aus dem DOM berechnet —
+sie ist nur so aktuell wie die ausgelieferte HTML. Damit die Live-Seite
+(Vercel) nach einem Deploy nicht eine **CDN-gecachte alte HTML** zeigt (die
+Linie wirkt dann „wieder kaputt", ist aber nur alter Code), setzt
+`vercel.json` für HTML `Vercel-CDN-Cache-Control: no-cache`. Assets bleiben
+gecacht.
+
 ---
 
 ## 6. Resize-Verhalten
